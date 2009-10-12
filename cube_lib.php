@@ -456,8 +456,22 @@
 		}
 		return $move;
 	}
-	// Convert cubie cube to face cube ($d = dimensino)
-	function face_cube($cube, $d){
+	
+	// Convert cubie cube to face cube, using the default facelet identifiers
+	function face_cube($cube, $dim){
+		// Construct default facelet id scheme
+		for($f = 0; $f < 6; $f++){
+			for($i = 0; $i < $dim; $i++){
+				for($j = 0; $j < $dim; $j++) $fd .= $f;
+			}
+		}
+		return facelet_cube($cube, $dim, $fd);
+	}
+	
+	
+	// Convert cubie cube to facelet cube mapping each facelet
+	// to the given facelet id sequence
+	function facelet_cube($cube, $d, $fi){
 		global $U, $R, $F, $D, $L, $B;
 		// Facelet constants
 		
@@ -467,7 +481,34 @@
 		$s = $d * $d;
 		// Half of dimension squared
 		$m = (int)($s/2);
+		
+		// Map centre positions to facelet ids
+		$mfid = Array($fi[$U*$s+$m], $fi[$R*$s+$m], $fi[$F*$s+$m], $fi[$D*$s+$m], $fi[$L*$s+$m], $fi[$B*$s+$m]);
 
+		// Map the corner positions to facelet ids
+		$cfid = Array(
+			Array($fi[ ($U+1)*$s-1], $fi[      $R*$s], $fi[  $F*$s+$d-1]),
+			Array($fi[($U+1)*$s-$d], $fi[      $F*$s], $fi[  $L*$s+$d-1]),
+			Array($fi[       $U*$s], $fi[      $L*$s], $fi[  $B*$s+$d-1]),
+			Array($fi[  $U*$s+$d-1], $fi[      $B*$s], $fi[  $R*$s+$d-1]),
+			Array($fi[  $D*$s+$d-1], $fi[($F+1)*$s-1], $fi[($R+1)*$s-$d]),
+			Array($fi[       $D*$s], $fi[($L+1)*$s-1], $fi[($F+1)*$s-$d]),
+			Array($fi[($D+1)*$s-$d], $fi[($B+1)*$s-1], $fi[($L+1)*$s-$d]),
+			Array($fi[ ($D+1)*$s-1], $fi[($R+1)*$s-1], $fi[($B+1)*$s-$d]));
+		
+		// Map the edge positions to facelet ids
+		$efid = Array(
+			Array($fi[$U*$s+$m+$h], $fi[      $R*$s+$h]), Array($fi[($U+1)*$s-1-$h], $fi[      $F*$s+$h]),
+			Array($fi[$U*$s+$m-$h], $fi[      $L*$s+$h]), Array($fi[      $U*$s+$h], $fi[      $B*$s+$h]),
+			Array($fi[$D*$s+$m+$h], $fi[($R+1)*$s-1-$h]), Array($fi[      $D*$s+$h], $fi[($F+1)*$s-1-$h]),
+			Array($fi[$D*$s+$m-$h], $fi[($L+1)*$s-1-$h]), Array($fi[($D+1)*$s-1-$h], $fi[($B+1)*$s-1-$h]),
+			Array($fi[$F*$s+$m+$h], $fi[   $R*$s+$m-$h]), Array($fi[   $F*$s+$m-$h], $fi[   $L*$s+$m+$h]),
+			Array($fi[$B*$s+$m+$h], $fi[   $L*$s+$m-$h]), Array($fi[   $B*$s+$m-$h], $fi[   $R*$s+$m+$h]));
+			
+
+
+//print_r($efid);
+/*
 		// Map the corner positions to facelets
 		$ccol = Array(
 			Array($U, $R, $F), Array($U, $F, $L), Array($U, $L, $B), Array($U, $B, $R),
@@ -479,16 +520,19 @@
 			Array($U, $B), Array($D, $R), Array($D, $F),
 			Array($D, $L), Array($D, $B), Array($F, $R),
 			Array($F, $L), Array($B, $L), Array($B, $R));
-
+*/
+		// Map of centre facelet positions
+		$mpos = Array($U*$s+$m, $R*$s+$m, $F*$s+$m, $D*$s+$m, $L*$s+$m, $B*$s+$m);
+		
 		// Map of corner facelet positions (for any dimensoin of cube)
-		$CF = Array(
+		$cpos = Array(
 			Array( ($U+1)*$s-1,       $R*$s,   $F*$s+$d-1), Array(($U+1)*$s-$d,       $F*$s,   $L*$s+$d-1),
 			Array(       $U*$s,       $L*$s,   $B*$s+$d-1), Array(  $U*$s+$d-1,       $B*$s,   $R*$s+$d-1),
 			Array(  $D*$s+$d-1, ($F+1)*$s-1, ($R+1)*$s-$d), Array(       $D*$s, ($L+1)*$s-1, ($F+1)*$s-$d),
 			Array(($D+1)*$s-$d, ($B+1)*$s-1, ($L+1)*$s-$d), Array( ($D+1)*$s-1, ($R+1)*$s-1, ($B+1)*$s-$d));
 		
 		// Map edge facelet positions (for any dimensoin)
-		$EF = Array(
+		$epos = Array(
 			Array($U*$s+$m+$h,       $R*$s+$h), Array(($U+1)*$s-1-$h,       $F*$s+$h), Array($U*$s+$m-$h,       $L*$s+$h),
 			Array(   $U*$s+$h,       $B*$s+$h), Array(   $D*$s+$m+$h, ($R+1)*$s-1-$h), Array(   $D*$s+$h, ($F+1)*$s-1-$h),
 			Array($D*$s+$m-$h, ($L+1)*$s-1-$h), Array(($D+1)*$s-1-$h, ($B+1)*$s-1-$h), Array($F*$s+$m+$h,    $R*$s+$m-$h),
@@ -499,23 +543,26 @@
 			$j = $cube[1][$i]; // cornercubie with index j is at
 			// cornerposition with index i
 			$o = $cube[2][$i]; // Orientation of this cubie
-			for($n = 0; $n < 3; $n++) $fc[$CF[$i][($n + $o) % 3]] = $ccol[$j][$n];
+			for($n = 0; $n < 3; $n++) $fo[$cpos[$i][($n + $o) % 3]] = $cfid[$j][$n];
 		}
-		
+//print_r($mfid);
+//echo "\n<br/>";
 		// Pieces only applicable to odd sized puzzles
 		if($d % 2 == 1){ 
 			// Centers
 			for($i = 0; $i < 6; $i++){
-				if($d == 3) $fc[($i * 9) + 4] = $cube[0][$i];
+//echo "\n<br/>".$cube[0][$i];
+				$fo[$mpos[$i]] = $mfid[$cube[0][$i]];
 			}
 			// Centre edges 
 			for($i = 0; $i < 12; $i++){
 				$j = $cube[3][$i]; // edgecubie with index j is at edgeposition with index i
 				$o = $cube[4][$i]; // Orientation of this cubie
-				for($n = 0; $n < 2; $n++) $fc[$EF[$i][($n + $o) % 2]] = $ecol[$j][$n];
+				for($n = 0; $n < 2; $n++) $fo[$epos[$i][($n + $o) % 2]] = $efid[$j][$n];
 			}
 		}
-		return $fc;
+//print_r( $fo);
+		return $fo;
 	}
 	
 	// Convert cubie cube to letter cube (letters representing facelets)

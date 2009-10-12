@@ -88,6 +88,28 @@ img{
 	border:none;
 }
 
+#nav_box{
+	text-align:left;
+	float:right;
+	margin-right:20px;
+	margin-top:20px;
+	border:1px solid #888888;
+	background:#888888;
+	font-weight:bold;
+	color:#FFFFFF;
+}
+#nav_box ul{
+	list-style:none;
+	padding:5px;
+	margin:0px;
+	background:#F8F8F8;
+}
+#nav_box li{
+	color:#666666;
+	font-weight:normal;
+	margin:1px 0;
+}
+
 #content{
 	width:450px;
 	margin:20px auto;

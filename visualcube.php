@@ -29,11 +29,11 @@
 	// Database Configuration (for image caching)
 	
 	$DB_NAME="DB_NAME";
-	$DB_USERNAME="DB_USER";
-	$DB_PASSWORD="DB_PASS";
+	$DB_USERNAME="DB_USERNAME";
+	$DB_PASSWORD="DB_PASSWORD";
 	// Whether image caching is enabled. NOTE: if enabled a cron
 	// job will need to be set up to prun the database
-	$ENABLE_CACHE = false;//true; 
+	$ENABLE_CACHE = false; 
 	// Maximum size of image to be cached
 	$CACHE_IMG_SIZE_LIMIT = 10000; // 10Kb
 	
@@ -111,9 +111,18 @@
 		</style>
 	</head>
 	<body>
+		<div id="nav_box">
+			cube.crider.co.uk
+			<ul>
+				<li><a href="/">ZZ Tutorial</a></li>
+				<li><em>VisualCube</em></li>
+				<li><a href="scrambler.html">Random State Scrambler</a></li>
+				<li><a href="http://www.crider.co.uk">Author's Homepage</a></li>
+			</ul>
+		</div>
 		<div id="header_v">
 			<a href="http://validator.w3.org/check?uri=referer" title="Valid XHTML 1.0 Strict">
-				<img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Strict" width="88" height="31"/>
+				<img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Strict" width="88" height="31" style="margin-right:20px"/>
 			</a>
 			<h1>VisualCube</h1>
 			Generate custom Rubik's cube visualisations from your browser address bar.
@@ -171,6 +180,10 @@
 				</ul>
 				<br/><br/>
 			</div>
+			<h2>Source Code</h2>
+			<div> The source code for this script is available under the GNU Lesser General Public License at
+			<a href="https://sourceforge.net/projects/vcube/">sourceforge.net/projects/vcube</a>.</div>
+			<br/><br/>
 			<h2>Parameters</h2>
 			<table>
 				<tr><th>Variable</th><th>Description</th><th>Value Range</th><th>Default</th><th>Comment</th></tr>
@@ -182,12 +195,13 @@
 					<td>Used as an alternative to using an image extension as above.</td></tr>
 				<tr><td><em>pzl</em></td><td>Puzzle Type</td><td>1 to 9</td><td>3</td>
 					<td>Values from N=(1 to 9) represent an NxNxN cube. Currently only regular cubes are modelled</td></tr>
-				<tr><td><em>size</em></td><td>Size of generated image</td><td>0 to 1024</td><td>128</td><td>Images produced are square, so size specifies both width and height of the final image in pixels.</td></tr>
+				<tr><td><em>size</em></td><td>Size of generated image</td><td>0 to 1024</td><td>128</td><td>
+					Images produced are square, so size specifies both width and height of the final image in pixels.</td></tr>
 				<tr><td><em>view</em></td><td>Special View</td><td>plan|trans</td><td>&nbsp;</td>
-					<td>The view parameter allows special views to facilitate interpretation of diffecent case aspects.
+					<td>The view parameter allows special views to facilitate interpretation of different case aspects.
 					<br/><em>plan</em> rotates cube to expose U face, while showing the sides of the top layer<br/>
-					<em>trans</em> sets the cube background to be 20 opaque, and hides any masked faces</td></tr>
-				<tr><td><em>stage</em></td><td>Stage Mask</td><td>fl | f2l | ll | llc | lle</td><td>&nbsp;</td>
+					<em>trans</em> sets the cube base colour to transparent, and hides any masked or undefined faces</td></tr>
+				<tr><td><em>stage</em></td><td>Stage Mask</td><td>fl | f2l | ll | cll | ell | oll | coll | ocell</td><td>&nbsp;</td>
 					<td>Sets parts of the cube to be masked from being coloured.</td></tr>
 				<tr><td><em>r</em></td><td>Rotation Sequence</td><td>([xyz]-?[0-9][0-9]?[0-9]?)+</td><td>y45x-34</td>
 					<td>Each entry in the sequence is an axis (x, y or z), followed by the
@@ -212,11 +226,13 @@
 					<em>o</em>: This is an 'oriented' face (coloured silver)<br/>
 					<em>t</em>: This is a transparent face, and will not appear on the cube
 					</td></tr>
-				<tr><td><em>fc</em></td><td>Facelet Colours</td><td>[ndlswyrobgmp]*</td>
+				<tr><td><em>fc</em></td><td>Facelet Colours</td><td>[ndlswyrobgmpt]*</td>
 					<td>yyyyyyyyy rrrrrrrrr bbbbbbbbb wwwwwwwww ooooooooo ggggggggg</td>
 					<td>Defines the cube state in terms of facelet colours,
-					as an alternative to using fd.<br/><br/>
-					See the 'sch' variable below for an explanation of the colour codes.</td></tr>
+					as an alternative to using fd. fc
+					takes precedence over fd if both are defined.<br/><br/>
+					See the 'sch' variable below for an explanation of the colour codes.
+					</td></tr>
 				<tr><th colspan="5">Cube Style</th></tr>
 				<tr><td><em>sch</em></td><td>Colour Scheme</td>
 					<td>[ndlswyrobgmp]*6 <br/><br/>OR<br/><br/>
@@ -229,7 +245,7 @@
 					<br/><br/>The letters used in shorthand notation map to the generic
 					face colours as follows: n=black (noir), d=dark grey, l=light grey,
 					s=silver (lighter grey), w=white, y=yellow, r=red, o=orange, b=blue, g=green,
-					m=purple (magenta), p=pink<br/><br/>
+					m=purple (magenta), p=pink, t=transparent<br/><br/>
 					Where longhand notation is used, 3 or 6-digit hex codes can be used to specify
 					the exact colour. for example C80000 would be a dark red colour.
 					</td></tr>
@@ -283,19 +299,7 @@
 	
 		// Faces
 		$U = 0; $R = 1; $F = 2; $D = 3; $L = 4; $B = 5; $N = 6; $O = 7; $T = 8;
-		
-		// Facelet constants
-		$FC = Array('u', 'r', 'f', 'd', 'l', 'b', 'n', 'o', 't');
-		$FC_ID = Array(
-			'u' => $U,
-			'r' => $R,
-			'f' => $F,
-			'd' => $D,
-			'l' => $L,
-			'b' => $B,
-			'n' => $N,
-			'o' => $O,
-			't' => $T);
+
 	
 		// Colour constants
 		$BLACK  = '000000';
@@ -331,7 +335,7 @@
 			'green'  => $GREEN,
 			'purple' => $PURPLE,
 			'pink'   => $PINK);
-
+		
 		// Abbriviation colour mapping
 		$ABBR_COL = Array(
 			'n' => $BLACK,
@@ -345,8 +349,11 @@
 			'b' => $BLUE,
 			'g' => $GREEN,
 			'm' => $PURPLE,
-			'p' => $PINK);
+			'p' => $PINK,
+			't' => 't'); // Transparent
 
+		// Default colour scheme
+		$DEF_SCHEME = Array( $YELLOW, $RED, $BLUE, $WHITE,  $dim == 2 ? $PINK : $ORANGE, $GREEN, $GREY, $SILVER, 't');
 
 		// -----------------------[ User Parameters ]--------------------
 
@@ -386,12 +393,15 @@
 			$dim = $_REQUEST['pzl'];
 		
 		// Default scheme
-		$scheme = Array( $YELLOW,     $RED,    $BLUE,   $WHITE,  $dim == 2 ? $PINK : $ORANGE,   $GREEN);
-		$schcode = Array('y','r','b','w','o','g');
+		$scheme = $DEF_SCHEME;
+		
+		// Default mapping from colour code to face id
+		$schcode = Array('y', 'r', 'b', 'w', 'o', 'g',);
+		
 		// Retrive colour scheme from user
 		if(array_key_exists('sch', $_REQUEST)){
 			$sd = $_REQUEST['sch'];
-			if(preg_match('/^[ndlswyrogbpm]{6}$/', $sd)){
+			if(preg_match('/^[ndlswyrogbpmt]{6}$/', $sd)){
 				for($i = 0; $i < 6; $i++){
 					$scheme[$i] = $ABBR_COL[$sd[$i]];
 					$schcode[$i] = $sd[$i];
@@ -402,17 +412,13 @@
 				if(count($cols) == 6){
 					$cok = true;
 					for($i = 0; $i < 6; $i++){
-						$cols[$i] = parse_col($cols[$i]);
+						$scheme[$i] = parse_col($cols[$i]);
 						if(!$cols[$i]) $cok = false;
 					}
-					if($cok) $scheme = $cols;
+					if(!$cok) $scheme = $DEF_SCHEME;
 				}
 			}
 		}
-		// Append scheme with special colours
-		$scheme[$N] = $GREY;
-		$scheme[$O] = $SILVER;
-		$scheme[$T] = $DGREY;
 
 		// Retrive size from user
 		$size = 128; // default
@@ -425,11 +431,6 @@
 		// Retrive view variable
 		if(array_key_exists('view', $_REQUEST)){
 			$view = $_REQUEST['view'];
-		}
-	
-		// Retrive stage variable
-		if(array_key_exists('stage', $_REQUEST)){
-			$stage = $_REQUEST['stage'];
 		}
 	
 		// Retrive background colour
@@ -460,80 +461,105 @@
 			$fo = $_REQUEST['fo'];
 
 			
-		// Retrive alg def
-		if($dim <= 3 && (array_key_exists('alg', $_REQUEST) || array_key_exists('case', $_REQUEST))){
-			require "cube_lib.php";
-			$is_alg = array_key_exists('alg', $_REQUEST);
-			$alg = $is_alg ? $_REQUEST['alg'] : $_REQUEST['case'];
-			$alg = preg_replace('/[^UDLRFBudlrfbMESxyz\'23]/', '', $alg);
-			$alg = preg_replace('/3/', "'", $alg); // Replace 3 with a '
-			$alg = preg_replace('/2\'/', "2", $alg); // Replace 2' with a 2
-			if($is_alg) $alg = invert_alg($alg);
-			$fc = face_cube(case_cube($alg), $dim);
-			for($i = 0; $i < count($fc); $i++){
-				$facelets[$i] = $fc[$i];
-			}
-		}
-		// Retrive facelet def
-		else if(array_key_exists('fd', $_REQUEST) && preg_match('/^[udlrfbnot]+$/', $_REQUEST['fd'])){
-			$uf = $_REQUEST['fd'];
-			$nf = strlen($uf);
-			for($fc = 0; $fc < 6; $fc++){ for($i = 0; $i < $dim * $dim; $i++){
-				// Add user defined face
-				if($fc * $dim *$dim + $i < $nf)
-					$facelets[$fc * $dim * $dim + $i] = $FC_ID[$uf[$fc * $dim *$dim + $i]];
-				// Otherwise default to a blank face
-				else $facelets[$fc * $dim *$dim + $i] = $N;
-			}}
+		// Create default face defs
+		for($fc = 0; $fc < 6; $fc++){ for($i = 0; $i < $dim * $dim; $i++)
+			$facelets[$fc * $dim * $dim + $i] = $fc;
 		}
 		// Retrive colour def
-		else if(array_key_exists('fc', $_REQUEST) && preg_match('/^[ndlswyrobgmp]+$/', $_REQUEST['fc'])){
+		// This overrides face def and makes the $scheme variable redundent (ie, gets reset to default)
+		if(array_key_exists('fc', $_REQUEST) && preg_match('/^[ndlswyrobgmpt]+$/', $_REQUEST['fc'])){
+			$using_cols = true;
+			$scheme = $DEF_SCHEME;
 			$uf = $_REQUEST['fc'];
 			$nf = strlen($uf);
 			for($fc = 0; $fc < 6; $fc++){ for($i = 0; $i < $dim * $dim; $i++){
 				// Add user defined face
 				if($fc * $dim *$dim + $i < $nf)
-					$facecols[$fc * $dim * $dim + $i] = $uf[$fc * $dim *$dim + $i];
-				// Otherwise default to scheme colour
-				else $facecols[$fc * $dim * $dim + $i] = $schcode[$fc];
+					$facelets[$fc * $dim * $dim + $i] = $uf[$fc * $dim *$dim + $i];
+				// Otherwise use scheme code
+				else
+					$facelets[$fc * $dim * $dim + $i] = $schcode[$fc];
 			}}
 		}
-		// If no defs, create default cube
-		else{
-			for($fc = 0; $fc < 6; $fc++){ for($i = 0; $i < $dim * $dim; $i++)
-				$facelets[$fc * $dim * $dim + $i] = $fc;
+		// Retrive facelet def
+		else if(array_key_exists('fd', $_REQUEST) && preg_match('/^[udlrfbnot]+$/', $_REQUEST['fd'])){
+			// Map from face names to numeric face ID
+			$fd_map = Array('u' => $U, 'r' => $R, 'f' => $F, 'd' => $D, 'l' => $L, 'b' => $B, 'n' => $N, 'o' => $O, 't' => $T);
+			$uf = $_REQUEST['fd'];
+			$nf = strlen($uf);
+			for($fc = 0; $fc < 6; $fc++){ for($i = 0; $i < $dim * $dim; $i++){
+				// Add user defined face
+				if($fc * $dim *$dim + $i < $nf)
+					$facelets[$fc * $dim * $dim + $i] = $fd_map[$uf[$fc * $dim *$dim + $i]];
+				// Otherwise default to a blank/transparent face
+				else $facelets[$fc * $dim *$dim + $i] = $view == 'trans' ? $T : $N;
+			}}
+		}
+		// Retrive stage variable
+		if(array_key_exists('stage', $_REQUEST)){
+			$stage = $_REQUEST['stage'];
+			// Stage Definitions ]
+			if($dim == 3){
+				switch($stage){
+					case 'fl' :
+				$mask = "000000000000000111000000111111111111000000111000000111";
+				break;
+					case 'f2l' :
+				$mask = "000000000000111111000111111111111111000111111000111111";
+				break;
+					case 'll' :
+				$mask = "111111111111000000111000000000000000111000000111000000";
+				break;
+					case 'cll' :
+				$mask = "101000101101000000101000000000000000101000000101000000";
+				break;
+					case 'ell' :
+				$mask = "010111010010000000010000000000000000010000000010000000";
+				break;
+					case 'oll' :
+				$mask = "111111111000000000000000000000000000000000000000000000";
+				break;
+					case 'coll' :
+				$mask = "111111111101000000101000000000000000101000000101000000";
+				break;
+					case 'ocell' :
+				$mask = "111111111010000000010000000000000000010000000010000000";
+				break;
+				}
+			}else if($dim == 2){
+				switch($stage){
+					case 'fl' :
+				$mask = "000000110011111100110011";
+				break;
+					case 'll' :
+				$mask = "111111001100000011001100";
+				break;
+				}
 			}
+			// Apply mask to face def
+			if($mask){
+				for($i = 0; $i < $dim * $dim * 6; $i++){
+					$facelets[$i] = $mask[$i] == 0 ?
+						($view == 'trans' ? ($using_cols ? 't' : $T) :
+						($using_cols ? 'l' : $N)) : $facelets[$i];
+				}
+			}
+		}
+			
+		// Retrive alg def
+		if($dim <= 3 && (array_key_exists('alg', $_REQUEST) || array_key_exists('case', $_REQUEST))){
+			require "cube_lib.php";
+			$is_alg = array_key_exists('alg', $_REQUEST);
+			$alg = $is_alg ? $_REQUEST['alg'] : $_REQUEST['case'];
+			$alg = preg_replace('/%27/', "'", $alg);		
+			$alg = preg_replace('/[^UDLRFBudlrfbMESxyz\'23]/', '', $alg);
+			$alg = preg_replace('/3/', "'", $alg); // Replace 3 with a '
+			$alg = preg_replace('/2\'/', "2", $alg); // Replace 2' with a 2
+			if($is_alg) $alg = invert_alg($alg);
+			$facelets = facelet_cube(case_cube($alg), $dim, $facelets);
 		}
 		
-		// ------------------------[ Stage Definitions ]---------------------
-		if($stage && $dim == 3){
-			switch($stage){
-				case 'fl' :
-			$mask = "000000000000000111000000111111111111000000111000000111";
-			break;
-				case 'f2l' :
-			$mask = "000000000000111111000111111111111111000111111000111111";
-			break;
-				case 'll' :
-			$mask = "111111111111000000111000000000000000111000000111000000";
-			break;
-				case 'llc' :
-			$mask = "101000101101000000101000000000000000101000000101000000";
-			break;
-				case 'lle' :
-			$mask = "010111010010000000010000000000000000010000000010000000";
-			break;
-			}
-		}else if($dim == 2){
-			switch($stage){
-				case 'fl' :
-			$mask = "000000110011111100110011";
-			break;
-				case 'll' :
-			$mask = "111111001100000011001100";
-			break;
-			}
-		}
+	
 	
 		// ---------------[ 3D Cube Generator properties ]---------------
 	
@@ -693,7 +719,7 @@ if($bg) $cube .= "\t<rect fill='#$bg' x='$ox' y='$oy' width='$vw' height='$vh'/>
 	function parse_col($col){
 		global $NAME_COL, $ABBR_COL;
 		// As an abbriviation
-		if(preg_match('/^[ndlswyrogbpm]$/', $col))
+		if(preg_match('/^[ndlswyrogbpmt]$/', $col))
 			return $ABBR_COL[$col];
 		// As a name
 		if(array_key_exists($col, $NAME_COL))
@@ -787,7 +813,7 @@ if($bg) $cube .= "\t<rect fill='#$bg' x='$ox' y='$oy' width='$vw' height='$vh'/>
 
 	// Returns svg for a faces facelets
 	function facelet_svg($fc){
-		global $p, $dim, $N, $scheme, $facelets, $facecols, $ABBR_COL, $mask, $view;
+		global $p, $dim;
 		for($i = 0; $i < $dim; $i++){
 			for($j = 0; $j < $dim; $j++){
 				// Find centre point of facelet
@@ -830,13 +856,12 @@ if($bg) $cube .= "\t<rect fill='#$bg' x='$ox' y='$oy' width='$vw' height='$vh'/>
 	
 	/** Generates a polygon SVG tag for cube facelets */
 	function gen_facelet($p1, $p2, $p3, $p4, $seq){
-		global $mask, $view, $facelets, $scheme, $N, $facecols, $ABBR_COL, $cc;
-		$masked = $mask && $mask[$seq] == '0';
-		$fcid = $masked && $view == 'trans' ? 8 : $facelets[$seq];
-		$fcol = $masked ? $scheme[$N] : ($facecols ?
-			$ABBR_COL[$facecols[$seq]] :
-			$scheme[$fcid]);
-		return "\t\t<polygon fill='#$fcol' stroke='#$cc' ".($fcid == 8 ? "opacity='0' " : ' ' )."points='".
+		global $ABBR_COL, $facelets, $scheme, $using_cols, $cc, $T;
+		$fcol = $using_cols ? ($facelets[$seq] == 't' ? 't' : $ABBR_COL[$facelets[$seq]])
+		                    : ($facelets[$seq] == $T ? 't' : $scheme[$facelets[$seq]]);
+		return "\t\t<polygon fill='#".
+			($fcol == 't' ? '000000' : $fcol)."' stroke='#$cc' ".
+			($fcol == 't' ? "opacity='0' " : ' ' )."points='".
 				$p1[0].','.$p1[1].' '.
 				$p2[0].','.$p2[1].' '.
 				$p3[0].','.$p3[1].' '.
