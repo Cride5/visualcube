@@ -54,7 +54,7 @@
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 	<head>
-		<title>VisualCube (v0.3.0)</title>
+		<title>VisualCube (v0.3.1)</title>
 		<meta name="description"        content="Rubiks cube visualiser"/>
 		<meta name="keywords"           content="visualcube, visual cube, imagecube, image cube, cube vis, viscube, visual rubiks, imgcube, cube image, cube gif, cub png, cube jpeg"/>
 		<meta name="resource-type"      content="document"/>
