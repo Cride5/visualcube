@@ -1,7 +1,7 @@
 <?php
 /*
 	File: cube_lib.php
-	Date: 01/10/09
+	Date: 02 Apr 2010
 	Author(s): Conrad Rider (www.crider.co.uk)
 	Description: Php library for modelling a Rubik's cube
 
@@ -18,21 +18,25 @@
 	GNU Lesser General Public License for more details.
 
 	You should have received a copy of the GNU Lesser General Public License
-	along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+	along with VisualCube.  If not, see <http://www.gnu.org/licenses/>.
 	
-	Copyright (C) 2009 Conrad Rider
+	Copyright (C) 2010 Conrad Rider
 */
 
 	// Face constants
+	global $U, $R, $F, $D, $L, $B;
 	$U = 0; $R = 1; $F = 2; $D = 3; $L = 4; $B = 5;
 
 	// Corner Constants
+	global $URF, $UFL, $ULB, $UBR, $DFR, $DLF, $DBL, $DRB;
 	$URF = 0; $UFL = 1; $ULB = 2; $UBR = 3; $DFR = 4; $DLF = 5; $DBL = 6; $DRB = 7;
 
 	// Edge constants
+	global $UR, $UF, $UL, $UB, $DR, $DF, $DL, $DB, $FR, $FL, $BL, $BR;
 	$UR = 0; $UF = 1; $UL = 2; $UB = 3; $DR = 4; $DF = 5; $DL = 6; $DB = 7; $FR = 8; $FL = 9; $BL = 10; $BR = 11;
 
 	// Mapping from face constants to face letters
+	global $FACE_NAMES;
 	$FACE_NAMES = Array(
 		$U => 'u',
 		$R => 'r',
@@ -43,6 +47,7 @@
 	);
 	
 	// A solved cube
+	global $SOLVED_CUBE;
 	$SOLVED_CUBE = Array(
 		Array( $U, $R, $F, $D, $L, $B ),
 		Array( $URF, $UFL, $ULB, $UBR, $DFR, $DLF, $DBL, $DRB ),
@@ -51,6 +56,7 @@
 		Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ));
 		
 	// Partial cubes used to verify the correct parts are solved
+	global $VCUBE;
 	$VCUBE = Array(
 		// Verify a solved first layer 2x2
 		'2FL' => Array(
@@ -85,6 +91,55 @@
 			Array( $U, $R, $F, $D, $L, $B ),
 			Array( -1, -1, -1, -1, $DFR, $DLF, $DBL, $DRB ),
 			Array( -1, -1, -1, -1, 0, 0, 0, 0 ),
+			Array( -1, -1, -1, -1, $DR, $DF, $DL, $DB, $FR, $FL, $BL, $BR ),
+			Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )),
+		// Verify a solved F2L and T OCLL (for T ZBLL)
+		'F2L_OCLL_T' => Array(
+			Array( $U, $R, $F, $D, $L, $B ),
+			Array( -1, -1, -1, -1, $DFR, $DLF, $DBL, $DRB ),
+			Array(  0,  1,  2,  0, 0, 0, 0, 0 ),
+			Array( -1, -1, -1, -1, $DR, $DF, $DL, $DB, $FR, $FL, $BL, $BR ),
+			Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )),
+		// Verify a solved F2L and U OCLL (for Headlights ZBLL)
+		'F2L_OCLL_U' => Array(
+			Array( $U, $R, $F, $D, $L, $B ),
+			Array( -1, -1, -1, -1, $DFR, $DLF, $DBL, $DRB ),
+			Array(  0,  2,  1,  0, 0, 0, 0, 0 ),
+			Array( -1, -1, -1, -1, $DR, $DF, $DL, $DB, $FR, $FL, $BL, $BR ),
+			Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )),
+		// Verify a solved F2L and L OCLL (for L ZBLL)
+		'F2L_OCLL_L' => Array(
+			Array( $U, $R, $F, $D, $L, $B ),
+			Array( -1, -1, -1, -1, $DFR, $DLF, $DBL, $DRB ),
+			Array(  0,  2,  0,  1, 0, 0, 0, 0 ),
+			Array( -1, -1, -1, -1, $DR, $DF, $DL, $DB, $FR, $FL, $BL, $BR ),
+			Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )),
+		// Verify a solved F2L and H OCLL (for H ZBLL)
+		'F2L_OCLL_H' => Array(
+			Array( $U, $R, $F, $D, $L, $B ),
+			Array( -1, -1, -1, -1, $DFR, $DLF, $DBL, $DRB ),
+			Array(  2,  1,  2,  1, 0, 0, 0, 0 ),
+			Array( -1, -1, -1, -1, $DR, $DF, $DL, $DB, $FR, $FL, $BL, $BR ),
+			Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )),
+		// Verify a solved F2L and PI OCLL (for PI ZBLL)
+		'F2L_OCLL_PI' => Array(
+			Array( $U, $R, $F, $D, $L, $B ),
+			Array( -1, -1, -1, -1, $DFR, $DLF, $DBL, $DRB ),
+			Array(  1,  2,  2,  1, 0, 0, 0, 0 ),
+			Array( -1, -1, -1, -1, $DR, $DF, $DL, $DB, $FR, $FL, $BL, $BR ),
+			Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )),
+		// Verify a solved F2L and Sune OCLL (for Sune ZBLL)
+		'F2L_OCLL_S' => Array(
+			Array( $U, $R, $F, $D, $L, $B ),
+			Array( -1, -1, -1, -1, $DFR, $DLF, $DBL, $DRB ),
+			Array(  0,  2,  2,  2, 0, 0, 0, 0 ),
+			Array( -1, -1, -1, -1, $DR, $DF, $DL, $DB, $FR, $FL, $BL, $BR ),
+			Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )),
+		// Verify a solved F2L and Anti-sune OCLL (for Anti-sune ZBLL)
+		'F2L_OCLL_AS' => Array(
+			Array( $U, $R, $F, $D, $L, $B ),
+			Array( -1, -1, -1, -1, $DFR, $DLF, $DBL, $DRB ),
+			Array(  1,  0,  1,  1, 0, 0, 0, 0 ),
 			Array( -1, -1, -1, -1, $DR, $DF, $DL, $DB, $FR, $FL, $BL, $BR ),
 			Array( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 )),
 		// Verify a solved F2L and OLL (for PLL)
@@ -125,6 +180,7 @@
 	);
 	
 	// An array storing all cubie-level moves
+	global $CUBIE_MOVES;
 	$CUBIE_MOVES = Array(
 		Array( // U
 			Array( $U, $R, $F, $D, $L, $B ),
@@ -203,6 +259,7 @@
 		prod(prod(array_copy($CUBIE_MOVES[2]), $CUBIE_MOVES[5], 3), $CUBIE_MOVES[8], 1));
 		
 	// Mapping from power to chr to represent it
+	global $ALG_POW;
 	$ALG_POW = Array ('', "2", "'");
 	
 	// Returns the case identified by this alg (or -1 if not belonging to group),
@@ -223,6 +280,7 @@
 		for($i = 0; $i < count($frtns) && !$valid; $i++){
 			for($j = 0; $j < count($prtns) && !$valid; $j++){
 				$cube = case_cube($prtns[$j].$moves.$frtns[$i]);
+//println("testing cube: ".$prtns[$j].$moves.$frtns[$i]);
 //printcube($cube, 3);
 				if(is_member($cube, $group_id)){
 					$prtn = $prtns[$j];
@@ -323,6 +381,41 @@
 					case 12: // CLS 
 						match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)); // CO
 						break;
+					case 13: // ZBLL-T
+						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						break;
+					case 14: // ZBLL-U
+						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						break;
+					case 15: // ZBLL-L
+						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						break;
+					case 16: // ZBLL-H
+						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						break;
+					case 17: // ZBLL-Pi
+						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						break;
+					case 18: // ZBLL-S
+						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						break;
+					case 19: // ZBLL-As
+						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						break;
 				}
 //if($match) println("r:$r true");
 //else println("r:$r false");
@@ -347,6 +440,8 @@
 		for($j = 0; $j < 4; $j++){ if($cube[3][$j] == $FR){ $frp = $i + 1; break; }}
 		return $frp;
 	}
+	
+// TODO: This function failes on alg... x' U' R U L' U2 R' U' L' U' L2 u r2 U' z ... part of ZBLL-PI
 	// Returns true if the cube state is a member of the given group
 	function is_member($cube, $group_id){
 //echo "is member of? $group_id :";
@@ -354,22 +449,35 @@
 		global $VCUBE, $CUBIE_MOVES;
 		// Check cube from all y rotation angles
 		for($i = 0; $i < 4; $i++){
-			switch($group_id){
-				case  1: if(match($cube, $VCUBE['2OFL']    )) return true; break; // OLL
-				case  2: if(match($cube, $VCUBE['2O']      )) return true; break; // PBL
-				case  3: if(match($cube, $VCUBE['2FL']     )) return true; break; // CLL
-				case  4: if(match($cube, $VCUBE['F2L']     )) return true; break; // OLL
-				case  5: if(match($cube, $VCUBE['F2L_OLL'] )) return true; break; // PLL
-				case  6: if(match($cube, $VCUBE['F2L']     )) return true; break; // CLL
-				case  7: if(match($cube, $VCUBE['F2L_CLL'] )) return true; break; // ELL
-				case  8: if(match($cube, $VCUBE['F2B']     )) return true; break; // CMLL
-				case  9: if(match($cube, $VCUBE['F2L_OCLL'])) return true; break; // COLL
-				case 10: if(match($cube, $VCUBE['F2L_OCLL'])) return true; break; // ZBLL
-				case 11: if(match($cube, $VCUBE['F2LS']    )) return true; break; // ELS
-				case 12: if(match($cube, $VCUBE['F2LS_EO'] )) return true; break; // CLS
+//println("|".$cube[2][0].", ".$cube[2][1].", ".$cube[2][2].", ".$cube[2][3]."|");
+//printcube($cube, 3);
+			for($j = 0; $j < 4; $j++){
+				switch($group_id){
+					case  1: if(match($cube, $VCUBE['2OFL']    )) return true; break; // OLL
+					case  2: if(match($cube, $VCUBE['2O']      )) return true; break; // PBL
+					case  3: if(match($cube, $VCUBE['2FL']     )) return true; break; // CLL
+					case  4: if(match($cube, $VCUBE['F2L']     )) return true; break; // OLL
+					case  5: if(match($cube, $VCUBE['F2L_OLL'] )) return true; break; // PLL
+					case  6: if(match($cube, $VCUBE['F2L']     )) return true; break; // CLL
+					case  7: if(match($cube, $VCUBE['F2L_CLL'] )) return true; break; // ELL
+					case  8: if(match($cube, $VCUBE['F2B']     )) return true; break; // CMLL
+					case  9: if(match($cube, $VCUBE['F2L_OCLL'])) return true; break; // COLL
+					case 10: if(match($cube, $VCUBE['F2L_OCLL'])) return true; break; // ZBLL
+					case 11: if(match($cube, $VCUBE['F2LS']    )) return true; break; // ELS
+					case 12: if(match($cube, $VCUBE['F2LS_EO'] )) return true; break; // CLS
+					case 13: if(match($cube, $VCUBE['F2L_OCLL_T'])) return true; break; // ZBLL-T
+					case 14: if(match($cube, $VCUBE['F2L_OCLL_U'])) return true; break; // ZBLL-U
+					case 15: if(match($cube, $VCUBE['F2L_OCLL_L'])) return true; break; // ZBLL-L
+					case 16: if(match($cube, $VCUBE['F2L_OCLL_H'])) return true; break; // ZBLL-H
+					case 17: if(match($cube, $VCUBE['F2L_OCLL_PI'])) return true; break; // ZBLL-PI
+					case 18: if(match($cube, $VCUBE['F2L_OCLL_S'])) return true; break; // ZBLL-S
+					case 19: if(match($cube, $VCUBE['F2L_OCLL_AS'])) return true; break; // ZBLL-AS
+				}
+				// Rotate cube
+				$cube = prod($cube, $CUBIE_MOVES[move_id('y')], 1);
 			}
-			// Rotate cube by y
-			$cube = prod($cube, $CUBIE_MOVES[move_id('y')], 1);
+			// Rotate U-Layer
+			$cube = prod($cube, $CUBIE_MOVES[move_id('U')], 1);
 		}
 		return false;
 	}
@@ -402,6 +510,27 @@
 				+ els_FR($cube) * 16; // EO(5 edges) + position of FR
 			case 12: // CLS must track the orientation of the 5 corners (determined by o of 4 top ones)
 				return encode_o(array_slice($cube[2], 0, 4), 3); // CO
+			case 13: return encode_o(array_slice($cube[2], 0, 3), 3) // CO    (ZBLL-T)
+				+ encode_p(array_slice($cube[1], 0, 4)) * 27 // CP
+				+ encode_p(array_slice($cube[3], 0, 4)) * 27 * 24; // EP
+			case 14: return encode_o(array_slice($cube[2], 0, 3), 3) // CO    (ZBLL-U)
+				+ encode_p(array_slice($cube[1], 0, 4)) * 27 // CP
+				+ encode_p(array_slice($cube[3], 0, 4)) * 27 * 24; // EP
+			case 15: return encode_o(array_slice($cube[2], 0, 3), 3) // CO    (ZBLL-L)
+				+ encode_p(array_slice($cube[1], 0, 4)) * 27 // CP
+				+ encode_p(array_slice($cube[3], 0, 4)) * 27 * 24; // EP
+			case 16: return encode_o(array_slice($cube[2], 0, 3), 3) // CO    (ZBLL-Pi)
+				+ encode_p(array_slice($cube[1], 0, 4)) * 27 // CP
+				+ encode_p(array_slice($cube[3], 0, 4)) * 27 * 24; // EP
+			case 17: return encode_o(array_slice($cube[2], 0, 3), 3) // CO    (ZBLL-H)
+				+ encode_p(array_slice($cube[1], 0, 4)) * 27 // CP
+				+ encode_p(array_slice($cube[3], 0, 4)) * 27 * 24; // EP
+			case 18: return encode_o(array_slice($cube[2], 0, 3), 3) // CO    (ZBLL-S)
+				+ encode_p(array_slice($cube[1], 0, 4)) * 27 // CP
+				+ encode_p(array_slice($cube[3], 0, 4)) * 27 * 24; // EP
+			case 19: return encode_o(array_slice($cube[2], 0, 3), 3) // CO    (ZBLL-AS)
+				+ encode_p(array_slice($cube[1], 0, 4)) * 27 // CP
+				+ encode_p(array_slice($cube[3], 0, 4)) * 27 * 24; // EP
 		}
 		return -1;
 	}
