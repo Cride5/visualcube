@@ -264,12 +264,12 @@
 	
 	// Returns the case identified by this alg (or -1 if not belonging to group),
 	// as well an amended alg with any rotations required to make it fit the group
-	function gen_state($moves, $puzzle, $group_id){
+	function gen_state($moves, $puzzle, $group_id, $is_ll){
 		global $SOLVED_CUBE, $CUBIE_MOVES, $VCUBE;
 
 //println("\nGENSTATE:\ninput moves=$moves");
-		$moves = trim_rotations($moves);
-				
+		$moves = trim_rotations($moves, $is_ll);
+	
 //println("trimmed moves=$moves");
 		
 		// 1. Apply different combinations of initial
@@ -441,38 +441,19 @@
 		return $frp;
 	}
 	
-// TODO: This function failes on alg... x' U' R U L' U2 R' U' L' U' L2 u r2 U' z ... part of ZBLL-PI
+// TODO: This function failes on alg... x' U' R U L' U2 R' U' L' U' L2 u r2 U' z ... part of ZBLL-PI, or H
+// U' l2 u R2 U' R' U' L' U2 R' U L U' ... from ZBLL-PI
 	// Returns true if the cube state is a member of the given group
 	function is_member($cube, $group_id){
 //echo "is member of? $group_id :";
 //printcube($cube, 3);
-		global $VCUBE, $CUBIE_MOVES;
+		global $CUBIE_MOVES;
 		// Check cube from all y rotation angles
 		for($i = 0; $i < 4; $i++){
 //println("|".$cube[2][0].", ".$cube[2][1].", ".$cube[2][2].", ".$cube[2][3]."|");
 //printcube($cube, 3);
 			for($j = 0; $j < 4; $j++){
-				switch($group_id){
-					case  1: if(match($cube, $VCUBE['2OFL']    )) return true; break; // OLL
-					case  2: if(match($cube, $VCUBE['2O']      )) return true; break; // PBL
-					case  3: if(match($cube, $VCUBE['2FL']     )) return true; break; // CLL
-					case  4: if(match($cube, $VCUBE['F2L']     )) return true; break; // OLL
-					case  5: if(match($cube, $VCUBE['F2L_OLL'] )) return true; break; // PLL
-					case  6: if(match($cube, $VCUBE['F2L']     )) return true; break; // CLL
-					case  7: if(match($cube, $VCUBE['F2L_CLL'] )) return true; break; // ELL
-					case  8: if(match($cube, $VCUBE['F2B']     )) return true; break; // CMLL
-					case  9: if(match($cube, $VCUBE['F2L_OCLL'])) return true; break; // COLL
-					case 10: if(match($cube, $VCUBE['F2L_OCLL'])) return true; break; // ZBLL
-					case 11: if(match($cube, $VCUBE['F2LS']    )) return true; break; // ELS
-					case 12: if(match($cube, $VCUBE['F2LS_EO'] )) return true; break; // CLS
-					case 13: if(match($cube, $VCUBE['F2L_OCLL_T'])) return true; break; // ZBLL-T
-					case 14: if(match($cube, $VCUBE['F2L_OCLL_U'])) return true; break; // ZBLL-U
-					case 15: if(match($cube, $VCUBE['F2L_OCLL_L'])) return true; break; // ZBLL-L
-					case 16: if(match($cube, $VCUBE['F2L_OCLL_H'])) return true; break; // ZBLL-H
-					case 17: if(match($cube, $VCUBE['F2L_OCLL_PI'])) return true; break; // ZBLL-PI
-					case 18: if(match($cube, $VCUBE['F2L_OCLL_S'])) return true; break; // ZBLL-S
-					case 19: if(match($cube, $VCUBE['F2L_OCLL_AS'])) return true; break; // ZBLL-AS
-				}
+				if(is_member_strict($cube, $group_id)) return true;
 				// Rotate cube
 				$cube = prod($cube, $CUBIE_MOVES[move_id('y')], 1);
 			}
@@ -481,6 +462,49 @@
 		}
 		return false;
 	}
+	
+	// Returns true if the cube state is a member of the given group when AUF is allowed
+	function is_member_auf($cube, $group_id){
+//echo "is member of? $group_id :";
+//printcube($cube, 3);
+		global $CUBIE_MOVES;
+		// Check cube from all auf rotation angles
+		for($i = 0; $i < 4; $i++){
+//println("|".$cube[2][0].", ".$cube[2][1].", ".$cube[2][2].", ".$cube[2][3]."|");
+//printcube($cube, 3);
+			if(is_member_strict($cube, $group_id)) return true;
+			// Rotate U-Layer
+			$cube = prod($cube, $CUBIE_MOVES[move_id('U')], 1);
+		}
+		return false;
+	}
+	
+	function is_member_strict($cube, $group_id){
+		global $VCUBE;
+		switch($group_id){
+			case  1: if(match($cube, $VCUBE['2OFL']    )) return true; break; // OLL
+			case  2: if(match($cube, $VCUBE['2O']      )) return true; break; // PBL
+			case  3: if(match($cube, $VCUBE['2FL']     )) return true; break; // CLL
+			case  4: if(match($cube, $VCUBE['F2L']     )) return true; break; // OLL
+			case  5: if(match($cube, $VCUBE['F2L_OLL'] )) return true; break; // PLL
+			case  6: if(match($cube, $VCUBE['F2L']     )) return true; break; // CLL
+			case  7: if(match($cube, $VCUBE['F2L_CLL'] )) return true; break; // ELL
+			case  8: if(match($cube, $VCUBE['F2B']     )) return true; break; // CMLL
+			case  9: if(match($cube, $VCUBE['F2L_OCLL'])) return true; break; // COLL
+			case 10: if(match($cube, $VCUBE['F2L_OCLL'])) return true; break; // ZBLL
+			case 11: if(match($cube, $VCUBE['F2LS']    )) return true; break; // ELS
+			case 12: if(match($cube, $VCUBE['F2LS_EO'] )) return true; break; // CLS
+			case 13: if(match($cube, $VCUBE['F2L_OCLL_T'])) return true; break; // ZBLL-T
+			case 14: if(match($cube, $VCUBE['F2L_OCLL_U'])) return true; break; // ZBLL-U
+			case 15: if(match($cube, $VCUBE['F2L_OCLL_L'])) return true; break; // ZBLL-L
+			case 16: if(match($cube, $VCUBE['F2L_OCLL_H'])) return true; break; // ZBLL-H
+			case 17: if(match($cube, $VCUBE['F2L_OCLL_PI'])) return true; break; // ZBLL-PI
+			case 18: if(match($cube, $VCUBE['F2L_OCLL_S'])) return true; break; // ZBLL-S
+			case 19: if(match($cube, $VCUBE['F2L_OCLL_AS'])) return true; break; // ZBLL-AS
+		}
+		return false;
+	}
+	
 	// Returns a value uniquely identifying this cube state in this group
 	function cube_state($cube, $group_id){
 		switch($group_id){
@@ -745,13 +769,57 @@
 		}
 		return $cube;
 	}
+	// Formats an inputed alg to remove dissallowed characters and standardise notation
+	function format_alg($moves){
+		// Remove characters not allowed in an alg
+		$r = preg_replace('/[^UDLRFBudlrfbMESxyzw\'`23]/', '', $moves);
+		$r = preg_replace('/[3`]/', "'", $r); // Replace 3 or ` with a '
+		$r = preg_replace('/2\'|\'2/', "2", $r); // Replace 2' or '2 with a 2
+		// Fix wide notation
+		if(preg_match('/w/', $r)){
+			$r = preg_replace('/Uw/', 'u', $r);
+			$r = preg_replace('/Rw/', 'r', $r);
+			$r = preg_replace('/Fw/', 'f', $r);
+			$r = preg_replace('/Dw/', 'd', $r);
+			$r = preg_replace('/Lw/', 'l', $r);
+			$r = preg_replace('/Bw/', 'b', $r);
+			// now remove any extra w's
+			$r = preg_replace('/w/', '', $r);
+		}
+		// Merge multiple moves/rotations of same face
+//println( "init moves=|$moves|");
+		return compress_alg($r);
+//println("compressed moves=|$moves|");	
+	}
 	// Removes all initial and final rotations from a cube
-	function trim_rotations($moves){
+	function trim_rotations($alg, $is_ll){
+//echo "isll?$is_ll";
+		// Remove AUFs if its an LL alg
+		if($is_ll) $alg = remove_auf($alg);
+		
 		// Strip all initial rotations
-		$moves = preg_replace('/^([xyz][2\']?)+/', '', $moves);
-		// Strop all final rotations
-		$moves = preg_replace('/([xyz][2\']?)+$/', '', $moves);
-		return $moves;
+		$alg = preg_replace('/^([xyz][2\']?)+/', '', $alg);
+		// Strip all final rotations
+		$alg = preg_replace('/([xyz][2\']?)+$/', '', $alg);
+//echo "moves=|$moves|";
+		return $alg;
+	}
+	// Removes AUFs and replaces them with y rotations
+	function remove_auf($alg){
+		$n = strlen($alg);
+		for($i = 0; $i < $n; $i++){
+			$c = substr($alg, $i, 1);
+			if($c == 'U') $alg[$i] = 'y';
+			else if(preg_match('/[^yU2\'\s]/', $c)) // anything other than y and U turns are no longer aufs
+				break;
+		}
+		for($i = $n - 1; $i > -1; $i--){
+			$c = substr($alg, $i, 1);
+			if($c == 'U') $alg[$i] = 'y';
+			else if(preg_match('/[^yU2\'\s]/', $c)) // anything other than y and U turns are no longer aufs
+				break;
+		}
+		return compress_alg($alg);
 	}
 	// Inserts spaces in an alg for display
 	function expand_alg($alg){
@@ -806,24 +874,35 @@
 		return $alg;
 	}
 	
-	// Inverts a cube algorithm
+	// Inverts an NxN cube algorithm
 	function invert_alg($alg){
 		global $ALG_POW;
-		$inverse = "";
+		$inv = "";
 		$pow = 1;
+		$pre = '';
 		$i = strlen($alg) - 1;
 		while($i >= 0){
-			$move = move_id(substr($alg, $i, 1));
-			if($move != -1){
-				$inverse .= substr($alg, $i, 1).$ALG_POW[3 - $pow];
-				$pow = 1;
+			$c = substr($alg, $i, 1);
+			$mv = fcs_move_id($c);
+			if($mv != -1){
+				// Retrive layer depth
+				if($i > 0){
+					$pre = substr($alg, $i-1, 1);
+					if(!is_numeric($pre) || ($i > 1
+					&& fcs_move_id(substr($alg, $i-2, 1)) != -1))
+						$pre = '';
+					else	$i--;
+				}
+				// Invert and add the move
+				$inv .= $pre . $c . $ALG_POW[3 - $pow] . ' ';
+				$pow = 1; $pre = '';
 			}
 			else $pow = move_pow(substr($alg, $i, 1));
 			$i--;
 		}
-		return $inverse;
+		return $inv;
 	}
-	
+		
 	// Returns an array of algorithm statistics
 	// including, STM, HTM, QTM and GEN
 	function alg_stats($alg){
@@ -960,7 +1039,221 @@
 	}
 
 
-	// ------------------[ Basic Functions --------------
+
+	// -----------------[ NxNxN Face Cube ]---------------
+	
+	// Permutes an NxNxN face definition according to the given alg
+	function fcs_doperm($fcs, $alg, $dim){
+		$nf = $dim * $dim;
+		$mt = Array();
+		// Generate basic move tables
+		// Twist generic face
+		$fc_twist = Array();
+		for($row = 0; $row < $dim; $row++){
+			for($col = 0; $col < $dim; $col++){
+				$fc_twist[$row * $dim + $col] = ($dim - $col - 1) * $dim + $row;
+			}
+		}
+		// Inverse twist
+		$fc_twist2 = Array();
+		for($row = 0; $row < $dim; $row++){
+			for($col = 0; $col < $dim; $col++){
+				$fc_twist2[$row * $dim + $col] = $col * $dim + $dim - $row - 1;
+			}
+		}
+		
+		// Face order for slice turns
+		$sl_fo = Array(
+			Array(6, 5, 1, 6, 2, 4), // x
+			Array(2, 6, 3, 5, 6, 0), // y
+			Array(4, 0, 6, 1, 3, 6), // z
+			Array(6, 2, 4, 6, 5, 1), // x'
+			Array(5, 6, 0, 2, 6, 3), // y'
+			Array(1, 3, 6, 4, 0, 6), // z'
+		);
+		// Sticker order for slice turns
+		$sl_so = Array( // 1=+col+row, 2=-col+row, 3=+col-row, 4=-col-row,
+				// 5=+row+col, 6=-row+col, 7=+row-col, 8=-row-col, 0=null
+			Array(0, 1, 1, 0, 1, 1), // x
+			Array(8, 0, 8, 8, 0, 5), // y
+			Array(4, 7, 0, 1, 6, 0), // z
+		);
+		// Twist individual slices
+		$sl_twist = Array();
+		for($lr = 0; $lr < 6; $lr++){
+			$sl_twist[$lr] = Array();
+			for($sl = 0; $sl < $dim; $sl++){
+				$sl_twist[$lr][$sl] = Array();
+				for($fc = 0; $fc < 6; $fc++){
+					if($sl_so[$lr%3][$fc] == 0) continue;
+					for($i = 0; $i < $dim; $i++){
+						$sl_twist[$lr][$sl][$fc*$nf + fcs_pos($sl, $i, $sl_so[$lr%3][$fc], $dim)]
+							= $sl_fo[$lr][$fc]*$nf + fcs_pos($sl, $i, $sl_so[$lr%3][$sl_fo[$lr][$fc]], $dim);
+					}
+				}
+			}
+		}
+		// Initialise move tables
+		$fc_moves = Array();
+		for($i = 0; $i < $dim * 6; $i++){
+			for($j = 0; $j < $nf * 6; $j++){
+				$fc_moves[$i][$j] = $j;
+			}
+		}
+		
+		// Create move tables composed of simple units
+		
+		// Rotations
+		for($i = 0; $i < 3; $i++){
+			// Add all slice moves for axis
+			for($j = 0; $j < $dim; $j++)
+				fcs_union($fc_moves[$i], $sl_twist[$i][$j], 0);
+			// Add twist moves for each end
+			fcs_union($fc_moves[$i], $fc_twist, $i*$dim*$dim);
+			fcs_union($fc_moves[$i], $fc_twist2, ($i+3)*$dim*$dim);
+		}
+		// Centre-slice moves
+		if($dim % 2 > 0){
+			fcs_union($fc_moves[3], $sl_twist[3][floor($dim/2)], 0); // E
+			fcs_union($fc_moves[4], $sl_twist[4][floor($dim/2)], 0); // M
+			fcs_union($fc_moves[5], $sl_twist[2][floor($dim/2)], 0); // S
+		}
+
+		// Normal Moves
+		for($ax = 0; $ax < 3; $ax++){
+			for($dp = 0; $dp < $dim - 1; $dp++){
+				// Primary axis end
+				// Add twist move
+				fcs_union($fc_moves[6 + $ax*($dim-1) + $dp], $fc_twist, $ax*$dim*$dim);
+				for($sl = 0; $sl <= $dp; $sl++) // Add slice moves up to depth $dp
+					fcs_union($fc_moves[6 + $ax*($dim-1) + $dp], $sl_twist[$ax][$sl], 0);
+				// Secondary axis end
+				// Add twist move
+				fcs_union($fc_moves[6 + (3+$ax)*($dim-1) + $dp], $fc_twist, (3+$ax)*$dim*$dim);
+				for($sl = 0; $sl <= $dp; $sl++) // Add slice moves up to depth $dp
+					fcs_union($fc_moves[6 + (3+$ax)*($dim-1) + $dp], $sl_twist[3+$ax][$dim - $sl - 1], 0);
+			}
+		}
+		
+		// Carry out moves
+		$moves = fcs_parse_alg($alg, $dim);
+		
+		$fcs_ = Array();
+		if(!is_array($fcs)) $fcs = str_split($fcs);
+		foreach($moves as $mv){
+			fcs_permute($fcs, $fcs_, $fc_moves[$mv]);
+			$tmp = $fcs;
+			$fcs = $fcs_;
+			$fcs_ = $tmp;
+		}
+		return $fcs;
+	}
+	function fcs_pos($r, $c, $o, $d){
+		$n = $d*$d;
+		switch($o){
+			case 1: return $d * $r + $c;
+			case 2: return $d * ($r + 1) - 1 - $c;
+			case 3: return $n - $d * ($r + 1) + $c;
+			case 4: return $n - $d * $r - 1 - $c;
+			case 5: return $d * $c + $r;
+			case 6: return $d * ($c + 1) - 1 - $r;
+			case 7: return $n - $d * ($c + 1) + $r;
+			case 8: return $n - $d * $c - 1 - $r;
+		}
+	}
+	// Translations defined in $t2 are applied to $t1
+	function fcs_union(&$t1, &$t2, $offset){
+		foreach($t2 as $k => $v){
+			$t1[$k + $offset] = $v + $offset;
+		}
+	}
+	// Permutes given array, storing output in second array
+	function fcs_permute(&$in, &$out, $perm){
+		//print_r($perm);
+		for($i = 0; $i < count($in); $i++)
+			$out[$i] = $in[$perm[$i]];
+		//print_r($out);
+		return $out;
+	}
+	// Parses an algorithm string into a move-id sequence
+	function fcs_parse_alg($alg, $dim){
+		$moves = Array();
+		$i = 0;
+		$j = 0;
+		$pre = 0;
+		$len = strlen($alg);
+		while($i < $len){
+			$c = substr($alg, $i, 1);
+			$mv = fcs_move_id($c);
+			if(is_numeric($c)){
+				$pre = $c;
+			}
+			else if($mv >= 0){
+				$pow = $i < strlen($alg) - 1 ? move_pow(substr($alg, $i+1, 1)) : 1;
+				if($pow > 1) $i++;
+				// Add the move
+				$pre = $pre < 1 ? 1 : ($pre > $dim - 1 ? $dim - 1 : $pre);
+				if($mv >= 12){ $mv -= 6; $pre = $pre < 2 ? 2 : $pre; }
+				for($k = 0; $k < $pow; $k++)
+					$moves[$j++] = $mv < 6 ? $mv : 6 + ($mv - 6) * ($dim - 1) + ($pre - 1); 
+				$pre = 1;
+			}
+			else $pre = 1;
+
+			$i++;
+		}
+//		echo "|" . $alg . "|";
+//		print_r($moves);
+		
+		return $moves;
+	}
+	// Maps move names to a move id
+	function fcs_move_id($move){
+		switch($move){
+			case 'y': return 0;
+			case 'x': return 1;
+			case 'z': return 2;
+			case 'E': return 3;
+			case 'M': return 4;
+			case 'S': return 5;
+			case 'U': return 6;
+			case 'R': return 7;
+			case 'F': return 8;
+			case 'D': return 9;
+			case 'L': return 10;
+			case 'B': return 11;
+			case 'u': return 12;
+			case 'r': return 13;
+			case 'f': return 14;
+			case 'd': return 15;
+			case 'l': return 16;
+			case 'b': return 17;
+		}
+		return -1;
+	}
+	// Formats an alg for bigcubes
+	function fcs_format_alg($alg){
+		// Fix URL encoded characters (urldecode doesn't seem to remove them)
+		$r = preg_replace('/%27/', "'", $alg);
+		$r = preg_replace('/%20/', " ", $r);
+		// Remove characters not allowed in an alg
+		$r = preg_replace('/[^UDLRFBudlrfbMESxyzw\'`234567890 ]/', '', $r);
+		$r = preg_replace('/[`]/', "'", $r); // Replace ` with a '
+		$r = preg_replace('/2\'|\'2/', "2", $r); // Replace 2' or '2 with a 2
+		// Fix wide notation
+		if(preg_match('/[w]/', $r)){
+			$r = preg_replace('/Uw/', 'u', $r);
+			$r = preg_replace('/Rw/', 'r', $r);
+			$r = preg_replace('/Fw/', 'f', $r);
+			$r = preg_replace('/Dw/', 'd', $r);
+			$r = preg_replace('/Lw/', 'l', $r);
+			$r = preg_replace('/Bw/', 'b', $r);
+			// now remove any extra w's
+			$r = preg_replace('/w/', '', $r);
+		}
+		return $r;
+	}
+	// ------------------[ Basic Functions ]--------------
 
 	// Copy an array
 	function array_copy($ary){

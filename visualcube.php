@@ -23,27 +23,65 @@
 	Copyright (C) 2010 Conrad Rider
 	
 	TODO:
-	* Model for NxNxN cubes
-	* Display plan view example on main page
+	* Permutation Arrows
+	* Other puzzles
+	
+	CHANGES: (Version 0.3.0 to 0.4.0)
+	* Algs applicable to NxNxN cubes
+	* Wider range of stage masks, with the ability to rotate them
+	* Style variables configurable via cookies
 */
 
-	// Causes cube svg to be outputted as XML for inspection
-	$DEBUG = false;
+	//  -----------------[ Script Configuration ]-----------------
 
 	// Database Configuration (for image caching)
-	
 	$DB_NAME="DATABASE_NAME";
 	$DB_USERNAME="DATABASE_USERNAME";
 	$DB_PASSWORD="DATABASE_PASSWORD";
+	
+	// Maximum cube dimension to render (pzl)
+	$MAX_PZL_DIM = 10;
+	
+	// Whether to allow cookie config of style variables (r, sch, bg, cc, co, fo, dist)
+	$ENABLE_COOKIES = true;
 
 	// Whether image caching is enabled. NOTE: if enabled a cron
-	// job will need to be set up to prun the database
-	$ENABLE_CACHE = true; 
+	// job will need to be set up to prune the database
+	$ENABLE_CACHE = false; 
+	
 	// Maximum size of image to be cached
 	$CACHE_IMG_SIZE_LIMIT = 10000; // 10Kb
 	
+	// Causes cube svg to be outputted as XML for inspection
+	$DEBUG = false;
+
+	// Default rendering values
+	$DEFAULTS = Array(
+		'fmt'   => 'png',
+		'pzl'   => '3',
+		'size'  => '128',
+		'view'  => '',
+		'stage' => '',
+		'r'     => 'y45x-34',
+		'alg'   => '',
+		'case'  => '',
+		'fd'    => 'uuuuuuuuurrrrrrrrrfffffffffdddddddddlllllllllbbbbbbbbb',
+		'fc'    => 'yyyyyyyyyrrrrrrrrrbbbbbbbbbwwwwwwwwwoooooooooggggggggg',
+		'sch'   => 'yrbwog',
+		'bg'    => 'white',
+		'cc'    => 'black',
+		'co'    => '100',
+		'fo'    => '100',
+		'dist'  => '5',
+	);
+	
+	
+	// ----------------------[ API Page ]-----------------------
+	
 	// If no format specified, display API page
 	if(!array_key_exists('fmt', $_REQUEST)){
+	
+	
 		// XML definition
 		$HTML_DEF = '<?xml version="1.0" encoding="iso-8859-1"?>'."\n".
 		    '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"'."\n".
@@ -54,7 +92,7 @@
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 	<head>
-		<title>VisualCube (v0.3.1)</title>
+		<title>VisualCube (v0.4.0)</title>
 		<meta name="description"        content="Rubiks cube visualiser"/>
 		<meta name="keywords"           content="visualcube, visual cube, imagecube, image cube, cube vis, viscube, visual rubiks, imgcube, cube image, cube gif, cub png, cube jpeg"/>
 		<meta name="resource-type"      content="document"/>
@@ -67,8 +105,19 @@
 		<meta name="author"             content="Conrad Rider"/>
 		<meta name="copyright"          content="Copyright © 2009-2010 Conrad Rider"/>
 		<meta http-equiv="Content-Type" content="text/html; iso-8859-1"/>
+		<script type="text/javascript">
+			//<![CDATA[
+			function setCookie(cname, value){
+				var days = 365;
+				var date = new Date();
+				date.setTime(date.getTime()+(days*24*60*60*1000));
+				var expires = "; expires="+date.toGMTString();
+				document.cookie = cname + "=" + value + expires + "; path=/";
+			}
+			//]]>
+		</script>
 		<style media="screen" type="text/css">
-			@import url("screen.css");
+			@import url("common.css");
 			table{
 				border-spacing:0px; 
 				border-top:1px solid silver;
@@ -113,12 +162,34 @@
 				float:right;
 				border:none;
 			}
+			#cookie_list{
+				width:250px;
+			}
+			#cookie_list li{
+				margin-bottom:20px;
+			}
+			#cookie_list input{
+				float:right;
+				width:60px;
+			}
 		</style>
 	</head>
 	<body>
+		<div id="nav_box">
+			cube.crider.co.uk
+			<ul>
+				<li><a href="/">ZZ Tutorial</a></li>
+				<li><a href="http://www.ctimer.co.uk">cTimer</a></li>
+				<li><em>VisualCube</em></li>
+				<li><a href="algtrans.html">Algorithm Translator</a></li>
+				<li><a href="coracle.html">Coracle Lookahead Drill</a></li>
+				<li><a href="scrambler.html">Random State Scrambler</a></li>
+				<li><a href="http://www.crider.co.uk">Author's Homepage</a></li>
+			</ul>
+		</div>
 		<div id="header_v">
 			<a href="http://validator.w3.org/check?uri=referer" title="Valid XHTML 1.0 Strict">
-				<img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Strict" width="88" height="31" style="margin-right:20px"/>
+				<img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Strict" width="88" height="31" style="margin-right:200px"/>
 			</a>
 			<h1>VisualCube</h1>
 			Generate custom Rubik's cube visualisations from your browser address bar.
@@ -138,13 +209,13 @@
 			<div id="examples">
 				<a href="visualcube.png?size=200&amp;alg=S2M2E2">
 					<img src="visualcube_0.gif" alt="Example 0"/></a>
-				<a href="visualcube.png?size=200&amp;cc=s&amp;sch=yrbnog&amp;fd=fdduufdrubulurbflrlfrbfruldlfrddbfddlbfulrrlbbludblbfu">
+				<a href="visualcube.png?size=200&amp;view=plan&amp;case=RUR'U'R'U2RUR'UR2U2R'y2">
 					<img src="visualcube_1.gif" alt="Example 1"/></a>
 				<a href="visualcube.png?size=200&amp;co=30&amp;co=12&amp;fo=50">
 					<img src="visualcube_2.gif" alt="Example 2"/></a>
 				<a href="visualcube.png?size=200&amp;r=y45x34&amp;cc=n&amp;fo=100&amp;co=35&amp;fd=tototototttttttttttttofotfttdtodotdtttttttttttttobotbt">
 					<img src="visualcube_3.gif" alt="Example3"/></a>
-				<a href="visualcube.png?size=200&amp;pzl=7&amp;r=z-15x-105&amp;sch=yyyyyy&amp;fc=ynyyynynnnynnnyyyyyyyyynnnyynyynyynnnyyynnynnnnny">
+				<a href="visualcube.png?size=200&amp;pzl=7&amp;cc=grey&amp;r=z-15x-105&amp;sch=yyyyyy&amp;fc=ynyyynynnnynnnyyyyyyyyynnnyynyynyynnnyyynnynnnnny">
 					<img src="visualcube_4.gif" alt="Example4"/></a>
 			</div>
 			Click each cube to see how it was generated..
@@ -152,7 +223,7 @@
 			<h2>Features</h2>
 			<ul>
 				<li>Fully 3D cube visualisation</li>
-				<li>Cube dimensions from 1x1x1 to 9x9x9</li>
+				<li>Cube dimensions from 1x1x1 to NxNxN</li>
 				<li>Algorithm support</li>
 				<li>Complete orientation control</li>
 				<li>Multiple image formats</li>
@@ -161,18 +232,15 @@
 				<li>Custom colour schemes</li>
 				<li>Custom background colour</li>
 				<li>Image caching for speedy access</li>
+				<li>Cookie configurable variables</li>
 			</ul>
 			<br/>
 			<h2>To Do</h2>
 			<div>
 				The following features/bug fixes are planned for the future (ordered by priority).
 				<ul>
-					<li>Stage mask to be applied before algorithm execution</li>
-					<li>More stage values inc eo, eoline, f2b, cls, els, zbll, cll, ell, oll, pll</li>
 					<li>More special views added to the 'view' variable (permutation arrows for example)</li>
-					<li>Algorithms for 4x4 cubes and above</li>
-					<li>Visualisation of other puzzles</li>
-				
+					<li>Visualisation of other puzzles inc square-1, megaminx and pyraminx</li>
 				</ul>
 				<br/><br/>
 			</div>
@@ -183,36 +251,38 @@
 			<h2>Parameters</h2>
 			<table>
 				<tr><th>Variable</th><th>Description</th><th>Value Range</th><th>Default</th><th>Comment</th></tr>
-				<tr><td><em>.</em></td><td>script extension</td><td> .png | .gif | .jpg | .svg | .tiff | .ico </td><td>.png</td>
+				<tr><td><em>.</em></td><td>script extension</td><td> .png | .gif | .jpg | .svg | .tiff | .ico </td><td>.<?php echo $DEFAULTS['fmt']; ?></td>
 					<td>The extension used in the script url dictates the format of the image generated. For example:
 					visiting <a href="visualcube.jpg">/visualcube.jpg</a>
 					will create a jpeg image.</td></tr>
-				<tr><td><em>fmt</em></td><td>Image Format</td><td> png | gif | jpg | svg | tiff | ico </td><td>.png</td>
+				<tr><td><em>fmt</em></td><td>Image Format</td><td> png | gif | jpg | svg | tiff | ico </td><td><?php echo $DEFAULTS['fmt']; ?></td>
 					<td>Used as an alternative to using an image extension as above.</td></tr>
-				<tr><td><em>pzl</em></td><td>Puzzle Type</td><td>1 to 9</td><td>3</td>
-					<td>Values from N=(1 to 9) represent an NxNxN cube. Currently only regular cubes are modelled</td></tr>
-				<tr><td><em>size</em></td><td>Size of generated image</td><td>0 to 1024</td><td>128</td><td>
+				<tr><td><em>pzl</em></td><td>Puzzle Type</td><td>1 to <?php echo $MAX_PZL_DIM; ?></td><td><?php echo $DEFAULTS['pzl']; ?></td>
+					<td>Values from N=(1 to <?php echo $MAX_PZL_DIM; ?>) represent an NxNxN cube. Currently only regular cubes are modelled</td></tr>
+				<tr><td><em>size</em></td><td>Size of generated image</td><td>0 to 1024</td><td><?php echo $DEFAULTS['size']; ?></td><td>
 					Images produced are square, so size specifies both width and height of the final image in pixels.</td></tr>
-				<tr><td><em>view</em></td><td>Special View</td><td>plan|trans</td><td>&nbsp;</td>
+				<tr><td><em>view</em></td><td>Special View</td><td>plan|trans</td><td><?php echo $DEFAULTS['view']; ?>&nbsp;</td>
 					<td>The view parameter allows special views to facilitate interpretation of different case aspects.
 					<br/><em>plan</em> rotates cube to expose U face, while showing the sides of the top layer<br/>
 					<em>trans</em> sets the cube base colour to transparent, and hides any masked or undefined faces</td></tr>
-				<tr><td><em>stage</em></td><td>Stage Mask</td><td>fl | f2l | ll | cll | ell | oll | coll | ocell</td><td>&nbsp;</td>
-					<td>Sets parts of the cube to be masked from being coloured.</td></tr>
-				<tr><td><em>r</em></td><td>Rotation Sequence</td><td>([xyz]-?[0-9][0-9]?[0-9]?)+</td><td>y45x-34</td>
+				<tr><td><em>stage</em></td><td>Stage Mask</td><td> ( fl | f2l | ll | cll | ell | oll | ocll | oell | coll | ocell | wv |
+					 vh | els | cls | cmll | cross | f2l-3 | f2l-2 | f2l-sm | f2l-1 | f2b | line | 2x2x2 | 2x2x3 )-?[xyz2']*
+					 </td><td><?php echo $DEFAULTS['stage']; ?>&nbsp;</td>
+					<td>Sets parts of the cube to be masked from being coloured. The stage identifier is optionally followed by a rotation algorithm. For example: <em>stage=cross-x2</em> would rotate the cross mask so that the cross appears on the U-layer rather than the D-layer</td></tr>
+				<tr><td><em>r</em></td><td>Rotation Sequence</td><td>([xyz]-?[0-9][0-9]?[0-9]?)+</td><td><?php echo $DEFAULTS['r']; ?></td>
 					<td>Each entry in the sequence is an axis (x, y or z), followed by the
 					number of degrees to rotate in a clockwise direction. Negative values are permitted.
 					Any number of rotations is possible.</td></tr>
 				<tr><th colspan="5">State Definitions</th></tr>
-				<tr><td><em>alg</em></td><td>Algorithm to apply</td><td>[UDLRFBudlrfbMESxyz'2 ]*</td><td>&nbsp;</td>
+				<tr><td><em>alg</em></td><td>Algorithm to apply</td><td>[UDLRFBudlrfbMESxyz'2 ]*</td><td><?php echo $DEFAULTS['alg']; ?>&nbsp;</td>
 					<td>The system applies the algorithm to the cube and displays the resulting state.<br/><br/>
 					<em>NOTE:</em> Currently unavailable for 4x4 cubes or above</td></tr>
-				<tr><td><em>case</em></td><td>Algorithm to solve case</td><td>[UDLRFBudlrfbMESxyz'2 ]*</td><td>&nbsp;</td>
+				<tr><td><em>case</em></td><td>Algorithm to solve case</td><td>[UDLRFBudlrfbMESxyz'2 ]*</td><td><?php echo $DEFAULTS['case']; ?>&nbsp;</td>
 					<td>The system displays the cube state which is solved by applying the algorithm
 					(algorithm inverse).<br/><br/>
 					<em>NOTE:</em> Currently unavailable for 4x4 cubes or above</td></tr>
 				<tr><td><em>fd</em></td><td>Facelet Definition</td><td>[udlrfbnot]*</td>
-					<td>uuuuuuuuu rrrrrrrrr fffffffff ddddddddd lllllllll bbbbbbbbb</td>
+					<td><?php echo insert_space($DEFAULTS['fd'], $DEFAULTS['pzl']); ?></td>
 					<td>Defines the cube state in terms of facelet positions.
 					u stands for a 'U' facelet (and likewise with rfdlb).
 					Defining a cube state using this method means the cube will be coloured
@@ -223,7 +293,7 @@
 					<em>t</em>: This is a transparent face, and will not appear on the cube
 					</td></tr>
 				<tr><td><em>fc</em></td><td>Facelet Colours</td><td>[ndlswyrobgmpt]*</td>
-					<td>yyyyyyyyy rrrrrrrrr bbbbbbbbb wwwwwwwww ooooooooo ggggggggg</td>
+					<td><?php echo insert_space($DEFAULTS['fc'], $DEFAULTS['pzl']); ?></td>
 					<td>Defines the cube state in terms of facelet colours,
 					as an alternative to using fd. fc
 					takes precedence over fd if both are defined.<br/><br/>
@@ -235,7 +305,7 @@
 					Comma separated list containing 6x one of:<br/>
 					black | dgrey | grey | silver | white | yellow | red | orange | blue
 					| green | purple | pink | [0-9a-fA-F]*3 | [0-9a-fA-F]*6
-					</td><td>yrbwog</td>
+					</td><td><?php echo $DEFAULTS['sch']; ?></td>
 					<td>The order of the colours specified represent the faces in this order:<br/><br/>
 					U R F D L B
 					<br/><br/>The letters used in shorthand notation map to the generic
@@ -249,16 +319,37 @@
 					black | dgrey | grey | silver | white | yellow | red | orange | blue
 					| green | purple | pink | [0-9a-fA-F]*3 | [0-9a-fA-F]*6
 					</td>
-					<td>FFF</td><td>The value <em>t</em> represents transparent, and is only valid for png and gif images.</td></tr>
-				<tr><td><em>cc</em></td><td>Cube Colour</td><td>see above</td><td>black</td><td>This is the cube's base colour.</td></tr>
-				<tr><td><em>co</em></td><td>Cube Opacity</td><td>0 to 99</td><td>100</td>
+					<td><?php echo $DEFAULTS['bg']; ?></td><td>The value <em>t</em> represents transparent, and is only valid for png and gif images.</td></tr>
+				<tr><td><em>cc</em></td><td>Cube Colour</td><td>see above</td><td><?php echo $DEFAULTS['cc']; ?></td><td>This is the cube's base colour.</td></tr>
+				<tr><td><em>co</em></td><td>Cube Opacity</td><td>0 to 99</td><td><?php echo $DEFAULTS['co']; ?></td>
 					<td>Setting this value causes the base cube to be transparent.
 					It means facelets at the back of the cube will also be rendered.
 					A value of 0 gives complete transparency.</td></tr>
-				<tr><td><em>fo</em></td><td>Facelet Opacity</td><td>0 to 99</td><td>100</td>
+				<tr><td><em>fo</em></td><td>Facelet Opacity</td><td>0 to 99</td><td><?php echo $DEFAULTS['fo']; ?></td>
 					<td>Setting this value causes the facelets to be rendered with transparency.</td></tr>
+				<tr><td><em>dist</em></td><td>Projection Distance</td><td>1 to 100</td><td><?php echo $DEFAULTS['dist']; ?></td>
+					<td>Controls the distance of the cube from the perspective of the viewer.</td></tr>
 			</table>
-			<br/><br/>
+			<br/><br/><?php if($ENABLE_COOKIES){ ?>
+			<h2>Cookie Configuration</h2>
+			The desired values for cookie configurable variables can be set below. <br/>
+			Refer to the table above for acceptable values.
+			<ul id="cookie_list">
+				<li><input type="text" value="<?php echo $_COOKIE['vc_r']?>"
+					onkeyup="setCookie('vc_r', this.value)"/>Rotation Sequence (r):</li>
+				<li><input type="text" value="<?php echo $_COOKIE['vc_sch']?>"
+					onkeyup="setCookie('vc_sch', this.value)"/>Colour Scheme (sch):</li>
+				<li><input type="text" value="<?php echo $_COOKIE['vc_bg']?>"
+					onkeyup="setCookie('vc_bg', this.value)"/>Background Colour (bg):</li>
+				<li><input type="text" value="<?php echo $_COOKIE['vc_cc']?>"
+					onkeyup="setCookie('vc_cc', this.value)"/>Cube Colour (cc):</li>
+				<li><input type="text" value="<?php echo $_COOKIE['vc_co']?>"
+					onkeyup="setCookie('vc_co', this.value)"/>Cube Opacity (co):</li>
+				<li><input type="text" value="<?php echo $_COOKIE['vc_fo']?>"
+					onkeyup="setCookie('vc_fo', this.value)"/>Facelet Opacity (fo):</li>
+				<li><input type="text" value="<?php echo $_COOKIE['vc_dist']?>"
+					onkeyup="setCookie('vc_dist', this.value)"/>Projection Distance (dist):</li>
+			</ul><?php } ?>
 		</div>
 		<div id="footer">
 			Copyright &copy; 2010 <a href="http://www.crider.co.uk">Conrad Rider</a>.
@@ -267,8 +358,9 @@
 	</body>
 </html>
 <?	
+
+	// Otherwise render a cube
 	}else{
-	
 		// Check cache for image and return if it exists in cache
 		if($ENABLE_CACHE){
 			// Connect to db
@@ -290,7 +382,8 @@
 		
 		
 		// Otherwise generate image
-
+		
+		
 		// -----------------[ Constants ]-----------------
 	
 		// Faces
@@ -304,8 +397,8 @@
 		$SILVER = 'BFBFBF';
 		$WHITE  = 'FFFFFF';
 		$YELLOW = 'FEFE00';
-		$RED    = 'FE0000';
-		$ORANGE = 'FE8600';
+		$RED    = 'EE0000';//'FE0000';
+		$ORANGE = 'FFA100';//'FE8600';
 		$BLUE   = '0000F2';
 		$GREEN  = '00F300';
 		$PURPLE = 'A83DD9';
@@ -331,7 +424,7 @@
 			'green'  => $GREEN,
 			'purple' => $PURPLE,
 			'pink'   => $PINK);
-		
+	
 		// Abbriviation colour mapping
 		$ABBR_COL = Array(
 			'n' => $BLACK,
@@ -349,7 +442,13 @@
 			't' => 't'); // Transparent
 
 		// Default colour scheme
-		$DEF_SCHEME = Array( $YELLOW, $RED, $BLUE, $WHITE,  $dim == 2 ? $PINK : $ORANGE, $GREEN, $GREY, $SILVER, 't');
+		$DEF_SCHEME = Array ($YELLOW, $RED, $BLUE, $WHITE, $dim == 2 ? $PINK : $ORANGE, $GREEN, $GREY, $SILVER, 't');
+		// $DEF_SCHEME = Array ($WHITE, $RED, $GREEN, $BLUE, $ORANGE, $YELLOW, $GREY, $SILVER, 't'); // Japanese scheme
+
+		// Corresponding mappings from colour code to face id
+		$DEF_SCHCODE = Array('y', 'r', 'b', 'w', 'o', 'g',);
+		//$DEF_SCHCODE = Array('w', 'r', 'g', 'b', 'o', 'y',); // Japanese scheme
+
 
 		// -----------------------[ User Parameters ]--------------------
 
@@ -367,9 +466,10 @@
 	
 		// Default rotation sequence
 		$rtn = Array(Array(1, 45), Array(0, -34));
-		// Get rotation from user
-		if(array_key_exists('r', $_REQUEST)){
-			preg_match_all('/([xyz])(\-?[0-9][0-9]?[0-9]?)/', $_REQUEST['r'], $matches);
+		// Get rotation from request (or cookie)
+		if(array_key_exists('r', $_REQUEST) || ($ENABLE_COOKIES && isset($_COOKIE['vc_r']))){
+			$_r = array_key_exists('r', $_REQUEST) ? $_REQUEST['r'] : $_COOKIE['vc_r'];
+			preg_match_all('/([xyz])(\-?[0-9][0-9]?[0-9]?)/', $_r, $matches);
 			for($i = 0; $i < count($matches[0]); $i++){
 				switch($matches[1][$i]){
 					case 'x' : $rtn_[$i][0] = 0; break;
@@ -384,19 +484,18 @@
 
 		// Retrive cube Dimension
 		$dim = 3;
-		if(array_key_exists('pzl', $_REQUEST)
-		&& preg_match('/^[1-9]$/', $_REQUEST['pzl']))
+		if(array_key_exists('pzl', $_REQUEST) && is_numeric($_REQUEST['pzl'])
+		&& $_REQUEST['pzl'] > 0 && $_REQUEST['pzl'] <= $MAX_PZL_DIM)
 			$dim = $_REQUEST['pzl'];
 		
 		// Default scheme
 		$scheme = $DEF_SCHEME;
-		
 		// Default mapping from colour code to face id
-		$schcode = Array('y', 'r', 'b', 'w', 'o', 'g',);
-		
-		// Retrive colour scheme from user
-		if(array_key_exists('sch', $_REQUEST)){
-			$sd = $_REQUEST['sch'];
+		$schcode = $DEF_SCHCODE;		
+		// Retrive colour scheme from request (or cookie)
+		if(array_key_exists('sch', $_REQUEST) || ($ENABLE_COOKIES && isset($_COOKIE['vc_sch']))){
+			// Retrive from cookie or 'sch' variable
+			$sd = array_key_exists('sch', $_REQUEST) ? $_REQUEST['sch'] : $_COOKIE['vc_sch'];
 			if(preg_match('/^[ndlswyrogbpmt]{6}$/', $sd)){
 				for($i = 0; $i < 6; $i++){
 					$scheme[$i] = $ABBR_COL[$sd[$i]];
@@ -423,38 +522,51 @@
 			if($size < 0) $size = 0;
 			if($size > 1024) $size = 1024;
 		}
+		
+		// Retrive dist variable - projection distance (how close the eye is to the cube)
+		$dist = 5; // default dist parameter
+		if(array_key_exists('dist', $_REQUEST) || ($ENABLE_COOKIES && isset($_COOKIE['vc_dist']))){
+			$dist_ = array_key_exists('dist', $_REQUEST) ? $_REQUEST['dist'] : $_COOKIE['vc_dist'];
+			if(is_numeric($dist_)) $dist = $dist_ < 1 ? 1 : ($dist_ > 100 ? 100 : $dist_);
+		}
 	
 		// Retrive view variable
 		if(array_key_exists('view', $_REQUEST)){
 			$view = $_REQUEST['view'];
 		}
 	
-		// Retrive background colour
+		// Retrive background colour from request (or cookies)
 		$bg = "FFFFFF";
-		if(array_key_exists('bg', $_REQUEST)){
-			if($_REQUEST['bg'] == "t") $bg = null;
+		if(array_key_exists('bg', $_REQUEST) || ($ENABLE_COOKIES && isset($_COOKIE['vc_bg']))){
+			$bg_ = array_key_exists('bg', $_REQUEST) ? $_REQUEST['bg'] : $_COOKIE['vc_bg'];
+			if($bg_ == "t") $bg = null;
 			else{
-				$bg_ = parse_col($_REQUEST['bg']);
+				$bg_ = parse_col($bg_);
 				if($bg_) $bg = $bg_;
 			}
 		}
-		// Retrive cube colour
+		
+		// Retrive cube colour from request (or cookies)
 		$cc = $view == 'trans' ? $SILVER : $BLACK;
-		if(array_key_exists('cc', $_REQUEST)){
-			$cc_ = parse_col($_REQUEST['cc']);
+		if(array_key_exists('cc', $_REQUEST) || ($ENABLE_COOKIES && isset($_COOKIE['vc_cc']))){
+			$cc_ = array_key_exists('cc', $_REQUEST) ? $_REQUEST['cc'] : $_COOKIE['vc_cc'];
+			$cc_ = parse_col($cc_);
 			if($cc_) $cc = $cc_;
 		}
-		// Retrive cube opacity
-		$co = $view == 'trans' ? 50 : 100;
-		if(array_key_exists('co', $_REQUEST)
-		&& preg_match('/^[0-9][0-9]?$/', $_REQUEST['co']))
-			$co = $_REQUEST['co'];
 
-		// Retrive face opacity
+		// Retrive cube opacity from request (or cookies)
+		$co = $view == 'trans' ? 50 : 100;
+		if(array_key_exists('co', $_REQUEST) || ($ENABLE_COOKIES && isset($_COOKIE['vc_co']))){
+			$co_ = array_key_exists('co', $_REQUEST) ? $_REQUEST['co'] : $_COOKIE['vc_co'];
+			if(preg_match('/^[0-9][0-9]?$/', $co_)) $co = $co_;
+		}
+
+		// Retrive face opacity from request (or cookies)
 		$fo = 100;
-		if(array_key_exists('fo', $_REQUEST)
-		&& preg_match('/^[0-9][0-9]?$/', $_REQUEST['fo']))
-			$fo = $_REQUEST['fo'];
+		if(array_key_exists('fo', $_REQUEST) || ($ENABLE_COOKIES && isset($_COOKIE['vc_fo']))){
+			$fo_ = array_key_exists('fo', $_REQUEST) ? $_REQUEST['fo'] : $_COOKIE['vc_fo'];
+			if(preg_match('/^[0-9][0-9]?$/', $fo_)) $fo = $fo_;
+		}
 
 			
 		// Create default face defs
@@ -494,6 +606,13 @@
 		// Retrive stage variable
 		if(array_key_exists('stage', $_REQUEST)){
 			$stage = $_REQUEST['stage'];
+			// Extract rotation sequence if present
+			$p = strrpos($stage, '-');
+			$st_rtn = '';
+			if($p > 0){
+				$st_rtn = urldecode(substr($stage, $p+1));
+				$stage = substr($stage, 0, $p);
+			}
 			// Stage Definitions ]
 			if($dim == 3){
 				switch($stage){
@@ -507,7 +626,7 @@
 				$mask = "111111111111000000111000000000000000111000000111000000";
 				break;
 					case 'cll' :
-				$mask = "101000101101000000101000000000000000101000000101000000";
+				$mask = "101010101101000000101000000000000000101000000101000000";
 				break;
 					case 'ell' :
 				$mask = "010111010010000000010000000000000000010000000010000000";
@@ -515,11 +634,59 @@
 					case 'oll' :
 				$mask = "111111111000000000000000000000000000000000000000000000";
 				break;
+					case 'ocll' :
+				$mask = "101010101000000000000000000000000000000000000000000000";
+				break;
+					case 'oell' :
+				$mask = "010111010000000000000000000000000000000000000000000000";
+				break;
 					case 'coll' :
 				$mask = "111111111101000000101000000000000000101000000101000000";
 				break;
 					case 'ocell' :
 				$mask = "111111111010000000010000000000000000010000000010000000";
+				break;
+					case 'wv' :
+				$mask = "111111111000111111000111111111111111000111111000111111";
+				break;
+					case 'vh' :
+				$mask = "010111010000111111000111111111111111000111111000111111";
+				break;
+					case 'els' :
+				$mask = "111111111000111011000111110111111111000111111000111111";
+				break;
+					case 'cls' :
+				$mask = "111111111000111111000111111111111111000111111000111111";
+				break;
+					case 'cmll' :
+				$mask = "101000101101111111101101101101101101101111111101101101";
+				break;
+					case 'cross' :
+				$mask = "000000000000010010000010010010111010000010010000010010";
+				break;
+					case 'f2l-3' :
+				$mask = "000000000000110110000011011011111010000010010000010010";
+				break;
+					case 'f2l-2' :
+				$mask = "000000000000011011000010010010111111000110110000111111";
+				break;
+					case 'f2l-sm' :
+				$mask = "000000000000110110000011011011111110000110110000011011";
+				break;
+					case 'f2l-1' :
+				$mask = "000000000000011011000110110110111111000111111000111111";
+				break;
+					case 'f2b' :
+				$mask = "000000000000111111000101101101101101000111111000101101";
+				break;
+					case 'line' :
+				$mask = "000000000000000000000010010010010010000000000000010010";
+				break;
+					case '2x2x2' :
+				$mask = "000000000000110110000011011011011000000000000000000000";
+				break;
+					case '2x2x3' :
+				$mask = "000000000000110110000111111111111000000011011000000000";
 				break;
 				}
 			}else if($dim == 2){
@@ -530,8 +697,18 @@
 					case 'll' :
 				$mask = "111111001100000011001100";
 				break;
+					case 'oll' :
+				$mask = "111100000000111100000000";
+				break;
 				}
 			}
+
+			// Apply alg to mask if defined
+			if($st_rtn != ''){
+				require_once "cube_lib.php";
+				$mask = fcs_doperm($mask, fcs_format_alg($st_rtn), $dim);
+			}
+
 			// Apply mask to face def
 			if($mask){
 				for($i = 0; $i < $dim * $dim * 6; $i++){
@@ -543,25 +720,19 @@
 		}
 			
 		// Retrive alg def
-		if($dim <= 3 && (array_key_exists('alg', $_REQUEST) || array_key_exists('case', $_REQUEST))){
-			require "cube_lib.php";
-			$is_alg = array_key_exists('alg', $_REQUEST);
-			$alg = $is_alg ? $_REQUEST['alg'] : $_REQUEST['case'];
-			$alg = preg_replace('/%27/', "'", $alg);		
-			$alg = preg_replace('/[^UDLRFBudlrfbMESxyz\'23]/', '', $alg);
-			$alg = preg_replace('/3/', "'", $alg); // Replace 3 with a '
-			$alg = preg_replace('/2\'/', "2", $alg); // Replace 2' with a 2
-			if($is_alg) $alg = invert_alg($alg);
-			$facelets = facelet_cube(case_cube($alg), $dim, $facelets);
+		if(array_key_exists('alg', $_REQUEST) || array_key_exists('case', $_REQUEST)){
+			require_once "cube_lib.php";
+			$alg = array_key_exists('alg', $_REQUEST) ? $_REQUEST['alg'] : '';
+			$case = array_key_exists('case', $_REQUEST) ? $_REQUEST['case'] : '';
+			$alg = fcs_format_alg(urldecode($alg));
+			$case = invert_alg(fcs_format_alg(urldecode($case)));
+//			$facelets = facelet_cube(case_cube($alg), $dim, $facelets); // old 3x3 alg system
+			$facelets = fcs_doperm($facelets, $case . ' ' . $alg, $dim); // new NxN facelet permute
 		}
 		
 	
-	
 		// ---------------[ 3D Cube Generator properties ]---------------
 	
-		// Projection distance (how close the eye is to the cube)
-		$PDIST = 5;
-
 		// Outline width
 		$OUTLINE_WIDTH = 0.94;
 
@@ -586,7 +757,7 @@
 		// Translation vector to centre the cube
 		$t = Array(-$dim/2, -$dim/2, -$dim/2);
 		// Translation vector to move the cube away from viewer
-		$zpos = Array(0, 0, $PDIST);
+		$zpos = Array(0, 0, $dist);
 		// Rotation vectors to track visibility of each face
 		$rv = Array(Array(0, -1, 0), Array(1, 0, 0), Array(0, 0, -1), Array(0, 1, 0), Array(-1, 0, 0), Array(0, 0, 1));
 		for($fc = 0; $fc < 6; $fc++){
@@ -702,11 +873,6 @@ if($bg) $cube .= "\t<rect fill='#$bg' x='$ox' y='$oy' width='$vw' height='$vh'/>
 			}
 		}
 	}
-
-
-
-
-
 	
 
 	// -----------------[ User input functions ]----------------------
@@ -730,9 +896,15 @@ if($bg) $cube .= "\t<rect fill='#$bg' x='$ox' y='$oy' width='$vw' height='$vh'/>
 		return null;
 	}
 
-
-
-
+	// Insert space in default fd/fc variables
+	function insert_space($in, $dim){
+		$out = '';
+		$dim *= $dim;
+		for($i = 0; $i < 6; $i++){
+			$out .= substr($in, $dim * $i, $dim) . ' ';
+		}
+		return $out;
+	}
 
 
 	// -------------------[ 3D Geometry Functions ]--------------------
