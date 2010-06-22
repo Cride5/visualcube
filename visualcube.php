@@ -2,7 +2,7 @@
 /*
 	File: visualcube.php
 	Date: 02 Apr 2010
-	Author(s): Conrad Rider (www.crider.co.uk)
+	Author(s): Conrad Rider (www.crider.co.uk), Shotaro Makisumi <smakisumi@gmail.com>
 	Description: Main script to generate cube images
 
 	This file is part of VisualCube.
