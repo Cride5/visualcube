@@ -2,7 +2,8 @@
 /*
 	File: visualcube.php
 	Date: 02 Apr 2010
-	Author(s): Conrad Rider (www.crider.co.uk), Shotaro Makisumi <smakisumi@gmail.com>
+	Author(s): Conrad Rider (www.crider.co.uk)
+	Contributors: Shotaro Makisumi <smakisumi@gmail.com>, Jaume Casado Ruiz <minterior@gmail.com>
 	Description: Main script to generate cube images
 
 	This file is part of VisualCube.
@@ -38,7 +39,7 @@
 	$DB_NAME="DATABASE_NAME";
 	$DB_USERNAME="DATABASE_USERNAME";
 	$DB_PASSWORD="DATABASE_PASSWORD";
-
+	
 	// Maximum cube dimension to render (pzl)
 	$MAX_PZL_DIM = 10;
 	
@@ -54,10 +55,12 @@
 	
 	// Causes cube svg to be outputted as XML for inspection
 	$DEBUG = false;
+	// Do not display errors
+	if (!$DEBUG) error_reporting(0);
 
 	// Default rendering values
 	$DEFAULTS = Array(
-		'fmt'   => 'png',
+		'fmt'   => 'gif',
 		'pzl'   => '3',
 		'size'  => '128',
 		'view'  => '',
@@ -92,7 +95,7 @@
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 	<head>
-		<title>VisualCube (v0.4.1)</title>
+		<title>VisualCube (v0.4.2)</title>
 		<meta name="description"        content="Rubiks cube visualiser"/>
 		<meta name="keywords"           content="visualcube, visual cube, imagecube, image cube, cube vis, viscube, visual rubiks, imgcube, cube image, cube gif, cub png, cube jpeg"/>
 		<meta name="resource-type"      content="document"/>
@@ -179,7 +182,9 @@
 			cube.crider.co.uk
 			<ul>
 				<li><a href="/">ZZ Tutorial</a></li>
+				<li><a href="beginner.html">Beginner Tutorial</a></li>
 				<li><a href="http://www.ctimer.co.uk">cTimer</a></li>
+				<li><a href="http://www.ctimer.co.uk/wee">weeTimer</a></li>
 				<li><em>VisualCube</em></li>
 				<li><a href="algtrans.html">Algorithm Translator</a></li>
 				<li><a href="coracle.html">Coracle Lookahead Drill</a></li>
@@ -372,7 +377,7 @@
 			$hash = md5($_SERVER['QUERY_STRING']);
 			$imgdata = get_arrays("SELECT fmt, req, rcount, img FROM vcache WHERE hash='$hash'");
 			// Verify query strings are equal (deals with unlikely, but possible hash collisions)
-			if(count($imgdata) > 0 && $imgdata[0]['req'] == $_SERVER['QUERY_STRING']){
+			if($imgdata && count($imgdata) > 0 && $imgdata[0]['req'] == $_SERVER['QUERY_STRING']){
 				display_img($imgdata[0]['img'], $imgdata[0]['fmt']);
 				// Increment access count
 				mysql_query("UPDATE vcache SET rcount=".($imgdata[0]['rcount'] + 1)." WHERE hash='$hash'");
@@ -444,7 +449,7 @@
 			't' => 't'); // Transparent
 
 		// Default colour scheme
-		$DEF_SCHEME = Array ($YELLOW, $RED, $BLUE, $WHITE, $ORANGE, $GREEN, $GREY, $SILVER, 't');
+		$DEF_SCHEME = Array ($YELLOW, $RED, $BLUE, $WHITE, $ORANGE, $GREEN, $DGREY, $GREY, 't');
 		// $DEF_SCHEME = Array ($WHITE, $RED, $GREEN, $BLUE, $ORANGE, $YELLOW, $GREY, $SILVER, 't'); // Japanese scheme
 
 		// Corresponding mappings from colour code to face id
@@ -455,14 +460,14 @@
 		// -----------------------[ User Parameters ]--------------------
 
 		// Retrive format from user, default to first in list otherwise
-		$LEGAL_FMT = Array ('gif', 'png', 'svg', 'jpg', 'jpeg', 'tiff', 'ico');
+		$LEGAL_FMT = Array ('gif', 'png', 'svg', 'jpg', 'jpe', 'jpeg', 'tiff', 'ico');
 		$fmt = $LEGAL_FMT[0];
 		if(array_key_exists('fmt', $_REQUEST) || array_key_exists('fmt', $DEFAULTS)){
 			$fmt = array_key_exists('fmt', $_REQUEST) ? $_REQUEST['fmt'] : $DEFAULTS['fmt'];
 			if(!in_array($fmt, $LEGAL_FMT))
 				$fmt = $LEGAL_FMT[0];
 			else{
-				if($fmt == 'jpeg') $fmt = 'jpg';
+				if($fmt == 'jpeg' || $fmt == 'jpe') $fmt = 'jpg';
 			}
 		}
 	
@@ -719,7 +724,7 @@
 			}
 
 			// Apply alg to mask if defined
-			if($st_rtn != ''){
+			if($mask && $st_rtn != ''){
 				require_once "cube_lib.php";
 				$mask = fcs_doperm($mask, fcs_format_alg($st_rtn), $dim);
 			}
@@ -999,6 +1004,7 @@ if($bg) $cube .= "\t<rect fill='#$bg' x='$ox' y='$oy' width='$vw' height='$vh'/>
 	// Returns svg for a faces facelets
 	function facelet_svg($fc){
 		global $p, $dim;
+		$svg = '';
 		for($i = 0; $i < $dim; $i++){
 			for($j = 0; $j < $dim; $j++){
 				// Find centre point of facelet
@@ -1060,6 +1066,7 @@ if($bg) $cube .= "\t<rect fill='#$bg' x='$ox' y='$oy' width='$vw' height='$vh'/>
 		$convert = proc_open("/usr/bin/convert $opts svg:- $fmt:-", $descriptorspec, $pipes);
 		fwrite($pipes[0], $svg);
 		fclose($pipes[0]);
+		$img = null;
 		while(!feof($pipes[1])) {
 			$img .= fread($pipes[1], 1024);
 		}
@@ -1077,6 +1084,7 @@ if($bg) $cube .= "\t<rect fill='#$bg' x='$ox' y='$oy' width='$vw' height='$vh'/>
 		$opts = gen_image_opts($fmt);
 		$rsvg = exec("/usr/bin/convert $opts /tmp/visualcube.svg /tmp/visualcube.$fmt");
 		$imgfile = fopen("/tmp/visualcube.$fmt", 'r');
+		$img = null;
 		while($imgfile and !feof($imgfile)) {
 			$img .= fread($imgfile, 1024);
 		}
@@ -1086,6 +1094,7 @@ if($bg) $cube .= "\t<rect fill='#$bg' x='$ox' y='$oy' width='$vw' height='$vh'/>
 	
 	/** Generate ImageMagic optoins depenting on format */
 	function gen_image_opts($fmt){
+		$opts = '';
 //		$opts .= '+label "Generated by VisualCube"';
 //		$opts .= ' -comment "Generated by VisualCube"';
 //		$opts .= ' -caption "Generated by VisualCube"';
@@ -1108,6 +1117,7 @@ if($bg) $cube .= "\t<rect fill='#$bg' x='$ox' y='$oy' width='$vw' height='$vh'/>
 	function display_img($img, $fmt){
 		$mime = $fmt;
 		switch($fmt){
+			case 'jpe' : 
 			case 'jpg' : $mime = 'jpeg'; break;
 			case 'svg' : $mime = 'svg+xml'; break;
 			case 'ico' : $mime = 'vnd.microsoft.icon'; break;
