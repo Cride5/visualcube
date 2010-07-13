@@ -24,7 +24,7 @@
 	Copyright (C) 2010 Conrad Rider
 	
 	TODO:
-	* Permutation Arrows
+	* Automatic Permutation Arrows
 	* Other puzzles
 	
 	CHANGES: (Version 0.3.0 to 0.4.0)
@@ -56,7 +56,7 @@
 	// Causes cube svg to be outputted as XML for inspection
 	$DEBUG = false;
 	// Do not display errors
-	if (!$DEBUG) error_reporting(0);
+//	if (!$DEBUG) error_reporting(0);
 
 	// Default rendering values
 	$DEFAULTS = Array(
@@ -95,7 +95,7 @@
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 	<head>
-		<title>VisualCube (v0.5.0)</title>
+		<title>VisualCube (v0.5.1)</title>
 		<meta name="description"        content="Rubiks cube visualiser"/>
 		<meta name="keywords"           content="visualcube, visual cube, imagecube, image cube, cube vis, viscube, visual rubiks, imgcube, cube image, cube gif, cub png, cube jpeg"/>
 		<meta name="resource-type"      content="document"/>
@@ -594,22 +594,21 @@
 		}
 		
 		// Retrive cube colour from request (or cookies)
-		$cc = parse_col($DEFAULTS['cc']);
-		if(!$cc) $cc = $view == 'trans' ? $SILVER : $BLACK;
+		$cc = $view == 'trans' ? $SILVER : parse_col($DEFAULTS['cc']);
 		if(array_key_exists('cc', $_REQUEST) || ($ENABLE_COOKIES && isset($_COOKIE['vc_cc']))){
 			$cc_ = array_key_exists('cc', $_REQUEST) ? $_REQUEST['cc'] : $_COOKIE['vc_cc'];
 			$cc_ = parse_col($cc_);
 			if($cc_) $cc = $cc_;
 		}
+		$cc = !$cc ? $BLACK : $cc;
 
 		// Retrive cube opacity from request (or cookies)
-		$co = $DEFAULTS['co'];
-		if(!is_numeric($co) || $co < 0 || $co > 100)
-			$co = $view == 'trans' ? 50 : 100;
+		$co = $view == 'trans' ? 50 : $DEFAULTS['co'];
 		if(array_key_exists('co', $_REQUEST) || ($ENABLE_COOKIES && isset($_COOKIE['vc_co']))){
 			$co_ = array_key_exists('co', $_REQUEST) ? $_REQUEST['co'] : $_COOKIE['vc_co'];
 			if(preg_match('/^[0-9][0-9]?$/', $co_)) $co = $co_;
 		}
+		$co = !is_numeric($co) || $co < 0 || $co > 100 ? 100 : $co;
 
 		// Retrive face opacity from request (or cookies)
 		$fo = $DEFAULTS['fo'];
