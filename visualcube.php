@@ -57,6 +57,13 @@
 	// VisualCube version
 	$VERSION = "0.5.2";
 	
+
+	// Causes cube svg to be outputted as XML for inspection
+	$DEBUG = false;
+	// Do not display errors
+//	if (!$DEBUG) error_reporting(0);
+
+
 	// ----------------------[ API Page ]-----------------------
 	
 	// If no format specified, display API page
