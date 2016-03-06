@@ -9,7 +9,7 @@
 
 	// Default rendering values
 	$DEFAULTS = Array(
-		'fmt'   => 'gif',
+		'fmt'   => 'svg',
 		'pzl'   => '3',
 		'size'  => '128',
 		'view'  => '',
