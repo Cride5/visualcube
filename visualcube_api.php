@@ -106,9 +106,8 @@
 			cube.crider.co.uk
 			<ul>
 				<li><a href="<?php echo $CUBE_CRIDER; ?>">ZZ Tutorial</a></li>
-				<li><a href="<?php echo $CUBE_CRIDER; ?>beginner.html">Beginner Tutorial</a></li>
+				<li><a href="<?php echo $CUBE_CRIDER; ?>beginner.php">Beginner Tutorial</a></li>
 				<li><a href="http://www.ctimer.co.uk">cTimer</a></li>
-				<li><a href="http://www.ctimer.co.uk/wee">weeTimer</a></li>
 				<li><em>VisualCube</em></li>
 				<li><a href="<?php echo $CUBE_CRIDER; ?>algtrans.html">Algorithm Translator</a></li>
 				<li><a href="<?php echo $CUBE_CRIDER; ?>coracle.html">Coracle Lookahead Drill</a></li>
