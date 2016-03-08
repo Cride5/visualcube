@@ -27,7 +27,9 @@
 		'dist'  => '5',
 	);
 
-
+	// Location of ImageMagick's 'convert' binary.
+	// NOTE: if the $PATH variable is set up correctly using just 'convert' is sufficient
+	$CONVERT="convert";
 
 
 	// -------------[ Cache related configuration ]---------------

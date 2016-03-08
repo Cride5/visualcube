@@ -28,6 +28,9 @@
 	* Other puzzles
 	
 	CHANGES:
+	(Version 0.5.3 to 0.5.4)
+	* Added configurable DB host
+	* Added configurable path to ImageMagick convert binary
 	(Version 0.5.2 to 0.5.3)
 	* Fixed links on API page
 	* Changed default format to SVG, avoiding ImageMagick failures
@@ -51,6 +54,7 @@
 		$DB_NAME,
 		$DB_USERNAME,
 		$DB_PASSWORD,
+		$CONVERT,
 		$MAX_PZL_DIM,
 		$ENABLE_COOKIES,
 		$ENABLE_CACHE,
@@ -872,7 +876,7 @@
 	function convert($svg, $fmt) {
 		$opts = gen_image_opts($fmt);
 		$descriptorspec = array(0 => array("pipe", "r"), 1 => array("pipe", "w"));
-		$convert = proc_open("convert $opts svg:- $fmt:-", $descriptorspec, $pipes);
+		$convert = proc_open("$CONVERT $opts svg:- $fmt:-", $descriptorspec, $pipes);
 		fwrite($pipes[0], $svg);
 		fclose($pipes[0]);
 		$img = null;
@@ -891,7 +895,7 @@
 		fwrite($svgfile, $svg);
 		fclose($svgfile);
 		$opts = gen_image_opts($fmt);
-		$rsvg = exec("convert $opts /tmp/visualcube.svg /tmp/visualcube.$fmt");
+		$rsvg = exec("$CONVERT $opts /tmp/visualcube.svg /tmp/visualcube.$fmt");
 		$imgfile = fopen("/tmp/visualcube.$fmt", 'r');
 		$img = null;
 		while($imgfile and !feof($imgfile)) {
