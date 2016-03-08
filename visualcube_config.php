@@ -37,6 +37,7 @@
 	// job will need to be set up to prune the database
 	$ENABLE_CACHE = false;
 	// Database Configuration (for image caching)
+	$DB_HOST="localhost";
 	$DB_NAME="DATABASE_NAME";
 	$DB_USERNAME="DATABASE_USERNAME";
 	$DB_PASSWORD="DATABASE_PASSWORD";
