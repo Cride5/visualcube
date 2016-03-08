@@ -47,6 +47,7 @@
 	require 'visualcube_config.php';
 
 	global 
+		$DB_HOST,
 		$DB_NAME,
 		$DB_USERNAME,
 		$DB_PASSWORD,
@@ -79,8 +80,8 @@
 		// Check cache for image and return if it exists in cache
 		if($ENABLE_CACHE){
 			// Connect to db
-			mysql_connect("localhost", $DB_USERNAME, $DB_PASSWORD);
-			@mysql_select_db($DB_NAME) or die("Unable to select database");
+			$con = mysql_connect($DB_HOST, $DB_USERNAME, $DB_PASSWORD) or die("Connect Error: " . mysql_error());
+			@mysql_select_db($DB_NAME, $con) or die("Select DB Error: ".mysql_error());
 
 			$hash = md5($_SERVER['QUERY_STRING']);
 			$imgdata = get_arrays("SELECT fmt, req, rcount, img FROM vcache WHERE hash='$hash'");
@@ -871,7 +872,7 @@
 	function convert($svg, $fmt) {
 		$opts = gen_image_opts($fmt);
 		$descriptorspec = array(0 => array("pipe", "r"), 1 => array("pipe", "w"));
-		$convert = proc_open("/usr/bin/convert $opts svg:- $fmt:-", $descriptorspec, $pipes);
+		$convert = proc_open("convert $opts svg:- $fmt:-", $descriptorspec, $pipes);
 		fwrite($pipes[0], $svg);
 		fclose($pipes[0]);
 		$img = null;
@@ -890,7 +891,7 @@
 		fwrite($svgfile, $svg);
 		fclose($svgfile);
 		$opts = gen_image_opts($fmt);
-		$rsvg = exec("/usr/bin/convert $opts /tmp/visualcube.svg /tmp/visualcube.$fmt");
+		$rsvg = exec("convert $opts /tmp/visualcube.svg /tmp/visualcube.$fmt");
 		$imgfile = fopen("/tmp/visualcube.$fmt", 'r');
 		$img = null;
 		while($imgfile and !feof($imgfile)) {
