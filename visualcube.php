@@ -28,6 +28,8 @@
 	* Other puzzles
 	
 	CHANGES:
+	(Version 0.5.4 to 0.5.5)
+	* Changed to using style attribute to fix transparrancy issues
 	(Version 0.5.3 to 0.5.4)
 	* Added configurable DB host
 	* Added configurable path to ImageMagick convert binary
@@ -62,7 +64,7 @@
 
 
 	// VisualCube version
-	$VERSION = "0.5.3";
+	$VERSION = "0.5.5";
 	
 
 	// Causes cube svg to be outputted as XML for inspection
@@ -562,21 +564,21 @@
 		// Transparancy background rendering
 		if($co < 100){
 			// Create polygon for each background facelet (transparency only)
-			$cube .= "\t<g opacity='$fo%' stroke-opacity='50%' stroke-width='$sw' stroke-linejoin='round'>\n";
+			$cube .= "\t<g style='opacity:".($fo/100).";stroke-opacity:0.5;stroke-width:$sw;stroke-linejoin:round'>\n";
 			for($ri = 0; $ri < 3; $ri++){
 				$cube .= facelet_svg($ro[$ri]);
 			}
 			$cube .= "\t</g>\n";
 		
 			// Create outline for each background face (transparency only)
-			$cube .= "\t<g stroke-width='0.1' stroke-linejoin='round' opacity='$co%'>\n";	
+			$cube .= "\t<g style='stroke-width:0.1;stroke-linejoin:round;opacity:".($co/100)."'>\n";	
 			for($ri = 0; $ri < 3; $ri++)
 				$cube .= outline_svg($ro[$ri]);
 			$cube .= "\t</g>\n";	
 		}
 
 		// Create outline for each visible face
-		$cube .= "\t<g stroke-width='0.1' stroke-linejoin='round' opacity='$co%'>\n";	
+		$cube .= "\t<g style='stroke-width:0.1;stroke-linejoin:round;opacity:".($co/100)."'>\n";	
 		for($ri = 3; $ri < 6; $ri++){
 			if(face_visible($ro[$ri], $rv) || $co < 100)
 				$cube .= outline_svg($ro[$ri]);
@@ -584,7 +586,7 @@
 		$cube .= "\t</g>\n";	
 
 		// Create polygon for each visible facelet
-		$cube .= "\t<g opacity='$fo%' stroke-opacity='50%' stroke-width='$sw' stroke-linejoin='round'>\n";
+		$cube .= "\t<g style='opacity:".($fo/100).";stroke-opacity:0.5;stroke-width:$sw;stroke-linejoin:round'>\n";
 		for($ri = 3; $ri < 6; $ri++){
 			if(face_visible($ro[$ri], $rv) || $co < 100)
 				$cube .= facelet_svg($ro[$ri]);
@@ -593,7 +595,7 @@
 		
 		// Create OLL view guides
 		if($view == 'plan'){
-			$cube .= "\t<g opacity='$fo%' stroke-opacity='100%' stroke-width='0.02' stroke-linejoin='round'>\n";
+			$cube .= "\t<g style='opacity:".($fo/100).";stroke-opacity:1;stroke-width:0.02;stroke-linejoin:round'>\n";
 			$toRender = Array($F, $L, $B, $R);
 			foreach($toRender as $fc)
 				$cube .= oll_svg($fc);
@@ -603,7 +605,7 @@
 		// Draw Arrows
 		if(isset($arrows)){
 			$awidth = 0.12 / $dim;
-			$cube .= "\t<g opacity='100%' stroke-opacity='100%' stroke-width='$awidth' stroke-linecap='round'>\n";
+			$cube .= "\t<g style='opacity:1;stroke-opacity:1;stroke-width:$awidth;stroke-linecap:round'>\n";
 			foreach($arrows as $i => $a){
 				$cube .= gen_arrow($i, $a[0], $a[1], $a[2], $a[4], array_key_exists(3, $a)?$a[3]:$ac);
 			}
