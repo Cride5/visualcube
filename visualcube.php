@@ -54,7 +54,6 @@
 		$DB_NAME,
 		$DB_USERNAME,
 		$DB_PASSWORD,
-		$CONVERT,
 		$MAX_PZL_DIM,
 		$ENABLE_COOKIES,
 		$ENABLE_CACHE,
@@ -874,6 +873,7 @@
 	
 	/** Converts svg into given format */
 	function convert($svg, $fmt) {
+		global $CONVERT;
 		$opts = gen_image_opts($fmt);
 		$descriptorspec = array(0 => array("pipe", "r"), 1 => array("pipe", "w"));
 		$convert = proc_open("$CONVERT $opts svg:- $fmt:-", $descriptorspec, $pipes);
@@ -891,6 +891,7 @@
 	/** Alternative version using files rather than pipes,
 	not desired because of collision possibilities.. */
 	function convert_file($svg, $fmt) {
+		global $CONVERT;
 		$svgfile = fopen("/tmp/visualcube.svg", 'w');
 		fwrite($svgfile, $svg);
 		fclose($svgfile);
