@@ -20,14 +20,16 @@
 
 	You should have received a copy of the GNU Lesser General Public License
 	along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
-	
+
 	Copyright (C) 2010 Conrad Rider
-	
+
 	TODO:
 	* Automatic Permutation Arrows
 	* Other puzzles
-	
+
 	CHANGES:
+	(Version 0.5.5 to 0.5.6)
+	* Modified options to attempt to fix rendering issues in ImageMagick v6.9.x
 	(Version 0.5.4 to 0.5.5)
 	* Changed to using style attribute to fix transparrancy issues
 	(Version 0.5.3 to 0.5.4)
@@ -51,7 +53,7 @@
 	// Import configuration values
 	require 'visualcube_config.php';
 
-	global 
+	global
 		$DB_HOST,
 		$DB_NAME,
 		$DB_USERNAME,
@@ -65,7 +67,7 @@
 
 	// VisualCube version
 	$VERSION = "0.5.5";
-	
+
 
 	// Causes cube svg to be outputted as XML for inspection
 	$DEBUG = false;
@@ -74,10 +76,10 @@
 
 
 	// ----------------------[ API Page ]-----------------------
-	
+
 	// If no format specified, display API page
 	if(!array_key_exists('fmt', $_REQUEST)){
-	
+
 		include 'visualcube_api.php';
 
 	// Otherwise render a cube
@@ -100,17 +102,17 @@
 				return;
 			}
 		}
-		
-		
+
+
 		// Otherwise generate image
-		
-		
+
+
 		// -----------------[ Constants ]-----------------
-	
+
 		// Faces
 		$U = 0; $R = 1; $F = 2; $D = 3; $L = 4; $B = 5; $N = 6; $O = 7; $T = 8;
 
-	
+
 		// Colour constants
 		$BLACK  = '000000';
 		$DGREY  = '404040';
@@ -124,7 +126,7 @@
 		$GREEN  = '00D800';//'00F300';
 		$PURPLE = 'A83DD9';
 		$PINK   = 'F33D7B';
-	
+
 		// Other colour schemes
 		// Array('FFFF00', 'FF0000', '0000FF', 'FFFFFF', 'FF7F00', '00FF00'); // Basic
 		// Array('EFEF00', 'C80000', '0000B6', 'F7F7F7', 'FFA100', '00B648'); // Cubestation
@@ -145,7 +147,7 @@
 			'green'  => $GREEN,
 			'purple' => $PURPLE,
 			'pink'   => $PINK);
-	
+
 		// Abbreviation colour mapping
 		$ABBR_COL = Array(
 			'n' => $BLACK,
@@ -184,7 +186,7 @@
 				if($fmt == 'jpeg' || $fmt == 'jpe') $fmt = 'jpg';
 			}
 		}
-	
+
 		// Default rotation sequence
 		$rtn = Array(Array(1, 45), Array(0, -34));
 		// Get rotation from request (or cookie)
@@ -211,11 +213,11 @@
 		if(array_key_exists('pzl', $_REQUEST) && is_numeric($_REQUEST['pzl'])
 		&& $_REQUEST['pzl'] > 0 && $_REQUEST['pzl'] <= $MAX_PZL_DIM)
 			$dim = $_REQUEST['pzl'];
-		
+
 		// Default scheme
 		$scheme = $DEF_SCHEME;
 		// Default mapping from colour code to face id
-		$schcode = $DEF_SCHCODE;		
+		$schcode = $DEF_SCHCODE;
 		// Retrieve colour scheme from request (or cookie)
 		if(array_key_exists('sch', $_REQUEST) || array_key_exists('sch', $DEFAULTS)
 		|| ($ENABLE_COOKIES && isset($_COOKIE['vc_sch']) && $_COOKIE['vc_sch'] != '')){
@@ -249,20 +251,20 @@
 			if($size < 0) $size = 0;
 			if($size > 1024) $size = 1024;
 		}
-		
+
 		// Retrieve dist variable - projection distance (how close the eye is to the cube)
 		$dist = $DEFAULTS['dist']; // default dist parameter
 		if(array_key_exists('dist', $_REQUEST) || ($ENABLE_COOKIES && isset($_COOKIE['vc_dist']))){
 			$dist_ = array_key_exists('dist', $_REQUEST) ? $_REQUEST['dist'] : $_COOKIE['vc_dist'];
 			if(is_numeric($dist_)) $dist = $dist_ < 1 ? 1 : ($dist_ > 100 ? 100 : $dist_);
 		}
-	
+
 		// Retrieve view variable
 		$view = $DEFAULTS['view'];
 		if(array_key_exists('view', $_REQUEST)){
 			$view = $_REQUEST['view'];
 		}
-	
+
 		// Retrieve background colour from request (or cookies)
 		$bg = parse_col($DEFAULTS['bg']);
 		if(!$bg) $bg = 'FFFFFF';
@@ -274,7 +276,7 @@
 				if($bg_) $bg = $bg_;
 			}
 		}
-		
+
 		// Retrieve cube colour from request (or cookies)
 		$cc = $view == 'trans' ? $SILVER : parse_col($DEFAULTS['cc']);
 		if(array_key_exists('cc', $_REQUEST) || ($ENABLE_COOKIES && isset($_COOKIE['vc_cc']))){
@@ -301,7 +303,7 @@
 			if(preg_match('/^[0-9][0-9]?$/', $fo_)) $fo = $fo_;
 		}
 
-			
+
 		// Create default face defs
 		for($fc = 0; $fc < 6; $fc++){ for($i = 0; $i < $dim * $dim; $i++)
 			$facelets[$fc * $dim * $dim + $i] = $fc;
@@ -325,7 +327,7 @@
 		}
 		// Retrieve facelet def
 		if(!$uf){ $uf = array_key_exists('fd', $_REQUEST) ? $_REQUEST['fd'] : $DEFAULTS['fd'];
-		if(preg_match('/^[udlrfbnot]+$/', $uf)){			
+		if(preg_match('/^[udlrfbnot]+$/', $uf)){
 			// Map from face names to numeric face ID
 			$fd_map = Array('u' => $U, 'r' => $R, 'f' => $F, 'd' => $D, 'l' => $L, 'b' => $B, 'n' => $N, 'o' => $O, 't' => $T);
 			$nf = strlen($uf);
@@ -453,19 +455,19 @@
 				}
 			}
 		}
-			
+
 		// Retrieve alg def
 		if(array_key_exists('alg', $_REQUEST) || array_key_exists('case', $_REQUEST)
 		|| array_key_exists('alg', $DEFAULTS) || array_key_exists('case', $DEFAULTS)){
 			require_once "cube_lib.php";
-			if(array_key_exists('alg', $_REQUEST)) $alg = $_REQUEST['alg']; else $alg = $DEFAULTS['alg']; 
+			if(array_key_exists('alg', $_REQUEST)) $alg = $_REQUEST['alg']; else $alg = $DEFAULTS['alg'];
 			if(array_key_exists('case', $_REQUEST)) $case = $_REQUEST['case']; else $case = $DEFAULTS['case'];
 			$alg = fcs_format_alg(urldecode($alg));
 			$case = invert_alg(fcs_format_alg(urldecode($case)));
 //			$facelets = facelet_cube(case_cube($alg), $dim, $facelets); // old 3x3 alg system
 			$facelets = fcs_doperm($facelets, $case . ' ' . $alg, $dim); // new NxN facelet permute
 		}
-		
+
 		// Retrieve arrow defn's
 		if(array_key_exists('arw', $_REQUEST)){
 			$astr = preg_split('/,/', $_REQUEST['arw']);
@@ -475,16 +477,16 @@
 				if($a_) $arrows[$i++] = $a_;
 			}
 		}
-		
+
 		// Retrieve default arrow colour
 		$ac = $GREY;
 		if(array_key_exists('ac', $_REQUEST)){
 			$ac_ = parse_col($_REQUEST['ac']);
 			if($ac_ && $ac_ != 't') $ac = $ac_;
 		}
-	
+
 		// ---------------[ 3D Cube Generator properties ]---------------
-	
+
 		// Outline width
 		$OUTLINE_WIDTH = 0.94;
 
@@ -496,14 +498,14 @@
 		$oy = -0.9;
 		$vw = 1.8;
 		$vh = 1.8;
-	
+
 		// ------------------[ 3D Cube Generator ]-----------------------
 
 		// Set up cube for OLL view if specified
 		if($view == 'plan'){
 			$rtn = Array(Array(0, -90));
 		}
-	
+
 		// All cube face points
 		$p = Array();
 		// Translation vector to centre the cube
@@ -541,7 +543,7 @@
 				$rv[$fc] = rotate($rv[$fc], $rn[0], M_PI * $rn[1]/180);
 			}
 		}
-	
+
 		// Sort render order (crappy bubble sort)
 		$ro = Array(0, 1, 2, 3, 4, 5);
 		for($i = 0; $i < 5; $i++){ for($j = 0; $j < 5; $j++){
@@ -551,7 +553,7 @@
 
 		// Cube diagram SVG XML
 		$cube = "<?xml version='1.0' standalone='no'?>
-<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 
+<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN'
 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
 
 <svg version='1.1' xmlns='http://www.w3.org/2000/svg'
@@ -569,21 +571,21 @@
 				$cube .= facelet_svg($ro[$ri]);
 			}
 			$cube .= "\t</g>\n";
-		
+
 			// Create outline for each background face (transparency only)
-			$cube .= "\t<g style='stroke-width:0.1;stroke-linejoin:round;opacity:".($co/100)."'>\n";	
+			$cube .= "\t<g style='stroke-width:0.1;stroke-linejoin:round;opacity:".($co/100)."'>\n";
 			for($ri = 0; $ri < 3; $ri++)
 				$cube .= outline_svg($ro[$ri]);
-			$cube .= "\t</g>\n";	
+			$cube .= "\t</g>\n";
 		}
 
 		// Create outline for each visible face
-		$cube .= "\t<g style='stroke-width:0.1;stroke-linejoin:round;opacity:".($co/100)."'>\n";	
+		$cube .= "\t<g style='stroke-width:0.1;stroke-linejoin:round;opacity:".($co/100)."'>\n";
 		for($ri = 3; $ri < 6; $ri++){
 			if(face_visible($ro[$ri], $rv) || $co < 100)
 				$cube .= outline_svg($ro[$ri]);
 		}
-		$cube .= "\t</g>\n";	
+		$cube .= "\t</g>\n";
 
 		// Create polygon for each visible facelet
 		$cube .= "\t<g style='opacity:".($fo/100).";stroke-opacity:0.5;stroke-width:$sw;stroke-linejoin:round'>\n";
@@ -592,7 +594,7 @@
 				$cube .= facelet_svg($ro[$ri]);
 		}
 		$cube .= "\t</g>\n";
-		
+
 		// Create OLL view guides
 		if($view == 'plan'){
 			$cube .= "\t<g style='opacity:".($fo/100).";stroke-opacity:1;stroke-width:0.02;stroke-linejoin:round'>\n";
@@ -601,7 +603,7 @@
 				$cube .= oll_svg($fc);
 			$cube .= "\t</g>\n";
 		}
-		
+
 		// Draw Arrows
 		if(isset($arrows)){
 			$awidth = 0.12 / $dim;
@@ -611,19 +613,19 @@
 			}
 			$cube .= "\t</g>\n";
 		}
-	
+
 		$cube .= "</svg>\n";
 
 
-		
+
 
 
 		// Display cube
 		if($DEBUG) echo $cube;
 		else{
-			$img = $fmt != 'svg' ? convert($cube, $fmt) : $cube;
+			$img = $fmt != 'svg' ? convert($cube, $fmt, $size) : $cube;
 			display_img($img, $fmt);
-			
+
 			// Cache image if enabled
 			if($ENABLE_CACHE && !array_key_exists("nocache", $_REQUEST) && strlen($img) < $CACHE_IMG_SIZE_LIMIT){
 				$req = mysql_real_escape_string($_SERVER['QUERY_STRING']);
@@ -637,10 +639,10 @@
 			}
 		}
 	}
-	
+
 
 	// -----------------[ User input functions ]----------------------
-	
+
 	// Parse colour value
 	function parse_col($col){
 		global $NAME_COL, $ABBR_COL;
@@ -659,7 +661,7 @@
 		// Otherwise fail
 		return null;
 	}
-	
+
 	// Parse arrow definition
 	function parse_arrow($str, $dim){
 		$parts = preg_split('/-/', $str);
@@ -677,7 +679,7 @@
 			$arrow[$i][0] = $fcodes[$split[1][$i]];
 			$fn = $split[2][$i]; $fn = $fn >= $dim * $dim ? $dim * $dim - 1 : $fn;
 			$arrow[$i][1] = $fn % $dim;
-			$arrow[$i][2] = floor($fn / $dim); 
+			$arrow[$i][2] = floor($fn / $dim);
 		}
 		// Parse remainder
 		for($i = 1; $i < count($parts); $i++){
@@ -686,7 +688,7 @@
 				$arrow[2][3] = $arrow[2][3] > 10 ? 10 : $arrow[2][3]; // Var range = 0 to 50, default 10
 			}
 			else if(preg_match('/^s[0-9]+$/', $parts[$i])){
-				$arrow[4] = substr($parts[$i],1) / 10; 
+				$arrow[4] = substr($parts[$i],1) / 10;
 				$arrow[4] = $arrow[4] > 2 ? 2 : $arrow[4]; // Var range = 0 to 20, default 10
 			}
 			else{
@@ -694,7 +696,7 @@
 				if($ac_) $arrow[3] = $ac_;
 			}
 		}
-		return $arrow;	
+		return $arrow;
 	}
 
 	// Insert space in default fd/fc variables
@@ -709,7 +711,7 @@
 
 
 	// -------------------[ 3D Geometry Functions ]--------------------
-	
+
 	// Move point by translation vector
 	function translate($p, $t){
 		$p[0] += $t[0];
@@ -724,16 +726,16 @@
 		$p[2] *= $f;
 		return $p;
 	}
-	
+
 	// Scale point relative to position vector
 	function trans_scale($p, $v, $f){
 		// Translate each facelet to cf
 		$iv = Array(-$v[0], -$v[1], -$v[2]);
-		return translate(scale(translate($p, $iv), $f), $v);		
+		return translate(scale(translate($p, $iv), $f), $v);
 	}
 
 	function rotate($p, $ax, $an){
-		$np = Array($p[0], $p[1], $p[2]);	
+		$np = Array($p[0], $p[1], $p[2]);
 		switch($ax){
 			case 0 :
 				$np[2] = $p[2] * cos($an) - $p[1] * sin($an);
@@ -769,10 +771,10 @@
 
 
 	// ---------------------------[ Rendering Functions ]----------------------------
-	
+
 	// Returns svg for a cube outline
 	function outline_svg($fc){
-		global $p, $dim, $cc, $OUTLINE_WIDTH; 
+		global $p, $dim, $cc, $OUTLINE_WIDTH;
 		return "\t\t<polygon fill='#$cc' stroke='#$cc' points='".
 			$p[$fc][   0][   0][0]*$OUTLINE_WIDTH.','.$p[$fc][   0][   0][1]*$OUTLINE_WIDTH.' '.
 			$p[$fc][$dim][   0][0]*$OUTLINE_WIDTH.','.$p[$fc][$dim][   0][1]*$OUTLINE_WIDTH.' '.
@@ -798,9 +800,9 @@
 				$svg .= gen_facelet($p1, $p2, $p3, $p4, $fc * $dim * $dim + $i * $dim + $j);
 			}
 		}
-		return $svg;	
+		return $svg;
 	}
-	
+
 	// Renders the top rim of the R U L and B faces out from side of cube
 	function oll_svg($fc){
 		global $p, $dim, $rv;
@@ -820,11 +822,11 @@
 				$p4 = translate(trans_scale($p[$fc][$j  ][$i+1], $cf, 0.94), $tv2);
 				// Generate facelet polygon
 				$svg .= gen_facelet($p1, $p2, $p3, $p4, $fc * $dim * $dim + $i * $dim + $j);
-				
+
 		}
 		return $svg;
 	}
-	
+
 	/** Generates a polygon SVG tag for cube facelets */
 	function gen_facelet($p1, $p2, $p3, $p4, $seq){
 		global $ABBR_COL, $facelets, $scheme, $using_cols, $cc, $T;
@@ -838,7 +840,7 @@
 				$p3[0].','.$p3[1].' '.
 				$p4[0].','.$p4[1]."'/>\n";
 	}
-	
+
 	// Generates svg for an arrow pointing from sticker s1 to s2
 	function gen_arrow($id, $s1, $s2, $sv, $sc, $col){
 		global $p, $dim;
@@ -870,15 +872,15 @@
 			style="fill:none;stroke:#'.$col.';stroke-opacity:1" />
 		<path transform=" translate('.$p2[0].','.$p2[1].') scale('.(0.033 / $dim).') rotate('.$rt.')"
 			d="M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z"
-			style="fill:#'.$col.';stroke-width:0;stroke-linejoin:round"/>'."\n";	
+			style="fill:#'.$col.';stroke-width:0;stroke-linejoin:round"/>'."\n";
 	}
-	
+
 	/** Converts svg into given format */
-	function convert($svg, $fmt) {
+	function convert($svg, $fmt, $size) {
 		global $CONVERT;
-		$opts = gen_image_opts($fmt);
+		$opts = gen_image_opts($fmt, $size, "svg:-", "$fmt:-");
 		$descriptorspec = array(0 => array("pipe", "r"), 1 => array("pipe", "w"));
-		$convert = proc_open("$CONVERT $opts svg:- $fmt:-", $descriptorspec, $pipes);
+		$convert = proc_open("$CONVERT $opts", $descriptorspec, $pipes);
 		fwrite($pipes[0], $svg);
 		fclose($pipes[0]);
 		$img = null;
@@ -889,16 +891,16 @@
 		proc_close($convert);
 		return $img;
 	}
-	
+
 	/** Alternative version using files rather than pipes,
 	not desired because of collision possibilities.. */
-	function convert_file($svg, $fmt) {
+	function convert_file($svg, $fmt, $size) {
 		global $CONVERT;
 		$svgfile = fopen("/tmp/visualcube.svg", 'w');
 		fwrite($svgfile, $svg);
 		fclose($svgfile);
-		$opts = gen_image_opts($fmt);
-		$rsvg = exec("$CONVERT $opts /tmp/visualcube.svg /tmp/visualcube.$fmt");
+		$opts = gen_image_opts($fmt, $size, '/tmp/visualcube.svg', "/tmp/visualcube.$fmt");
+		$rsvg = exec("$CONVERT $opts");
 		$imgfile = fopen("/tmp/visualcube.$fmt", 'r');
 		$img = null;
 		while($imgfile and !feof($imgfile)) {
@@ -907,48 +909,49 @@
 		fclose($imgfile);
 		return $img;
 	}
-	
+
 	/** Generate ImageMagick options depending on format */
-	function gen_image_opts($fmt){
-		$opts = '';
+	function gen_image_opts($fmt, $size, $infile, $outfile){
+		$inopts = ' -density 600 -resize '.$size.'x'.$size;
+		$outopts = ' -channel RGBA -alpha set';
 //		$opts .= '+label "Generated by VisualCube"';
 //		$opts .= ' -comment "Generated by VisualCube"';
 //		$opts .= ' -caption "Generated by VisualCube"';
 //		$opts = "-gaussian 1";
 		switch($fmt){
-			case 'png' : $opts .= " -background none -quality 100";
+			case 'png' : $inopts .= " -background none"; $outopts .= " -quality 100 -define png:format=png32";
 			break;
-			case 'gif' : $opts .= " -background none";
+			case 'gif' : $inopts .= " -background none";
 			break;
-			case 'ico' : $opts .= " -background none";
+			case 'ico' : $inopts .= " -background none";
 			break;
-			case 'jpg' : $opts .= " -quality 90";
+			case 'jpg' : $outopts .= " -quality 90";
 			break;
-			
+
 		}
-		return $opts;
+		return "$inopts $infile $outopts $outfile";
 	}
-	
+
 	/** Sends image to browser */
 	function display_img($img, $fmt){
 		$mime = $fmt;
 		switch($fmt){
-			case 'jpe' : 
+			case 'jpe' :
 			case 'jpg' : $mime = 'jpeg'; break;
 			case 'svg' : $mime = 'svg+xml'; break;
 			case 'ico' : $mime = 'vnd.microsoft.icon'; break;
 		}
 		header("Content-type: image/$mime");
-//		header("Content-Length: " . filesize($img) ."; "); 
+//		header("Content-Length: " . filesize($img) ."; ");
 		echo $img;
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	// -----------------------------[ DB Access Functions ]--------------------------
-	
+
 	// Return result of sql query as array
 	function get_arrays($query){
 		$result = mysql_query($query);
