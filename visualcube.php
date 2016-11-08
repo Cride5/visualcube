@@ -96,7 +96,7 @@
 			if($imgdata && count($imgdata) > 0 && $imgdata[0]['req'] == $_SERVER['QUERY_STRING']){
 				display_img($imgdata[0]['img'], $imgdata[0]['fmt']);
 				// Increment access count
-				mysql_query("UPDATE vcache SET rcount=".($imgdata[0]['rcount'] + 1)." WHERE hash='$hash'");
+				mysql_query("UPDATE vcache SET rcount=rcount+1 WHERE hash='$hash'");
 				// Disconnect from db
 				mysql_close();
 				return;
