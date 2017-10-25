@@ -17,6 +17,16 @@ http://cube.crider.co.uk/visualcube.php
 2. Edit the configuration variables in visualcube_config.php
 3. Point your browser to: www.yourwebsite.com/visualcube.php
 4. (Optional) Edit DB_USER, DB_PASS and DB_NAME in visualcube_dbprune.sh and install the cron job.
+5. (Optional) Configure mod_rewrite to redirect image suffixes to corresponding fmt=xxx form. See below.
+
+##### Configuring mod_rewrite
+Add a .htaccess file to the same folder as visualcube.php with something like the following:
+```
+RewriteEngine On
+
+RewriteCond %{HTTP_HOST} ^(www\.example\.com)$
+RewriteRule ^visualcube\.(gif|png|jpg|jpeg|tiff|ico)$ http://www.example.com/visualcube.php?%{QUERY_STRING}&fmt=$1 [L]
+```
 
 
 ### Features
