@@ -1,5 +1,5 @@
 import * as SVG from 'svg.js'
-import { Face } from './constants';
+import { Face, ColorCode } from './constants';
 import { ICubeOptions, makeCubeGeometry } from './geometry/cube';
 import { Vec3, Axis } from './geometry/math';
 import { renderCube } from './drawing/cube';
@@ -36,12 +36,12 @@ let vw = 1.8;
 let vh = 1.8;
 let dist = 5;
 
-let cubeOpacity = 50;
+let cubeOpacity = 100;
 
 // Default rotation sequence
 let viewportRotation: [Axis, number][] = [
   [Axis.Y, 45],
-  [Axis.X, -34]
+  [Axis.X, -34],
 ];
 
 let cubeSize = 3;
@@ -60,11 +60,19 @@ let zPosition: Vec3 = [0, 0, dist];
       [Face.U]: 'yellow',
       [Face.R]: 'red',
       [Face.F]: 'blue',
-      [Face.B]: 'green',
+      [Face.B]: `#${ColorCode.Green}`,
       [Face.L]: 'orange',
       [Face.D]: 'white'
     },
-    stickerOpacity: 50,
+    // stickerColors: [
+    //   '#FF0000',
+    //   '#00FF00',
+    //   '#0000FF',
+    //   '#00FFFF',
+    //   '#FF00FF',
+    //   '#FFFF00',
+    // ],
+    stickerOpacity: 100,
     centerTranslation: centerTranslation,
     zPosition: zPosition,
     viewportRotations: viewportRotation,

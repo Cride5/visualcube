@@ -2,7 +2,7 @@ import { Face, AllFaces, ColorName } from "./../constants";
 import { FaceRotations, rotateFaces } from "./../models/face-rotations";
 import * as SVG from "svg.js";
 import { ICubeOptions, CubeGeometry, FaceStickers } from "./../geometry/cube";
-import { Vec3, transScale } from "../geometry/math";
+import { Vec3, transScale, scale, translate } from "../geometry/math";
 
 /**
  * Utility methods for rendering cube geometry using svg.js
@@ -47,6 +47,13 @@ export function renderCube(containerId: string, geometry: CubeGeometry, options:
     renderCubeOutline(cubeOutlineGroup, geometry[face], options);
     renderFaceStickers(svg, face, geometry[face], options);
   });
+
+  if (options.view === 'plan') {
+    let ollGroup = getOllLayerGroup(svg, options);
+    [Face.R, Face.F, Face.L, Face.B].forEach(face => {
+      renderOLLStickers(ollGroup,face, geometry[face], faceRotations, options);
+    });
+  }
 }
 
 /**
@@ -83,6 +90,17 @@ function getCubeOutlineGroup(svg: SVG.Doc, options: ICubeOptions): SVG.G {
   })
   return cubeOutlineGroup
 }
+
+function getOllLayerGroup(svg: SVG.Doc, options: ICubeOptions): SVG.G {
+  let group = svg.group();
+  group.opacity(options.stickerOpacity/100);
+  group.attr({
+    'stroke-opacity': '1',
+    'stroke-width': 0.02,
+    'stroke-linejoin': 'round'
+  });
+  return group;
+} 
 
 function renderCubeOutline(svg: SVG.G, face: FaceStickers, options: ICubeOptions): SVG.Polygon {
   const cubeSize =  face.length - 1;
@@ -125,14 +143,14 @@ function renderFaceStickers(svg: SVG.Doc, face: Face, stickers: FaceStickers, op
 
       let color = getStickerColor(face, i, j, options);
       console.log(face, i, j, color);
-      renderSticker(group, p1, p2, p3, p4, color, options.cubeColor, false);
+      renderSticker(group, p1, p2, p3, p4, color, options.cubeColor);
     }
   }
 
   return group;
 }
 
-function renderSticker(g: SVG.G, p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, stickerColor: string, cubeColor: string, transparent?: boolean): SVG.Polygon {
+function renderSticker(g: SVG.G, p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, stickerColor: string, cubeColor: string): SVG.Polygon {
   let stickerPoints = [
     [p1[0], p1[1]],
     [p2[0], p2[1]],
@@ -142,9 +160,6 @@ function renderSticker(g: SVG.G, p1: Vec3, p2: Vec3, p3: Vec3, p4: Vec3, sticker
   let polygon = g.polygon(stickerPoints);
   polygon.fill(stickerColor);
   polygon.stroke(cubeColor);
-  if (transparent) {
-    polygon.opacity(0);
-  }
   return polygon;
 }
 
@@ -180,4 +195,25 @@ function getStickerColor(face: Face, row: number, col: number, options: ICubeOpt
   }
 
   return options.stickerColors[colorIndex];
+}
+
+// Renders the top rim of the R U L and B faces out from side of cube
+export function renderOLLStickers(group: SVG.G, face: Face, stickers: FaceStickers, rotations: FaceRotations, options: ICubeOptions) {
+  // Translation vector, to move faces out
+  let v1 = scale(rotations[face], 0);
+  let v2 = scale(rotations[face], .2);
+  for (let i = 0; i < options.cubeSize; i++) {
+    // find center point of sticker
+    const centerPoint: Vec3 = [
+      (stickers[i][0][0] + stickers[i+1][1][0])/2,
+      (stickers[i][0][1] + stickers[i+1][1][1])/2,
+      0
+    ];
+    let p1 = translate(transScale(stickers[i][0], centerPoint, .94), v1);
+    let p2 = translate(transScale(stickers[i+1][0], centerPoint, .94), v1);
+    let p3 = translate(transScale(stickers[i+1][1], centerPoint, .94), v2);
+    let p4 = translate(transScale(stickers[i][1], centerPoint, .94), v2);
+
+    renderSticker(group, p1, p2, p3, p4, getStickerColor(face, 0, i, options), options.cubeColor)
+  }
 }

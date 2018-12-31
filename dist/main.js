@@ -5879,6 +5879,12 @@ function renderCube(containerId, geometry, options) {
         renderCubeOutline(cubeOutlineGroup, geometry[face], options);
         renderFaceStickers(svg, face, geometry[face], options);
     });
+    if (options.view === 'plan') {
+        var ollGroup_1 = getOllLayerGroup(svg, options);
+        [constants_1.Face.R, constants_1.Face.F, constants_1.Face.L, constants_1.Face.B].forEach(function (face) {
+            renderOLLStickers(ollGroup_1, face, geometry[face], faceRotations, options);
+        });
+    }
 }
 exports.renderCube = renderCube;
 /**
@@ -5911,6 +5917,16 @@ function getCubeOutlineGroup(svg, options) {
         'stroke-linejoin': 'round',
     });
     return cubeOutlineGroup;
+}
+function getOllLayerGroup(svg, options) {
+    var group = svg.group();
+    group.opacity(options.stickerOpacity / 100);
+    group.attr({
+        'stroke-opacity': '1',
+        'stroke-width': 0.02,
+        'stroke-linejoin': 'round'
+    });
+    return group;
 }
 function renderCubeOutline(svg, face, options) {
     var cubeSize = face.length - 1;
@@ -5949,12 +5965,12 @@ function renderFaceStickers(svg, face, stickers, options) {
             var p4 = math_1.transScale(stickers[j][i + 1], centerPoint, .85);
             var color = getStickerColor(face, i, j, options);
             console.log(face, i, j, color);
-            renderSticker(group, p1, p2, p3, p4, color, options.cubeColor, false);
+            renderSticker(group, p1, p2, p3, p4, color, options.cubeColor);
         }
     }
     return group;
 }
-function renderSticker(g, p1, p2, p3, p4, stickerColor, cubeColor, transparent) {
+function renderSticker(g, p1, p2, p3, p4, stickerColor, cubeColor) {
     var stickerPoints = [
         [p1[0], p1[1]],
         [p2[0], p2[1]],
@@ -5964,9 +5980,6 @@ function renderSticker(g, p1, p2, p3, p4, stickerColor, cubeColor, transparent) 
     var polygon = g.polygon(stickerPoints);
     polygon.fill(stickerColor);
     polygon.stroke(cubeColor);
-    if (transparent) {
-        polygon.opacity(0);
-    }
     return polygon;
 }
 /**
@@ -5999,6 +6012,26 @@ function getStickerColor(face, row, col, options) {
     }
     return options.stickerColors[colorIndex];
 }
+// Renders the top rim of the R U L and B faces out from side of cube
+function renderOLLStickers(group, face, stickers, rotations, options) {
+    // Translation vector, to move faces out
+    var v1 = math_1.scale(rotations[face], 0);
+    var v2 = math_1.scale(rotations[face], .2);
+    for (var i = 0; i < options.cubeSize; i++) {
+        // find center point of sticker
+        var centerPoint = [
+            (stickers[i][0][0] + stickers[i + 1][1][0]) / 2,
+            (stickers[i][0][1] + stickers[i + 1][1][1]) / 2,
+            0
+        ];
+        var p1 = math_1.translate(math_1.transScale(stickers[i][0], centerPoint, .94), v1);
+        var p2 = math_1.translate(math_1.transScale(stickers[i + 1][0], centerPoint, .94), v1);
+        var p3 = math_1.translate(math_1.transScale(stickers[i + 1][1], centerPoint, .94), v2);
+        var p4 = math_1.translate(math_1.transScale(stickers[i][1], centerPoint, .94), v2);
+        renderSticker(group, p1, p2, p3, p4, getStickerColor(face, 0, i, options), options.cubeColor);
+    }
+}
+exports.renderOLLStickers = renderOLLStickers;
 
 
 /***/ }),
@@ -6063,6 +6096,11 @@ exports.makeFaceStickers = makeFaceStickers;
  * for drawing svg polygons
  */
 function makeCubeGeometry(options) {
+    if (options.view === 'plan') {
+        options.viewportRotations = [
+            [math_1.Axis.X, -90]
+        ];
+    }
     return constants_1.AllFaces.reduce(function (acc, face) {
         acc[face] = makeFaceStickers(face, options);
         return acc;
@@ -6189,11 +6227,11 @@ var oy = -0.9;
 var vw = 1.8;
 var vh = 1.8;
 var dist = 5;
-var cubeOpacity = 50;
+var cubeOpacity = 100;
 // Default rotation sequence
 var viewportRotation = [
     [math_1.Axis.Y, 45],
-    [math_1.Axis.X, -34]
+    [math_1.Axis.X, -34],
 ];
 var cubeSize = 3;
 var centerTranslation = [-cubeSize / 2, -cubeSize / 2, -cubeSize / 2];
@@ -6210,11 +6248,19 @@ SVG.on(document, 'DOMContentLoaded', function () {
             _a[constants_1.Face.U] = 'yellow',
             _a[constants_1.Face.R] = 'red',
             _a[constants_1.Face.F] = 'blue',
-            _a[constants_1.Face.B] = 'green',
+            _a[constants_1.Face.B] = "#" + constants_1.ColorCode.Green,
             _a[constants_1.Face.L] = 'orange',
             _a[constants_1.Face.D] = 'white',
             _a),
-        stickerOpacity: 50,
+        // stickerColors: [
+        //   '#FF0000',
+        //   '#00FF00',
+        //   '#0000FF',
+        //   '#00FFFF',
+        //   '#FF00FF',
+        //   '#FFFF00',
+        // ],
+        stickerOpacity: 100,
         centerTranslation: centerTranslation,
         zPosition: zPosition,
         viewportRotations: viewportRotation,

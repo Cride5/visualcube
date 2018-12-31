@@ -21,6 +21,7 @@ export interface ICubeOptions {
   centerTranslation: Vec3;
   zPosition: Vec3;
   viewportRotations: [Axis, number][];
+  view?: string;
   width: number;
   height: number;
   viewbox: { // SVG viewbox settings
@@ -79,6 +80,11 @@ export function makeFaceStickers(face: Face, options: ICubeOptions): FaceSticker
  * for drawing svg polygons
  */
 export function makeCubeGeometry(options: ICubeOptions): CubeGeometry {
+  if (options.view === 'plan') {
+    options.viewportRotations = [
+      [Axis.X, -90]
+    ]
+  }
   return AllFaces.reduce((acc, face) => {
     acc[face] = makeFaceStickers(face, options);
     return acc;
