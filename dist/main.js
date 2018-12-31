@@ -5723,10 +5723,15 @@ var Face;
     Face[Face["D"] = 3] = "D";
     Face[Face["L"] = 4] = "L";
     Face[Face["B"] = 5] = "B";
-    // N = 6,
-    // O = 7,
-    // T = 8
 })(Face = exports.Face || (exports.Face = {}));
+exports.AllFaces = [
+    Face.U,
+    Face.R,
+    Face.F,
+    Face.D,
+    Face.L,
+    Face.B,
+];
 var ColorCode;
 (function (ColorCode) {
     ColorCode["Black"] = "000000";
@@ -5826,17 +5831,192 @@ exports.FaceRotationVectors = FaceRotationVectors;
 
 /***/ }),
 
-/***/ "./src/geometry/generator.ts":
-/*!***********************************!*\
-  !*** ./src/geometry/generator.ts ***!
-  \***********************************/
+/***/ "./src/drawing/cube.ts":
+/*!*****************************!*\
+  !*** ./src/drawing/cube.ts ***!
+  \*****************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var _a;
 var constants_1 = __webpack_require__(/*! ./../constants */ "./src/constants.ts");
+var face_rotations_1 = __webpack_require__(/*! ./../models/face-rotations */ "./src/models/face-rotations.ts");
+var SVG = __webpack_require__(/*! svg.js */ "./node_modules/svg.js/dist/svg.js");
+var math_1 = __webpack_require__(/*! ../geometry/math */ "./src/geometry/math.ts");
+/**
+ * Utility methods for rendering cube geometry using svg.js
+ */
+// Rotation vectors to track visibility of each face
+var defaultFaceRotations = (_a = {},
+    _a[constants_1.Face.U] = [0, -1, 0],
+    _a[constants_1.Face.R] = [1, 0, 0],
+    _a[constants_1.Face.F] = [0, 0, -1],
+    _a[constants_1.Face.D] = [0, 1, 1],
+    _a[constants_1.Face.L] = [-1, 0, 0],
+    _a[constants_1.Face.B] = [0, 0, 1],
+    _a);
+function renderCube(containerId, geometry, options) {
+    var faceRotations = face_rotations_1.rotateFaces(defaultFaceRotations, options.viewportRotations);
+    var renderOrder = getRenderOrder(faceRotations);
+    var svg = SVG(containerId).size(options.width, options.height);
+    svg.viewbox(options.viewbox.x, options.viewbox.y, options.viewbox.width, options.viewbox.height);
+    var hiddenFaces = renderOrder.filter(function (face) { return !faceVisible(face, faceRotations); });
+    var visibleFaces = renderOrder.filter(function (face) { return faceVisible(face, faceRotations); });
+    renderBackground(svg, options);
+    // Render hidden faces if cube color has transparency
+    if (options.cubeOpacity < 100) {
+        var cubeOutlineGroup_1 = getCubeOutlineGroup(svg, options);
+        hiddenFaces.forEach(function (face) {
+            renderFaceStickers(svg, face, geometry[face], options);
+            renderCubeOutline(cubeOutlineGroup_1, geometry[face], options);
+        });
+    }
+    var cubeOutlineGroup = getCubeOutlineGroup(svg, options);
+    visibleFaces.forEach(function (face) {
+        renderCubeOutline(cubeOutlineGroup, geometry[face], options);
+        renderFaceStickers(svg, face, geometry[face], options);
+    });
+}
+exports.renderCube = renderCube;
+/**
+ * Determines face render order based on z position. Faces further away
+ * will render first so anything closer will be drawn on top.
+ */
+function getRenderOrder(faceRotations) {
+    var renderOrder = constants_1.AllFaces.slice().sort(function (a, b) {
+        return faceRotations[b][2] - faceRotations[a][2];
+    });
+    return renderOrder;
+}
+function renderBackground(svg, options) {
+    var backgroundSvg = svg.rect(options.viewbox.width, options.viewbox.height);
+    backgroundSvg.x(options.viewbox.x);
+    backgroundSvg.y(options.viewbox.y);
+    backgroundSvg.fill({
+        color: options.backgroundColor
+    });
+}
+function faceVisible(face, rotations) {
+    console.log('face visible', face, rotations[face][2], rotations[face][2] < -0.105);
+    return rotations[face][2] < -0.105;
+}
+function getCubeOutlineGroup(svg, options) {
+    var cubeOutlineGroup = svg.group();
+    cubeOutlineGroup.opacity(options.cubeOpacity / 100);
+    cubeOutlineGroup.attr({
+        'stroke-width': '0.1',
+        'stroke-linejoin': 'round',
+    });
+    return cubeOutlineGroup;
+}
+function renderCubeOutline(svg, face, options) {
+    var cubeSize = face.length - 1;
+    var width = options.outlineWidth;
+    var outlinePoints = [
+        [face[0][0][0] * width, face[0][0][1] * width],
+        [face[cubeSize][0][0] * width, face[cubeSize][0][1] * width],
+        [face[cubeSize][cubeSize][0] * width, face[cubeSize][cubeSize][1] * width],
+        [face[0][cubeSize][0] * width, face[0][cubeSize][1] * width],
+    ];
+    var polygon = svg.polygon(outlinePoints);
+    polygon.fill(options.cubeColor);
+    polygon.stroke(options.cubeColor);
+    return polygon;
+}
+function renderFaceStickers(svg, face, stickers, options) {
+    var cubeSize = stickers.length - 1;
+    var group = svg.group();
+    group.opacity(options.stickerOpacity / 100);
+    group.attr({
+        'stoke-opacity': '0.5',
+        'stroke-width': options.strokeWidth,
+        'stroke-linejoin': 'round'
+    });
+    for (var i = 0; i < cubeSize; i++) {
+        for (var j = 0; j < cubeSize; j++) {
+            var centerPoint = [
+                (stickers[j][i][0] + stickers[j + 1][i + 1][0]) / 2,
+                (stickers[j][i][1] + stickers[j + 1][i + 1][1]) / 2,
+                0
+            ];
+            // Scale points in towards centre
+            var p1 = math_1.transScale(stickers[j][i], centerPoint, .85);
+            var p2 = math_1.transScale(stickers[j + 1][i], centerPoint, .85);
+            var p3 = math_1.transScale(stickers[j + 1][i + 1], centerPoint, .85);
+            var p4 = math_1.transScale(stickers[j][i + 1], centerPoint, .85);
+            var color = getStickerColor(face, i, j, options);
+            console.log(face, i, j, color);
+            renderSticker(group, p1, p2, p3, p4, color, options.cubeColor, false);
+        }
+    }
+    return group;
+}
+function renderSticker(g, p1, p2, p3, p4, stickerColor, cubeColor, transparent) {
+    var stickerPoints = [
+        [p1[0], p1[1]],
+        [p2[0], p2[1]],
+        [p3[0], p3[1]],
+        [p4[0], p4[1]],
+    ];
+    var polygon = g.polygon(stickerPoints);
+    polygon.fill(stickerColor);
+    polygon.stroke(cubeColor);
+    if (transparent) {
+        polygon.opacity(0);
+    }
+    return polygon;
+}
+/**
+ * Starting with U, stickers are numbered from
+ * their face starting with the top left corner
+ * sticker.
+ *
+ * U Face
+ * 1 | 2 | 3
+ * ----------
+ * 4 | 5 | 6
+ * ----------
+ * 7 | 8 | 9
+ *
+ * And so on for faces R, F, D, L, B.
+ * So R's top left corner for a 3x3 cube would be # 10
+ *
+ * An individual sticker's color is obtained by indexing
+ * into the array of sticker colors by the number the sticker is
+ */
+function getStickerColor(face, row, col, options) {
+    if (!Array.isArray(options.stickerColors)) {
+        return options.colorScheme[face] || constants_1.ColorName.Black;
+    }
+    var faceIndex = constants_1.AllFaces.indexOf(face);
+    var stickerNumber = (row * options.cubeSize) + col;
+    var colorIndex = faceIndex * (options.cubeSize * options.cubeSize) + stickerNumber;
+    if (options.stickerColors.length <= colorIndex) {
+        return constants_1.ColorName.Black;
+    }
+    return options.stickerColors[colorIndex];
+}
+
+
+/***/ }),
+
+/***/ "./src/geometry/cube.ts":
+/*!******************************!*\
+  !*** ./src/geometry/cube.ts ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/**
+ * Utlity Methods for creating 2D coodinates for svg polygons
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+var constants_1 = __webpack_require__(/*! ../constants */ "./src/constants.ts");
 var math_1 = __webpack_require__(/*! ./math */ "./src/geometry/math.ts");
 function makeStickerPosition(face, cubeSize, x, y) {
     switch (face) {
@@ -5850,6 +6030,9 @@ function makeStickerPosition(face, cubeSize, x, y) {
     }
 }
 exports.makeStickerPosition = makeStickerPosition;
+/**
+ * Creates 2D coordinates for stickers of a given face of the cube.
+ */
 function makeFaceStickers(face, options) {
     var stickers = math_1.makeMatrix(options.cubeSize + 1, options.cubeSize + 1);
     for (var row = 0; row <= options.cubeSize; row++) {
@@ -5875,6 +6058,17 @@ function makeFaceStickers(face, options) {
     return stickers;
 }
 exports.makeFaceStickers = makeFaceStickers;
+/**
+ * Creates geometry for rubiks cube stickers. Contains 2D coordinates
+ * for drawing svg polygons
+ */
+function makeCubeGeometry(options) {
+    return constants_1.AllFaces.reduce(function (acc, face) {
+        acc[face] = makeFaceStickers(face, options);
+        return acc;
+    }, {});
+}
+exports.makeCubeGeometry = makeCubeGeometry;
 
 
 /***/ }),
@@ -5962,12 +6156,11 @@ exports.project = project;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var _a;
 var SVG = __webpack_require__(/*! svg.js */ "./node_modules/svg.js/dist/svg.js");
 var constants_1 = __webpack_require__(/*! ./constants */ "./src/constants.ts");
-var utils_1 = __webpack_require__(/*! ./utils */ "./src/utils.ts");
-var generator_1 = __webpack_require__(/*! ./geometry/generator */ "./src/geometry/generator.ts");
+var cube_1 = __webpack_require__(/*! ./geometry/cube */ "./src/geometry/cube.ts");
 var math_1 = __webpack_require__(/*! ./geometry/math */ "./src/geometry/math.ts");
+var cube_2 = __webpack_require__(/*! ./drawing/cube */ "./src/drawing/cube.ts");
 // $DEFAULTS = Array(
 //   'fmt'   => 'svg',
 //   'pzl'   => '3',
@@ -5996,8 +6189,7 @@ var oy = -0.9;
 var vw = 1.8;
 var vh = 1.8;
 var dist = 5;
-var cubeOpacity = 100;
-var cubeColor = 'black';
+var cubeOpacity = 50;
 // Default rotation sequence
 var viewportRotation = [
     [math_1.Axis.Y, 45],
@@ -6006,142 +6198,70 @@ var viewportRotation = [
 var cubeSize = 3;
 var centerTranslation = [-cubeSize / 2, -cubeSize / 2, -cubeSize / 2];
 var zPosition = [0, 0, dist];
-// Rotation vectors to track visibility of each face
-var faceRotations = (_a = {},
-    _a[constants_1.Face.U] = [0, -1, 0],
-    _a[constants_1.Face.R] = [1, 0, 0],
-    _a[constants_1.Face.F] = [0, 0, -1],
-    _a[constants_1.Face.D] = [0, 1, 1],
-    _a[constants_1.Face.L] = [-1, 0, 0],
-    _a[constants_1.Face.B] = [0, 0, 1],
-    _a);
 SVG.on(document, 'DOMContentLoaded', function () {
-    var geometry = {};
+    var _a;
     var options = {
+        cubeColor: 'black',
         cubeSize: cubeSize,
+        cubeOpacity: cubeOpacity,
+        strokeWidth: strokeWidth,
+        outlineWidth: outlineWidth,
+        colorScheme: (_a = {},
+            _a[constants_1.Face.U] = 'yellow',
+            _a[constants_1.Face.R] = 'red',
+            _a[constants_1.Face.F] = 'blue',
+            _a[constants_1.Face.B] = 'green',
+            _a[constants_1.Face.L] = 'orange',
+            _a[constants_1.Face.D] = 'white',
+            _a),
+        stickerOpacity: 50,
         centerTranslation: centerTranslation,
         zPosition: zPosition,
-        viewportRotations: viewportRotation
+        viewportRotations: viewportRotation,
+        backgroundColor: 'white',
+        width: 512,
+        height: 512,
+        viewbox: {
+            x: ox,
+            y: oy,
+            width: vw,
+            height: vh
+        }
     };
-    [constants_1.Face.U, constants_1.Face.R, constants_1.Face.L, constants_1.Face.F, constants_1.Face.D, constants_1.Face.B].forEach(function (face) {
-        geometry[face] = generator_1.makeFaceStickers(face, options);
-        // Rotate rotation vectors
-        viewportRotation.forEach(function (rotation) {
-            faceRotations[face] = math_1.rotate(faceRotations[face], rotation[0], Math.PI * rotation[1] / 180);
-        });
-    });
-    var draw = SVG('drawing').size(512, 512);
-    draw.viewbox(ox, oy, vw, vh);
-    // Draw background
-    var backgroundSvg = draw.rect(vw, vh);
-    backgroundSvg.x(ox);
-    backgroundSvg.y(oy);
-    backgroundSvg.fill({
-        color: 'white'
-    });
-    // Create outline for each visible face
-    var u = utils_1.outlineSvg(draw, 'black', 100, outlineWidth, geometry[constants_1.Face.U]);
-    var f = utils_1.outlineSvg(draw, 'black', 100, outlineWidth, geometry[constants_1.Face.F]);
-    var r = utils_1.outlineSvg(draw, 'black', 100, outlineWidth, geometry[constants_1.Face.R]);
-    // Create polygon for each visible facelet
-    var fStickers = utils_1.faceStickersSvg(draw, geometry[constants_1.Face.F], 100, strokeWidth, 'blue', 'black');
-    var uStickers = utils_1.faceStickersSvg(draw, geometry[constants_1.Face.U], 100, strokeWidth, 'yellow', 'black');
-    var rStickers = utils_1.faceStickersSvg(draw, geometry[constants_1.Face.R], 100, strokeWidth, 'red', 'black');
-    // let bStickers = faceStickersSvg(draw, geometry[Face.B], 100, strokeWidth, 'green', 'black')
-    // let lStickers = faceStickersSvg(draw, geometry[Face.L], 100, strokeWidth, 'orange', 'black')
-    // let dStickers = faceStickersSvg(draw, geometry[Face.D], 100, strokeWidth, 'yellow', 'black')
-    // Create polygon for each visible facelet
-    // $cube .= "\t<g style='opacity:".($fo/100).";stroke-opacity:0.5;stroke-width:$sw;stroke-linejoin:round'>\n";
-    // for($ri = 3; $ri < 6; $ri++){
-    //   if(face_visible($ro[$ri], $rv) || $co < 100)
-    //     $cube .= facelet_svg($ro[$ri]);
-    // }
-    // $cube .= "\t</g>\n";
-    // var draw = SVG('drawing').size(300, 300)
-    // draw.rotate(45, 50, 50)
-    // var rect = draw.rect(100, 100).attr({ fill: '#f06' })
+    var geometry = cube_1.makeCubeGeometry(options);
+    cube_2.renderCube('drawing', geometry, options);
 });
 
 
 /***/ }),
 
-/***/ "./src/utils.ts":
-/*!**********************!*\
-  !*** ./src/utils.ts ***!
-  \**********************/
+/***/ "./src/models/face-rotations.ts":
+/*!**************************************!*\
+  !*** ./src/models/face-rotations.ts ***!
+  \**************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var math_1 = __webpack_require__(/*! ./geometry/math */ "./src/geometry/math.ts");
-function faceVisible(face, rotations) {
-    return rotations[face][2] < -0.105;
+var math_1 = __webpack_require__(/*! ./../geometry/math */ "./src/geometry/math.ts");
+var constants_1 = __webpack_require__(/*! ./../constants */ "./src/constants.ts");
+/**
+ * Applies set of rotations to all face rotation vectors.
+ */
+function rotateFaces(faceRotations, rotations) {
+    return constants_1.AllFaces.reduce(function (acc, face) {
+        rotations.forEach(function (rotation) {
+            if (!acc[face]) {
+                acc[face] = faceRotations[face].slice();
+            }
+            acc[face] = math_1.rotate(acc[face], rotation[0], Math.PI * rotation[1] / 180);
+        });
+        return acc;
+    }, {});
 }
-exports.faceVisible = faceVisible;
-function outlineSvg(svg, color, opacity, width, face) {
-    var cubeSize = face.length - 1;
-    var outlinePoints = [
-        [face[0][0][0] * width, face[0][0][1] * width],
-        [face[cubeSize][0][0] * width, face[cubeSize][0][1] * width],
-        [face[cubeSize][cubeSize][0] * width, face[cubeSize][cubeSize][1] * width],
-        [face[0][cubeSize][0] * width, face[0][cubeSize][1] * width],
-    ];
-    var polygon = svg.polygon(outlinePoints);
-    polygon.fill(color);
-    polygon.stroke(color);
-    polygon.attr({
-        'stroke-width': '0.1',
-        'stroke-linejoin': 'round',
-        'opacity': "" + opacity / 100
-    });
-    return polygon;
-}
-exports.outlineSvg = outlineSvg;
-function faceStickersSvg(svg, face, opacity, strokeWidth, stickerColor, cubeColor, transparent) {
-    var cubeSize = face.length - 1;
-    var group = svg.group();
-    group.opacity(opacity / 100);
-    group.attr({
-        'stoke-opacity': '0.5',
-        'stroke-width': strokeWidth,
-        'stroke-linejoin': 'round'
-    });
-    for (var i = 0; i < cubeSize; i++) {
-        for (var j = 0; j < cubeSize; j++) {
-            var centerPoint = [
-                (face[j][i][0] + face[j + 1][i + 1][0]) / 2,
-                (face[j][i][1] + face[j + 1][i + 1][1]) / 2,
-                0
-            ];
-            console.log(face[j][i], centerPoint);
-            // Scale points in towards centre
-            var p1 = math_1.transScale(face[j][i], centerPoint, .85);
-            var p2 = math_1.transScale(face[j + 1][i], centerPoint, .85);
-            var p3 = math_1.transScale(face[j + 1][i + 1], centerPoint, .85);
-            var p4 = math_1.transScale(face[j][i + 1], centerPoint, .85);
-            stickerSvg(group, p1, p2, p3, p4, stickerColor, cubeColor, transparent);
-        }
-    }
-    return group;
-}
-exports.faceStickersSvg = faceStickersSvg;
-function stickerSvg(g, p1, p2, p3, p4, stickerColor, cubeColor, transparent) {
-    var stickerPoints = [
-        [p1[0], p1[1]],
-        [p2[0], p2[1]],
-        [p3[0], p3[1]],
-        [p4[0], p4[1]],
-    ];
-    var polygon = g.polygon(stickerPoints);
-    polygon.fill(stickerColor);
-    polygon.stroke(cubeColor);
-    if (transparent) {
-        polygon.opacity(0);
-    }
-    return polygon;
-}
+exports.rotateFaces = rotateFaces;
 
 
 /***/ })

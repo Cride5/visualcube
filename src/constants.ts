@@ -6,10 +6,16 @@ export enum Face {
   D = 3,
   L = 4,
   B = 5,
-  // N = 6,
-  // O = 7,
-  // T = 8
 }
+
+export const AllFaces = [
+  Face.U,
+  Face.R,
+  Face.F,
+  Face.D,
+  Face.L,
+  Face.B,
+]
 
 export enum ColorCode {
   Black = '000000',

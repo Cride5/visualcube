@@ -1,18 +1,37 @@
-import { Face } from './../constants';
-import { StickerPosition } from '../models/sticker-position';
+/**
+ * Utlity Methods for creating 2D coodinates for svg polygons
+ */
+
+import { Face, AllFaces } from '../constants';
 import { Vec3, makeMatrix, translate, scale, rotate, project, Axis } from './math';
 
-export type FaceStickers = StickerPosition[][];
-export type CubeGeometry = { [face: string]: StickerPosition[][] };
+export type FaceStickers = Vec3[][];
+export type CubeGeometry = { [face: number]: Vec3[][] };
 
-export interface IGeneratorOptions {
+export interface ICubeOptions {
+  backgroundColor: string;
+  cubeColor: string;
+  outlineWidth: number;
+  strokeWidth: number;
   cubeSize: number;
+  cubeOpacity: number;
+  stickerOpacity: number;
+  colorScheme: { [face: number]: string };
+  stickerColors?: string[];
   centerTranslation: Vec3;
   zPosition: Vec3;
-  viewportRotations: [Axis, number][]
+  viewportRotations: [Axis, number][];
+  width: number;
+  height: number;
+  viewbox: { // SVG viewbox settings
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }
 }
 
-export function makeStickerPosition(face: Face, cubeSize: number, x: number, y: number): StickerPosition {
+export function makeStickerPosition(face: Face, cubeSize: number, x: number, y: number): Vec3 {
   switch (face) {
     case Face.U: return [x, 0, cubeSize - y];
     case Face.R: return [cubeSize, y, x];
@@ -24,8 +43,11 @@ export function makeStickerPosition(face: Face, cubeSize: number, x: number, y: 
   }
 }
 
-export function makeFaceStickers(face: Face, options: IGeneratorOptions): FaceStickers {
-  let stickers: StickerPosition[][] = makeMatrix<StickerPosition>(options.cubeSize+1, options.cubeSize+1);
+/**
+ * Creates 2D coordinates for stickers of a given face of the cube.
+ */
+export function makeFaceStickers(face: Face, options: ICubeOptions): FaceStickers {
+  let stickers: Vec3[][] = makeMatrix<Vec3>(options.cubeSize+1, options.cubeSize+1);
 
   for(let row = 0; row <= options.cubeSize; row++) {
     for (let col = 0; col <= options.cubeSize; col++) {
@@ -50,4 +72,15 @@ export function makeFaceStickers(face: Face, options: IGeneratorOptions): FaceSt
   }
 
   return stickers;
+}
+
+/**
+ * Creates geometry for rubiks cube stickers. Contains 2D coordinates
+ * for drawing svg polygons
+ */
+export function makeCubeGeometry(options: ICubeOptions): CubeGeometry {
+  return AllFaces.reduce((acc, face) => {
+    acc[face] = makeFaceStickers(face, options);
+    return acc;
+  }, {} as CubeGeometry)
 }
