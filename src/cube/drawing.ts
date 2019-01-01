@@ -1,8 +1,9 @@
-import { Face, AllFaces, ColorName } from "./../constants";
-import { FaceRotations, rotateFaces } from "./../models/face-rotations";
+import { ColorName } from "./../constants";
 import * as SVG from "svg.js";
-import { ICubeOptions, CubeGeometry, FaceStickers } from "./../geometry/cube";
-import { Vec3, transScale, scale, translate } from "../geometry/math";
+import { CubeGeometry, FaceStickers, FaceRotations, rotateFaces } from "./geometry";
+import { Vec3, transScale, scale, translate } from "../math";
+import { Face, AllFaces } from "./constants";
+import { ICubeOptions } from "./options";
 
 /**
  * Utility methods for rendering cube geometry using svg.js
@@ -77,7 +78,6 @@ function renderBackground(svg: SVG.Doc, options: ICubeOptions) {
 }
 
 function faceVisible(face: Face, rotations: FaceRotations) {
-  console.log('face visible', face,rotations[face][2], rotations[face][2] < -0.105);
   return rotations[face][2] < -0.105;
 }
 
@@ -142,7 +142,6 @@ function renderFaceStickers(svg: SVG.Doc, face: Face, stickers: FaceStickers, op
       let p4 = transScale(stickers[j][i+1], centerPoint, .85);
 
       let color = getStickerColor(face, i, j, options);
-      console.log(face, i, j, color);
       renderSticker(group, p1, p2, p3, p4, color, options.cubeColor);
     }
   }

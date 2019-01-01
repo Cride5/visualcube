@@ -1,35 +1,16 @@
-import { IColorScheme } from './models/color-scheme';
-export enum Face {
-  U = 0,
-  R = 1,
-  F = 2,
-  D = 3,
-  L = 4,
-  B = 5,
-}
-
-export const AllFaces = [
-  Face.U,
-  Face.R,
-  Face.F,
-  Face.D,
-  Face.L,
-  Face.B,
-]
-
 export enum ColorCode {
-  Black = '000000',
-  DarkGray = '404040',
-  Gray = '808080',
-  Silver = 'BFBFBF',
-  White = 'FFFFFF',
-  Yellow = 'FEFE00',
-  Red = 'EE0000',
-  Orange = 'FFA100',
-  Blue = '0000F2',
-  Green = '00D800',
-  Purple = 'A83DD9',
-  Pink = 'F33D7B',
+  Black = '#000000',
+  DarkGray = '#404040',
+  Gray = '#808080',
+  Silver = '#BFBFBF',
+  White = '#FFFFFF',
+  Yellow = '#FEFE00',
+  Red = '#EE0000',
+  Orange = '#FFA100',
+  Blue = '#0000F2',
+  Green = '#00D800',
+  Purple = '#A83DD9',
+  Pink = '#F33D7B',
 }
 
 export enum ColorName {
@@ -92,22 +73,4 @@ export const ColorAbbreviationToCode: { [name:string]: ColorCode } = {
   [ColorAbbreviation.Purple]: ColorCode.Purple,
   [ColorAbbreviation.Pink]: ColorCode.Pink,
   [ColorAbbreviation.Transparent]: null
-}
-
-export const DefaultColorScheme: IColorScheme = {
-  u: ColorCode.Yellow,
-  r: ColorCode.Red,
-  f: ColorCode.Blue,
-  d: ColorCode.White,
-  l: ColorCode.Orange,
-  b: ColorCode.Green
-}
-
-export class FaceRotationVectors {
-  static U = [0, -1, 0];
-  static R = [1, 0, 0];
-  static F = [0 ,0, -1];
-  static D = [0, 1, 0];
-  static L = [-1, 0, 0];
-  static B = [0, 0, 1];
 }

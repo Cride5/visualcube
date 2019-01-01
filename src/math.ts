@@ -1,3 +1,7 @@
+/**
+ * Methods for manipulating points in 3d space (Vec3)
+ */
+
 export type Vec3 = [number, number, number];
 
 export enum Axis {

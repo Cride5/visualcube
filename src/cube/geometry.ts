@@ -1,35 +1,32 @@
+import { ICubeOptions } from './options';
 /**
  * Utlity Methods for creating 2D coodinates for svg polygons
  */
 
-import { Face, AllFaces } from '../constants';
-import { Vec3, makeMatrix, translate, scale, rotate, project, Axis } from './math';
+import { Face, AllFaces } from './constants';
+import { Vec3, makeMatrix, translate, scale, rotate, project, Axis } from '../math';
 
 export type FaceStickers = Vec3[][];
 export type CubeGeometry = { [face: number]: Vec3[][] };
 
-export interface ICubeOptions {
-  backgroundColor: string;
-  cubeColor: string;
-  outlineWidth: number;
-  strokeWidth: number;
-  cubeSize: number;
-  cubeOpacity: number;
-  stickerOpacity: number;
-  colorScheme: { [face: number]: string };
-  stickerColors?: string[];
-  centerTranslation: Vec3;
-  zPosition: Vec3;
-  viewportRotations: [Axis, number][];
-  view?: string;
-  width: number;
-  height: number;
-  viewbox: { // SVG viewbox settings
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }
+/**
+ * Rotation vectors by face
+ */
+export type FaceRotations = { [face: number]: Vec3 }
+
+/**
+ * Applies set of rotations to all face rotation vectors.
+ */
+export function rotateFaces(faceRotations: FaceRotations, rotations: [Axis, number][]): FaceRotations {
+  return AllFaces.reduce((acc, face) => {
+    rotations.forEach((rotation) => {
+      if (!acc[face]) {
+        acc[face] = [...faceRotations[face]]
+      }
+      acc[face] = rotate(acc[face], rotation[0], Math.PI * rotation[1]/180)
+    });
+    return acc;
+  }, {})
 }
 
 export function makeStickerPosition(face: Face, cubeSize: number, x: number, y: number): Vec3 {

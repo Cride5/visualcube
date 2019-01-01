@@ -1,8 +1,9 @@
 import * as SVG from 'svg.js'
-import { Face, ColorCode } from './constants';
-import { ICubeOptions, makeCubeGeometry } from './geometry/cube';
-import { Vec3, Axis } from './geometry/math';
-import { renderCube } from './drawing/cube';
+import { makeCubeGeometry } from './cube/geometry';
+import { Vec3, Axis } from './math';
+import { renderCube } from './cube/drawing';
+import { ICubeOptions } from './cube/options';
+import { DefaultColorScheme } from './cube/constants';
 
 // $DEFAULTS = Array(
 //   'fmt'   => 'svg',
@@ -56,14 +57,7 @@ let zPosition: Vec3 = [0, 0, dist];
     cubeOpacity: cubeOpacity,
     strokeWidth: strokeWidth,
     outlineWidth: outlineWidth,
-    colorScheme: {
-      [Face.U]: 'yellow',
-      [Face.R]: 'red',
-      [Face.F]: 'blue',
-      [Face.B]: `#${ColorCode.Green}`,
-      [Face.L]: 'orange',
-      [Face.D]: 'white'
-    },
+    colorScheme: DefaultColorScheme,
     // stickerColors: [
     //   '#FF0000',
     //   '#00FF00',
