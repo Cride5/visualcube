@@ -6141,6 +6141,128 @@ exports.makeCubeGeometry = makeCubeGeometry;
 
 /***/ }),
 
+/***/ "./src/cube/simulation.ts":
+/*!********************************!*\
+  !*** ./src/cube/simulation.ts ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var constants_1 = __webpack_require__(/*! ./constants */ "./src/cube/constants.ts");
+var TurnType;
+(function (TurnType) {
+    TurnType[TurnType["Clockwise"] = 0] = "Clockwise";
+    TurnType[TurnType["CounterClockwise"] = 1] = "CounterClockwise";
+    TurnType[TurnType["Double"] = 2] = "Double";
+})(TurnType = exports.TurnType || (exports.TurnType = {}));
+var CubeData = /** @class */ (function () {
+    function CubeData(cubeSize) {
+        var _this = this;
+        this.cubeSize = cubeSize;
+        /**
+         *  Data to store face value
+         *  data saved in flat array [1, 2, 3, 4, 5, 6, 7, 8, 9]
+         *  maps to cube stickers like this
+         *
+         *  U Face
+         *  1 | 2 | 3
+         *  ----------
+         *  4 | 5 | 6
+         *  ----------
+         *  7 | 8 | 9
+         *
+         *  Stickers are numbered in that manner starting with the U face
+         *  continuing with this order U, R, F, D, L, B
+         *
+         *  Because each face has a differen't orientation it may not be clear
+         *  how the back faces are numbered. Below is an example 3x3 mapping
+         *
+         *  Example numbers of 3x3 cube. nxn cubes follow the same pattern
+         *
+         *        B
+         *      L U R
+         *        F
+         *        D
+         *                  | 54  | 53  | 52  |
+         *                   -----------------
+         *                  | 51  | 50  | 49  |
+         *                   -----------------
+         *                  | 48  | 47  | 46  |
+         * -----------------                   -----------------
+         *  43  | 40  | 37     1  |  2  |  3    12  | 15  | 18
+         * ----------------- ----------------- -----------------
+         *  44  | 41  | 38     4  |  5  |  6    11  | 14  | 17
+         * ----------------- ----------------- -----------------
+         *  45  | 42  | 39     7  |  8  |  9    10  | 13  | 16
+         * -----------------                   -----------------
+         *                  | 19  | 20  | 21  |
+         *                   -----------------
+         *                  | 22  | 23  | 24  |
+         *                   -----------------
+         *                  | 25  | 26  | 27  |
+         *
+         *                  | 28  | 29  | 30  |
+         *                   -----------------
+         *                  | 31  | 32  | 33  |
+         *                   -----------------
+         *                  | 34  | 35  | 36  |
+         */
+        this.faces = {};
+        this.counterClockwiseSticker = function (stickerNumber, cubeSize) { return (stickerNumber * cubeSize) % ((cubeSize * cubeSize) + 1); };
+        this.clockwiseSticker = function (stickerNumber, cubeSize) {
+            var numStickers = cubeSize * cubeSize;
+            return (numStickers + 1) - _this.counterClockwiseSticker(stickerNumber, cubeSize);
+        };
+        this.numStickers = this.cubeSize * this.cubeSize;
+        var currentValue = 1;
+        this.clockwiseMapping = [];
+        this.counterClockwiseMapping = [];
+        constants_1.AllFaces.forEach(function (face) {
+            _this.faces[face] = [];
+            for (var i = 0; i < _this.numStickers; i++) {
+                _this.faces[face].push(currentValue++);
+            }
+        });
+        for (var i = 1; i <= this.numStickers; i++) {
+            this.clockwiseMapping.push(this.clockwiseSticker(i, cubeSize));
+            this.counterClockwiseMapping.push(this.counterClockwiseSticker(i, cubeSize));
+        }
+        this.rTurn();
+        console.log(this.faces);
+    }
+    CubeData.prototype.rotateFace = function (face, turn) {
+        var _this = this;
+        // TODO more efficient rotation to not construct so many new arrays
+        // Move values on face
+        switch (turn) {
+            case TurnType.Clockwise:
+                console.log('clockwise');
+                this.faces[face] = this.clockwiseMapping.map(function (newStickerNumber) { return _this.faces[face][newStickerNumber - 1]; });
+                break;
+            case TurnType.CounterClockwise:
+                console.log('counter');
+                this.faces[face] = this.counterClockwiseMapping.map(function (newStickerNumber) { return _this.faces[face][newStickerNumber - 1]; });
+                break;
+            case TurnType.Double:
+                console.log('double');
+                this.faces[face].reverse();
+                break;
+        }
+        // Move values on adjacent faces
+    };
+    CubeData.prototype.rTurn = function () {
+        this.rotateFace(constants_1.Face.R, TurnType.Clockwise);
+    };
+    return CubeData;
+}());
+exports.CubeData = CubeData;
+
+
+/***/ }),
+
 /***/ "./src/index.ts":
 /*!**********************!*\
   !*** ./src/index.ts ***!
@@ -6151,6 +6273,7 @@ exports.makeCubeGeometry = makeCubeGeometry;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var simulation_1 = __webpack_require__(/*! ./cube/simulation */ "./src/cube/simulation.ts");
 var SVG = __webpack_require__(/*! svg.js */ "./node_modules/svg.js/dist/svg.js");
 var geometry_1 = __webpack_require__(/*! ./cube/geometry */ "./src/cube/geometry.ts");
 var math_1 = __webpack_require__(/*! ./math */ "./src/math.ts");
@@ -6197,18 +6320,26 @@ SVG.on(document, 'DOMContentLoaded', function () {
     var options = {
         cubeColor: 'black',
         cubeSize: cubeSize,
-        cubeOpacity: cubeOpacity,
+        cubeOpacity: 100,
         strokeWidth: strokeWidth,
         outlineWidth: outlineWidth,
         colorScheme: constants_1.DefaultColorScheme,
-        // stickerColors: [
-        //   '#FF0000',
-        //   '#00FF00',
-        //   '#0000FF',
-        //   '#00FFFF',
-        //   '#FF00FF',
-        //   '#FFFF00',
-        // ],
+        stickerColors: [
+            'white',
+            'white',
+            'white',
+            'white',
+            'white',
+            'white',
+            'white',
+            'white',
+            'white',
+            'red', 'red', 'red', 'red', 'red', 'red', 'red', 'red', 'red',
+            'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue',
+            'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green',
+            'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow',
+            'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange',
+        ],
         stickerOpacity: 100,
         centerTranslation: centerTranslation,
         zPosition: zPosition,
@@ -6225,6 +6356,7 @@ SVG.on(document, 'DOMContentLoaded', function () {
     };
     var geometry = geometry_1.makeCubeGeometry(options);
     drawing_1.renderCube('drawing', geometry, options);
+    var test = new simulation_1.CubeData(3);
 });
 
 

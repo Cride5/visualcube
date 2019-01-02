@@ -1,3 +1,4 @@
+import { CubeData } from './cube/simulation';
 import * as SVG from 'svg.js'
 import { makeCubeGeometry } from './cube/geometry';
 import { Vec3, Axis } from './math';
@@ -54,18 +55,26 @@ let zPosition: Vec3 = [0, 0, dist];
   let options: ICubeOptions = {
     cubeColor: 'black',
     cubeSize: cubeSize,
-    cubeOpacity: cubeOpacity,
+    cubeOpacity: 100,
     strokeWidth: strokeWidth,
     outlineWidth: outlineWidth,
     colorScheme: DefaultColorScheme,
-    // stickerColors: [
-    //   '#FF0000',
-    //   '#00FF00',
-    //   '#0000FF',
-    //   '#00FFFF',
-    //   '#FF00FF',
-    //   '#FFFF00',
-    // ],
+    stickerColors: [
+      'white',
+      'white',
+      'white',
+      'white',
+      'white',
+      'white',
+      'white',
+      'white',
+      'white',
+      'red','red','red','red','red','red','red','red','red',
+      'blue','blue','blue','blue','blue','blue','blue','blue','blue',
+      'green','green','green','green','green','green','green','green','green',
+      'yellow','yellow','yellow','yellow','yellow','yellow','yellow','yellow','yellow',
+      'orange', 'orange','orange','orange','orange','orange','orange','orange','orange',
+    ],
     stickerOpacity: 100,
     centerTranslation: centerTranslation,
     zPosition: zPosition,
@@ -84,4 +93,6 @@ let zPosition: Vec3 = [0, 0, dist];
   let geometry = makeCubeGeometry(options);
 
   renderCube('drawing', geometry, options);
+
+  let test = new CubeData(3);
 })
