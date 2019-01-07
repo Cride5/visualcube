@@ -1,9 +1,43 @@
+import { Axis } from './../math';
 import { AllFaces, Face } from './constants';
 
 export enum TurnType {
   Clockwise,
   CounterClockwise,
   Double
+}
+
+// Given sticker N return sticker number after rotation
+type FaceRotation = (stickerNumber: number, cubeSize: number) => number;
+
+const faceIdentity: FaceRotation = (stickerNumber: number, cubeSize: number) => stickerNumber;
+const flipVertically: FaceRotation = (stickerNumber: number, cubeSize: number) => {
+  let row = Math.floor((stickerNumber - 1)/cubeSize);
+  let col = (stickerNumber - 1) % cubeSize;
+  let newCol = (cubeSize -1) - col;
+  return newCol + (cubeSize * row) + 1;
+};
+const counterClockwiseSticker: FaceRotation = (stickerNumber, cubeSize) => (stickerNumber * cubeSize) % ((cubeSize  * cubeSize) + 1);
+const clockwiseSticker: FaceRotation = (stickerNumber, cubeSize) => {
+  let numStickers = cubeSize * cubeSize;
+  return (numStickers + 1) - counterClockwiseSticker(stickerNumber, cubeSize);
+}
+
+// Faces that wrap around a given axis
+const AxisMapping = {
+  [Axis.X]: [Face.U, Face.B, Face.F, Face.D],
+  [Axis.Y]: [Face.L, Face.B, Face.R, Face.F],
+  [Axis.Z]: [Face.L, Face.U, Face.R, Face.D]
+}
+
+// Face's orientation related to other faces on a given axis
+const AxisOrientation = {
+  [Axis.X]: {
+    [Face.U]: faceIdentity,
+    [Face.B]: flipVertically,
+    [Face.F]: faceIdentity,
+    [Face.D]: faceIdentity,
+  }
 }
 
 export class CubeData {
@@ -58,11 +92,6 @@ export class CubeData {
    */
   private faces: { [face: number]: number[] } = {}
   private numStickers: number;
-  private counterClockwiseSticker = (stickerNumber, cubeSize) => (stickerNumber * cubeSize) % ((cubeSize  * cubeSize) + 1);
-  private clockwiseSticker = (stickerNumber, cubeSize) => {
-    let numStickers = cubeSize * cubeSize;
-    return (numStickers + 1) - this.counterClockwiseSticker(stickerNumber, cubeSize);
-  }
 
   // Precalculated index mapping values for face rotations
   private clockwiseMapping: number[];
@@ -81,34 +110,35 @@ export class CubeData {
     });
 
     for (let i = 1; i <= this.numStickers; i++) {
-      this.clockwiseMapping.push(this.clockwiseSticker(i, cubeSize));
-      this.counterClockwiseMapping.push(this.counterClockwiseSticker(i, cubeSize));
+      this.clockwiseMapping.push(clockwiseSticker(i, cubeSize));
+      this.counterClockwiseMapping.push(counterClockwiseSticker(i, cubeSize));
     }
 
     this.rTurn();
-    console.log(this.faces);
   }
 
+  /**
+   * Rotates values on an outer face of the rubiks cubes
+   */
   private rotateFace(face: Face, turn: TurnType) {
     // TODO more efficient rotation to not construct so many new arrays
-    // Move values on face
     switch (turn) {
       case TurnType.Clockwise:
-        console.log('clockwise');
         this.faces[face] = this.clockwiseMapping.map(newStickerNumber => this.faces[face][newStickerNumber - 1]);
         break;
       case TurnType.CounterClockwise:
-        console.log('counter');
         this.faces[face] = this.counterClockwiseMapping.map(newStickerNumber => this.faces[face][newStickerNumber - 1]);
         break;
       case TurnType.Double:
-        console.log('double');
         this.faces[face].reverse();
         break;
     }
+  }
 
-    // Move values on adjacent faces
-
+  /**
+   * Rotate layers around the x axis of the cube
+   */
+  private xTurn(offset: number) {
 
   }
 

@@ -6151,6 +6151,8 @@ exports.makeCubeGeometry = makeCubeGeometry;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var _a, _b, _c;
+var math_1 = __webpack_require__(/*! ./../math */ "./src/math.ts");
 var constants_1 = __webpack_require__(/*! ./constants */ "./src/cube/constants.ts");
 var TurnType;
 (function (TurnType) {
@@ -6158,6 +6160,33 @@ var TurnType;
     TurnType[TurnType["CounterClockwise"] = 1] = "CounterClockwise";
     TurnType[TurnType["Double"] = 2] = "Double";
 })(TurnType = exports.TurnType || (exports.TurnType = {}));
+var faceIdentity = function (stickerNumber, cubeSize) { return stickerNumber; };
+var flipVertically = function (stickerNumber, cubeSize) {
+    var row = Math.floor((stickerNumber - 1) / cubeSize);
+    var col = (stickerNumber - 1) % cubeSize;
+    var newCol = (cubeSize - 1) - col;
+    return newCol + (cubeSize * row) + 1;
+};
+var counterClockwiseSticker = function (stickerNumber, cubeSize) { return (stickerNumber * cubeSize) % ((cubeSize * cubeSize) + 1); };
+var clockwiseSticker = function (stickerNumber, cubeSize) {
+    var numStickers = cubeSize * cubeSize;
+    return (numStickers + 1) - counterClockwiseSticker(stickerNumber, cubeSize);
+};
+// Faces that wrap around a given axis
+var AxisMapping = (_a = {},
+    _a[math_1.Axis.X] = [constants_1.Face.U, constants_1.Face.B, constants_1.Face.F, constants_1.Face.D],
+    _a[math_1.Axis.Y] = [constants_1.Face.L, constants_1.Face.B, constants_1.Face.R, constants_1.Face.F],
+    _a[math_1.Axis.Z] = [constants_1.Face.L, constants_1.Face.U, constants_1.Face.R, constants_1.Face.D],
+    _a);
+// Face's orientation related to other faces on a given axis
+var AxisOrientation = (_b = {},
+    _b[math_1.Axis.X] = (_c = {},
+        _c[constants_1.Face.U] = faceIdentity,
+        _c[constants_1.Face.B] = flipVertically,
+        _c[constants_1.Face.F] = faceIdentity,
+        _c[constants_1.Face.D] = faceIdentity,
+        _c),
+    _b);
 var CubeData = /** @class */ (function () {
     function CubeData(cubeSize) {
         var _this = this;
@@ -6211,11 +6240,6 @@ var CubeData = /** @class */ (function () {
          *                  | 34  | 35  | 36  |
          */
         this.faces = {};
-        this.counterClockwiseSticker = function (stickerNumber, cubeSize) { return (stickerNumber * cubeSize) % ((cubeSize * cubeSize) + 1); };
-        this.clockwiseSticker = function (stickerNumber, cubeSize) {
-            var numStickers = cubeSize * cubeSize;
-            return (numStickers + 1) - _this.counterClockwiseSticker(stickerNumber, cubeSize);
-        };
         this.numStickers = this.cubeSize * this.cubeSize;
         var currentValue = 1;
         this.clockwiseMapping = [];
@@ -6227,31 +6251,33 @@ var CubeData = /** @class */ (function () {
             }
         });
         for (var i = 1; i <= this.numStickers; i++) {
-            this.clockwiseMapping.push(this.clockwiseSticker(i, cubeSize));
-            this.counterClockwiseMapping.push(this.counterClockwiseSticker(i, cubeSize));
+            this.clockwiseMapping.push(clockwiseSticker(i, cubeSize));
+            this.counterClockwiseMapping.push(counterClockwiseSticker(i, cubeSize));
         }
         this.rTurn();
-        console.log(this.faces);
     }
+    /**
+     * Rotates values on an outer face of the rubiks cubes
+     */
     CubeData.prototype.rotateFace = function (face, turn) {
         var _this = this;
         // TODO more efficient rotation to not construct so many new arrays
-        // Move values on face
         switch (turn) {
             case TurnType.Clockwise:
-                console.log('clockwise');
                 this.faces[face] = this.clockwiseMapping.map(function (newStickerNumber) { return _this.faces[face][newStickerNumber - 1]; });
                 break;
             case TurnType.CounterClockwise:
-                console.log('counter');
                 this.faces[face] = this.counterClockwiseMapping.map(function (newStickerNumber) { return _this.faces[face][newStickerNumber - 1]; });
                 break;
             case TurnType.Double:
-                console.log('double');
                 this.faces[face].reverse();
                 break;
         }
-        // Move values on adjacent faces
+    };
+    /**
+     * Rotate layers around the x axis of the cube
+     */
+    CubeData.prototype.xTurn = function (offset) {
     };
     CubeData.prototype.rTurn = function () {
         this.rotateFace(constants_1.Face.R, TurnType.Clockwise);
