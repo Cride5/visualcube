@@ -6445,7 +6445,7 @@ var CubeData = /** @class */ (function () {
     };
     CubeData.prototype.rTurn = function (turnType) {
         this.rotateFace(constants_1.Face.R, turnType);
-        this.xLayersRotation(2, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+        this.xLayersRotation(this.cubeSize - 1, turnType === TurnType.Clockwise, turnType === TurnType.Double);
     };
     CubeData.prototype.lTurn = function (turnType) {
         this.rotateFace(constants_1.Face.L, turnType);
@@ -6475,12 +6475,21 @@ var CubeData = /** @class */ (function () {
     CubeData.prototype.eTurn = function (turnType) {
         if (this.cubeSize < 2)
             return;
-        this.yLayersRotation(1, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
+        this.yLayersRotation(1, turnType === TurnType.CounterClockwise, turnType === TurnType.Double, this.cubeSize - 2);
     };
     CubeData.prototype.sTurn = function (turnType) {
         if (this.cubeSize < 2)
             return;
-        this.zLayersRotation(1, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+        this.zLayersRotation(1, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize - 2);
+    };
+    CubeData.prototype.xTurn = function (turnType) {
+        this.xLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize);
+    };
+    CubeData.prototype.yTurn = function (turnType) {
+        this.yLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize);
+    };
+    CubeData.prototype.zTurn = function (turnType) {
+        this.zLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize);
     };
     CubeData.prototype.turn = function (turn) {
         switch (turn.move) {
@@ -6510,6 +6519,15 @@ var CubeData = /** @class */ (function () {
                 break;
             case constants_1.AlgorithmUnit.S:
                 this.sTurn(turn.turnType);
+                break;
+            case constants_1.AlgorithmUnit.X:
+                this.xTurn(turn.turnType);
+                break;
+            case constants_1.AlgorithmUnit.Y:
+                this.yTurn(turn.turnType);
+                break;
+            case constants_1.AlgorithmUnit.Z:
+                this.zTurn(turn.turnType);
                 break;
             default:
                 throw new Error("Unrecognized move in turn " + JSON.stringify(turn));
@@ -6613,7 +6631,7 @@ function makeStickerColors(options) {
 }
 SVG.on(document, 'DOMContentLoaded', function () {
     var options = {
-        algorithm: 'M2 E2 S2',
+        algorithm: 'F R\' U\' F\' U L\' B U\' B2 U\' F\' R\' B R2 F U L U',
         cubeColor: 'black',
         cubeSize: cubeSize,
         cubeOpacity: cubeOpacity,

@@ -96,7 +96,7 @@ function makeStickerColors(options: ICubeOptions): string[] {
 (SVG as any).on(document, 'DOMContentLoaded', function() {
   
   let options: ICubeOptions = {
-    algorithm: 'M2 E2 S2',
+    algorithm: 'F R\' U\' F\' U L\' B U\' B2 U\' F\' R\' B R2 F U L U',
     cubeColor: 'black',
     cubeSize: cubeSize,
     cubeOpacity: cubeOpacity,

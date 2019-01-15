@@ -214,7 +214,7 @@ export class CubeData {
 
   rTurn(turnType: TurnType) {
     this.rotateFace(Face.R, turnType);
-    this.xLayersRotation(2, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+    this.xLayersRotation(this.cubeSize - 1, turnType === TurnType.Clockwise, turnType === TurnType.Double);
   }
 
   lTurn(turnType: TurnType) {
@@ -249,12 +249,24 @@ export class CubeData {
 
   eTurn(turnType: TurnType) {
     if (this.cubeSize < 2) return;
-    this.yLayersRotation(1, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
+    this.yLayersRotation(1, turnType === TurnType.CounterClockwise, turnType === TurnType.Double, this.cubeSize - 2);
   }
 
   sTurn(turnType: TurnType) {
     if (this.cubeSize < 2) return;
-    this.zLayersRotation(1, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+    this.zLayersRotation(1, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize - 2);
+  }
+
+  xTurn(turnType: TurnType) {
+    this.xLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize);
+  }
+
+  yTurn(turnType: TurnType) {
+    this.yLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize)
+  }
+
+  zTurn(turnType: TurnType) {
+    this.zLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize);
   }
 
   turn(turn: Turn) {
@@ -285,6 +297,15 @@ export class CubeData {
       break;
       case AlgorithmUnit.S:
         this.sTurn(turn.turnType);
+      break;
+      case AlgorithmUnit.X:
+        this.xTurn(turn.turnType);
+      break;
+      case AlgorithmUnit.Y:
+        this.yTurn(turn.turnType);
+      break;
+      case AlgorithmUnit.Z:
+        this.zTurn(turn.turnType);
       break;
       default:
         throw new Error(`Unrecognized move in turn ${JSON.stringify(turn)}`);
