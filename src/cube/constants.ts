@@ -36,3 +36,39 @@ export const DefaultColorScheme: ICubeColorScheme = {
   [Face.L]: ColorCode.Orange,
   [Face.B]: ColorCode.Green
 }
+
+export enum AlgorithmUnit {
+  F = 'F',
+  U = 'U',
+  R = 'R',
+  L = 'L',
+  D = 'D',
+  B = 'B',
+  M = 'M',
+  E = 'E',
+  S = 'S',
+  X = 'x',
+  Y = 'y',
+  Z = 'z'
+}
+
+export const possibleMoves: string[] = [
+  AlgorithmUnit.F,
+  AlgorithmUnit.U,
+  AlgorithmUnit.R,
+  AlgorithmUnit.L,
+  AlgorithmUnit.D,
+  AlgorithmUnit.B,
+  AlgorithmUnit.M,
+  AlgorithmUnit.E,
+  AlgorithmUnit.S,
+  AlgorithmUnit.X,
+  AlgorithmUnit.Y,
+  AlgorithmUnit.Z,
+]
+
+export enum TurnAbbreviation {
+  Clockwise = '',
+  CounterClockwise = '\'',
+  Double = '2'
+}

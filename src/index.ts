@@ -1,11 +1,12 @@
-import { CubeData, TurnType } from './cube/simulation';
+import { CubeData } from './cube/simulation';
 import * as SVG from 'svg.js'
 import { makeCubeGeometry } from './cube/geometry';
 import { Vec3, Axis } from './math';
 import { renderCube } from './cube/drawing';
 import { ICubeOptions } from './cube/options';
-import { DefaultColorScheme, Face, AllFaces } from './cube/constants';
-import { ColorCode } from './constants';
+import { DefaultColorScheme, AllFaces } from './cube/constants';
+import { ColorName } from './constants';
+import { parseAlgorithm } from './cube/algorithm';
 
 // $DEFAULTS = Array(
 //   'fmt'   => 'svg',
@@ -51,32 +52,58 @@ let cubeSize = 3;
 let centerTranslation: Vec3 = [-cubeSize/2, -cubeSize/2, -cubeSize/2];
 let zPosition: Vec3 = [0, 0, dist];
 
-(SVG as any).on(document, 'DOMContentLoaded', function() {
-
-  let startValues = {
-    [Face.U]: [ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White],
-    [Face.F]: [ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red],
-    [Face.R]: [ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue],
-    [Face.D]: [ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow],
-    [Face.L]: [ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green],
-    [Face.B]: [ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange],
+function makeStickerColors(options: ICubeOptions): string[] {
+  let stickerColors = options.stickerColors;
+  
+  // Fill with color scheme if sticker colors not predefined.
+  if (!stickerColors) {
+    stickerColors = [].concat.apply([], AllFaces.map(face => {
+      return Array.apply(null, Array(options.cubeSize * options.cubeSize)).map(() => options.colorScheme[face])
+    }));
   }
-  let test = new CubeData(3, startValues);
-  test.rTurn(TurnType.Double);
-  test.lTurn(TurnType.Double);
-  test.uTurn(TurnType.Double);
-  test.dTurn(TurnType.Double);
-  test.fTurn(TurnType.Double);
-  test.bTurn(TurnType.Double);
+
+  let faceMappedStickers = AllFaces.reduce((acc, face) => {
+    if (!acc[face]) acc[face] = [];
+
+    for (let i = 0; i < options.cubeSize; i++) {
+      for (let j = 0; j < options.cubeSize; j++) {
+        const faceIndex = AllFaces.indexOf(face);
+        const stickerNumber = (i * options.cubeSize) + j;
+        const colorIndex = faceIndex * (options.cubeSize * options.cubeSize) + stickerNumber;
+
+        if (stickerColors.length <= colorIndex) {
+          acc[face][(options.cubeSize * i) + j] = ColorName.Black;
+        } else {
+          acc[face][(options.cubeSize * i) + j] = stickerColors[colorIndex];
+        }
+      }
+    }
+
+    return acc;
+  }, {});
+
+  // Apply Algorithm
+  let cubeData = new CubeData(options.cubeSize, faceMappedStickers);
+  let alg = parseAlgorithm(options.algorithm);
+
+  alg.forEach(move => {
+    cubeData.turn(move);
+  });
+
+  return [].concat.apply([], AllFaces.map(face => cubeData.faces[face].slice()));
+}
+
+(SVG as any).on(document, 'DOMContentLoaded', function() {
   
   let options: ICubeOptions = {
+    algorithm: 'M2 E2 S2',
     cubeColor: 'black',
     cubeSize: cubeSize,
-    cubeOpacity: 100,
+    cubeOpacity: cubeOpacity,
     strokeWidth: strokeWidth,
     outlineWidth: outlineWidth,
     colorScheme: DefaultColorScheme,
-    stickerColors: [].concat.apply([], AllFaces.map(face => test.faces[face].slice())),
+    // stickerColors: [].concat.apply([], AllFaces.map(face => test.faces[face].slice())),
     stickerOpacity: 100,
     centerTranslation: centerTranslation,
     zPosition: zPosition,
@@ -93,6 +120,7 @@ let zPosition: Vec3 = [0, 0, dist];
   };
 
   let geometry = makeCubeGeometry(options);
+  options.stickerColors = makeStickerColors(options); // Colors of stickers after algorithms / masking applies
 
   renderCube('drawing', geometry, options);
 })

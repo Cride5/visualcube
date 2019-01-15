@@ -2,6 +2,7 @@ import { Axis } from './../math';
 import { Vec3 } from "../math";
 
 export interface ICubeOptions {
+  algorithm?: string;
   backgroundColor: string;
   cubeColor: string;
   outlineWidth: number;

@@ -5794,6 +5794,62 @@ exports.ColorAbbreviationToCode = (_b = {},
 
 /***/ }),
 
+/***/ "./src/cube/algorithm.ts":
+/*!*******************************!*\
+  !*** ./src/cube/algorithm.ts ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var simulation_1 = __webpack_require__(/*! ./simulation */ "./src/cube/simulation.ts");
+var constants_1 = __webpack_require__(/*! ./constants */ "./src/cube/constants.ts");
+/**
+ * Takes in an algorithm string and parses the turns from it
+ * algorithm string format should be moves separated by a single space
+ * (ex. "U R2 L' x")
+ */
+function parseAlgorithm(algorithm) {
+    if (!algorithm) {
+        return [];
+    }
+    return algorithm.split(' ').map(function (move) {
+        if (move.length > 2) {
+            throw new Error("Invalid move (" + move + ") in algorithm '" + algorithm + "'");
+        }
+        return {
+            move: getMove(move),
+            turnType: getTurnType(move)
+        };
+    });
+}
+exports.parseAlgorithm = parseAlgorithm;
+function getMove(move) {
+    if (constants_1.possibleMoves.indexOf(move.charAt(0)) < 0) {
+        throw new Error("invalid move (" + move + ")");
+    }
+    else
+        return move.charAt(0);
+}
+function getTurnType(move) {
+    switch (move.charAt(1)) { // if string is only length 1 .charAt(1) will return empty string
+        case constants_1.TurnAbbreviation.Clockwise:
+            return simulation_1.TurnType.Clockwise;
+        case constants_1.TurnAbbreviation.CounterClockwise:
+            return simulation_1.TurnType.CounterClockwise;
+        case constants_1.TurnAbbreviation.Double:
+            return simulation_1.TurnType.Double;
+        default:
+            throw new Error("Invalid move modifier (" + move.charAt(1) + ") in move '" + move + "'");
+    }
+    ;
+}
+
+
+/***/ }),
+
 /***/ "./src/cube/constants.ts":
 /*!*******************************!*\
   !*** ./src/cube/constants.ts ***!
@@ -5843,6 +5899,41 @@ exports.DefaultColorScheme = (_a = {},
     _a[Face.L] = constants_1.ColorCode.Orange,
     _a[Face.B] = constants_1.ColorCode.Green,
     _a);
+var AlgorithmUnit;
+(function (AlgorithmUnit) {
+    AlgorithmUnit["F"] = "F";
+    AlgorithmUnit["U"] = "U";
+    AlgorithmUnit["R"] = "R";
+    AlgorithmUnit["L"] = "L";
+    AlgorithmUnit["D"] = "D";
+    AlgorithmUnit["B"] = "B";
+    AlgorithmUnit["M"] = "M";
+    AlgorithmUnit["E"] = "E";
+    AlgorithmUnit["S"] = "S";
+    AlgorithmUnit["X"] = "x";
+    AlgorithmUnit["Y"] = "y";
+    AlgorithmUnit["Z"] = "z";
+})(AlgorithmUnit = exports.AlgorithmUnit || (exports.AlgorithmUnit = {}));
+exports.possibleMoves = [
+    AlgorithmUnit.F,
+    AlgorithmUnit.U,
+    AlgorithmUnit.R,
+    AlgorithmUnit.L,
+    AlgorithmUnit.D,
+    AlgorithmUnit.B,
+    AlgorithmUnit.M,
+    AlgorithmUnit.E,
+    AlgorithmUnit.S,
+    AlgorithmUnit.X,
+    AlgorithmUnit.Y,
+    AlgorithmUnit.Z,
+];
+var TurnAbbreviation;
+(function (TurnAbbreviation) {
+    TurnAbbreviation["Clockwise"] = "";
+    TurnAbbreviation["CounterClockwise"] = "'";
+    TurnAbbreviation["Double"] = "2";
+})(TurnAbbreviation = exports.TurnAbbreviation || (exports.TurnAbbreviation = {}));
 
 
 /***/ }),
@@ -6299,7 +6390,7 @@ var CubeData = /** @class */ (function () {
     /**
      * Rotates layer values around a given axis
      */
-    CubeData.prototype.axisRotation = function (offset, axis, faceOrder, forward, double) {
+    CubeData.prototype.axisRotation = function (offset, range, axis, faceOrder, forward, double) {
         var _this = this;
         if (forward === void 0) { forward = true; }
         if (double === void 0) { double = false; }
@@ -6310,66 +6401,119 @@ var CubeData = /** @class */ (function () {
         var originalValues = faceOrder.map(function (face) { return _this.faces[face].slice(); });
         // Copy values
         for (var i = 0; i < this.cubeSize; i++) {
-            var stickerIndex = (this.cubeSize * i) + offset;
-            for (var j = 0; j < faceOrder.length; j++) {
-                var face = faceOrder[j];
-                var nextFace = double ? faceOrder[(j + 2) % faceOrder.length] : faceOrder[(j + 1) % faceOrder.length];
-                var valueIndex = AxisOrientation[axis][face](stickerIndex + 1, this.cubeSize) - 1;
-                var nextFaceValueIndex = AxisOrientation[axis][nextFace](stickerIndex + 1, this.cubeSize) - 1;
-                this.faces[face][valueIndex] = originalValues[(double ? j + 2 : j + 1) % originalValues.length][nextFaceValueIndex];
+            for (var r = 0; r < range; r++) {
+                var stickerIndex = (this.cubeSize * i) + (offset + r);
+                for (var j = 0; j < faceOrder.length; j++) {
+                    var face = faceOrder[j];
+                    var nextFace = double ? faceOrder[(j + 2) % faceOrder.length] : faceOrder[(j + 1) % faceOrder.length];
+                    var valueIndex = AxisOrientation[axis][face](stickerIndex + 1, this.cubeSize) - 1;
+                    var nextFaceValueIndex = AxisOrientation[axis][nextFace](stickerIndex + 1, this.cubeSize) - 1;
+                    this.faces[face][valueIndex] = originalValues[(double ? j + 2 : j + 1) % originalValues.length][nextFaceValueIndex];
+                }
             }
         }
     };
     /**
      * Rotate layers around the x axis of the cube
      */
-    CubeData.prototype.xTurn = function (offset, forward, double) {
+    CubeData.prototype.xLayersRotation = function (offset, forward, double, range) {
         if (forward === void 0) { forward = true; }
         if (double === void 0) { double = false; }
+        if (range === void 0) { range = 1; }
         var faceOrder = [constants_1.Face.U, constants_1.Face.F, constants_1.Face.D, constants_1.Face.B];
-        this.axisRotation(offset, math_1.Axis.X, faceOrder, forward, double);
+        this.axisRotation(offset, range, math_1.Axis.X, faceOrder, forward, double);
     };
     /**
      * Rotate layers around the y axis of the cube
      */
-    CubeData.prototype.yTurn = function (offset, forward, double) {
+    CubeData.prototype.yLayersRotation = function (offset, forward, double, range) {
         if (forward === void 0) { forward = true; }
         if (double === void 0) { double = false; }
+        if (range === void 0) { range = 1; }
         var faceOrder = [constants_1.Face.L, constants_1.Face.F, constants_1.Face.R, constants_1.Face.B];
-        this.axisRotation(offset, math_1.Axis.Y, faceOrder, forward, double);
+        this.axisRotation(offset, range, math_1.Axis.Y, faceOrder, forward, double);
     };
     /**
      * Rotate layers around the z axis of the cube
      */
-    CubeData.prototype.zTurn = function (offset, forward, double) {
+    CubeData.prototype.zLayersRotation = function (offset, forward, double, range) {
         if (forward === void 0) { forward = true; }
         if (double === void 0) { double = false; }
+        if (range === void 0) { range = 1; }
         var faceOrder = [constants_1.Face.U, constants_1.Face.L, constants_1.Face.D, constants_1.Face.R];
-        this.axisRotation(offset, math_1.Axis.Z, faceOrder, forward, double);
+        this.axisRotation(offset, range, math_1.Axis.Z, faceOrder, forward, double);
     };
     CubeData.prototype.rTurn = function (turnType) {
         this.rotateFace(constants_1.Face.R, turnType);
-        this.xTurn(2, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+        this.xLayersRotation(2, turnType === TurnType.Clockwise, turnType === TurnType.Double);
     };
     CubeData.prototype.lTurn = function (turnType) {
         this.rotateFace(constants_1.Face.L, turnType);
-        this.xTurn(0, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
+        this.xLayersRotation(0, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
     };
     CubeData.prototype.uTurn = function (turnType) {
         this.rotateFace(constants_1.Face.U, turnType);
-        this.yTurn(0, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+        this.yLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double);
     };
     CubeData.prototype.dTurn = function (turnType) {
         this.rotateFace(constants_1.Face.D, turnType);
-        this.yTurn(2, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
+        this.yLayersRotation(this.cubeSize - 1, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
     };
     CubeData.prototype.fTurn = function (turnType) {
         this.rotateFace(constants_1.Face.F, turnType);
-        this.zTurn(2, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+        this.zLayersRotation(this.cubeSize - 1, turnType === TurnType.Clockwise, turnType === TurnType.Double);
     };
     CubeData.prototype.bTurn = function (turnType) {
         this.rotateFace(constants_1.Face.B, turnType);
-        this.zTurn(0, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
+        this.zLayersRotation(0, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
+    };
+    CubeData.prototype.mTurn = function (turnType) {
+        if (this.cubeSize < 2)
+            return;
+        this.xLayersRotation(1, turnType === TurnType.CounterClockwise, turnType === TurnType.Double, this.cubeSize - 2);
+    };
+    CubeData.prototype.eTurn = function (turnType) {
+        if (this.cubeSize < 2)
+            return;
+        this.yLayersRotation(1, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
+    };
+    CubeData.prototype.sTurn = function (turnType) {
+        if (this.cubeSize < 2)
+            return;
+        this.zLayersRotation(1, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+    };
+    CubeData.prototype.turn = function (turn) {
+        switch (turn.move) {
+            case constants_1.AlgorithmUnit.F:
+                this.fTurn(turn.turnType);
+                break;
+            case constants_1.AlgorithmUnit.B:
+                this.bTurn(turn.turnType);
+                break;
+            case constants_1.AlgorithmUnit.U:
+                this.uTurn(turn.turnType);
+                break;
+            case constants_1.AlgorithmUnit.D:
+                this.dTurn(turn.turnType);
+                break;
+            case constants_1.AlgorithmUnit.R:
+                this.rTurn(turn.turnType);
+                break;
+            case constants_1.AlgorithmUnit.L:
+                this.lTurn(turn.turnType);
+                break;
+            case constants_1.AlgorithmUnit.M:
+                this.mTurn(turn.turnType);
+                break;
+            case constants_1.AlgorithmUnit.E:
+                this.eTurn(turn.turnType);
+                break;
+            case constants_1.AlgorithmUnit.S:
+                this.sTurn(turn.turnType);
+                break;
+            default:
+                throw new Error("Unrecognized move in turn " + JSON.stringify(turn));
+        }
     };
     return CubeData;
 }());
@@ -6395,6 +6539,7 @@ var math_1 = __webpack_require__(/*! ./math */ "./src/math.ts");
 var drawing_1 = __webpack_require__(/*! ./cube/drawing */ "./src/cube/drawing.ts");
 var constants_1 = __webpack_require__(/*! ./cube/constants */ "./src/cube/constants.ts");
 var constants_2 = __webpack_require__(/*! ./constants */ "./src/constants.ts");
+var algorithm_1 = __webpack_require__(/*! ./cube/algorithm */ "./src/cube/algorithm.ts");
 // $DEFAULTS = Array(
 //   'fmt'   => 'svg',
 //   'pzl'   => '3',
@@ -6432,31 +6577,50 @@ var viewportRotation = [
 var cubeSize = 3;
 var centerTranslation = [-cubeSize / 2, -cubeSize / 2, -cubeSize / 2];
 var zPosition = [0, 0, dist];
+function makeStickerColors(options) {
+    var stickerColors = options.stickerColors;
+    // Fill with color scheme if sticker colors not predefined.
+    if (!stickerColors) {
+        stickerColors = [].concat.apply([], constants_1.AllFaces.map(function (face) {
+            return Array.apply(null, Array(options.cubeSize * options.cubeSize)).map(function () { return options.colorScheme[face]; });
+        }));
+    }
+    var faceMappedStickers = constants_1.AllFaces.reduce(function (acc, face) {
+        if (!acc[face])
+            acc[face] = [];
+        for (var i = 0; i < options.cubeSize; i++) {
+            for (var j = 0; j < options.cubeSize; j++) {
+                var faceIndex = constants_1.AllFaces.indexOf(face);
+                var stickerNumber = (i * options.cubeSize) + j;
+                var colorIndex = faceIndex * (options.cubeSize * options.cubeSize) + stickerNumber;
+                if (stickerColors.length <= colorIndex) {
+                    acc[face][(options.cubeSize * i) + j] = constants_2.ColorName.Black;
+                }
+                else {
+                    acc[face][(options.cubeSize * i) + j] = stickerColors[colorIndex];
+                }
+            }
+        }
+        return acc;
+    }, {});
+    // Apply Algorithm
+    var cubeData = new simulation_1.CubeData(options.cubeSize, faceMappedStickers);
+    var alg = algorithm_1.parseAlgorithm(options.algorithm);
+    alg.forEach(function (move) {
+        cubeData.turn(move);
+    });
+    return [].concat.apply([], constants_1.AllFaces.map(function (face) { return cubeData.faces[face].slice(); }));
+}
 SVG.on(document, 'DOMContentLoaded', function () {
-    var _a;
-    var startValues = (_a = {},
-        _a[constants_1.Face.U] = [constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White],
-        _a[constants_1.Face.F] = [constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red],
-        _a[constants_1.Face.R] = [constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue],
-        _a[constants_1.Face.D] = [constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow],
-        _a[constants_1.Face.L] = [constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green],
-        _a[constants_1.Face.B] = [constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange],
-        _a);
-    var test = new simulation_1.CubeData(3, startValues);
-    test.rTurn(simulation_1.TurnType.Double);
-    test.lTurn(simulation_1.TurnType.Double);
-    test.uTurn(simulation_1.TurnType.Double);
-    test.dTurn(simulation_1.TurnType.Double);
-    test.fTurn(simulation_1.TurnType.Double);
-    test.bTurn(simulation_1.TurnType.Double);
     var options = {
+        algorithm: 'M2 E2 S2',
         cubeColor: 'black',
         cubeSize: cubeSize,
-        cubeOpacity: 100,
+        cubeOpacity: cubeOpacity,
         strokeWidth: strokeWidth,
         outlineWidth: outlineWidth,
         colorScheme: constants_1.DefaultColorScheme,
-        stickerColors: [].concat.apply([], constants_1.AllFaces.map(function (face) { return test.faces[face].slice(); })),
+        // stickerColors: [].concat.apply([], AllFaces.map(face => test.faces[face].slice())),
         stickerOpacity: 100,
         centerTranslation: centerTranslation,
         zPosition: zPosition,
@@ -6472,6 +6636,7 @@ SVG.on(document, 'DOMContentLoaded', function () {
         }
     };
     var geometry = geometry_1.makeCubeGeometry(options);
+    options.stickerColors = makeStickerColors(options); // Colors of stickers after algorithms / masking applies
     drawing_1.renderCube('drawing', geometry, options);
 });
 
