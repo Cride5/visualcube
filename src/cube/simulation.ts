@@ -11,16 +11,13 @@ export enum TurnType {
 type FaceRotation = (stickerNumber: number, cubeSize: number) => number;
 
 const faceIdentity: FaceRotation = (stickerNumber: number, cubeSize: number) => stickerNumber;
-const flipVertically: FaceRotation = (stickerNumber: number, cubeSize: number) => {
-  let row = Math.floor((stickerNumber - 1)/cubeSize);
-  let col = (stickerNumber - 1) % cubeSize;
-  let newCol = (cubeSize -1) - col;
-  return newCol + (cubeSize * row) + 1;
-};
 const counterClockwiseSticker: FaceRotation = (stickerNumber, cubeSize) => (stickerNumber * cubeSize) % ((cubeSize  * cubeSize) + 1);
 const clockwiseSticker: FaceRotation = (stickerNumber, cubeSize) => {
   let numStickers = cubeSize * cubeSize;
   return (numStickers + 1) - counterClockwiseSticker(stickerNumber, cubeSize);
+}
+const doubleTurn: FaceRotation = (stickerNumber, cubeSize) => {
+  return ((cubeSize * cubeSize) - stickerNumber) + 1;
 }
 
 // Faces that wrap around a given axis
@@ -31,12 +28,30 @@ const AxisMapping = {
 }
 
 // Face's orientation related to other faces on a given axis
-const AxisOrientation = {
+const AxisOrientation: { [axis: number]: {[face: number]: FaceRotation }} = {
   [Axis.X]: {
     [Face.U]: faceIdentity,
-    [Face.B]: flipVertically,
+    [Face.B]: doubleTurn,
     [Face.F]: faceIdentity,
     [Face.D]: faceIdentity,
+    [Face.L]: null,
+    [Face.R]: null
+  },
+  [Axis.Y]: {
+    [Face.U]: null,
+    [Face.B]: counterClockwiseSticker,
+    [Face.F]: counterClockwiseSticker,
+    [Face.D]: null,
+    [Face.L]: counterClockwiseSticker,
+    [Face.R]: counterClockwiseSticker
+  },
+  [Axis.Z]: {
+    [Face.U]: counterClockwiseSticker,
+    [Face.B]: null,
+    [Face.F]: null,
+    [Face.D]: clockwiseSticker,
+    [Face.L]: faceIdentity,
+    [Face.R]: doubleTurn
   }
 }
 
@@ -90,31 +105,42 @@ export class CubeData {
    *                   -----------------
    *                  | 34  | 35  | 36  |
    */
-  private faces: { [face: number]: number[] } = {}
+  public faces: { [face: number]: any[] } = {}
   private numStickers: number;
 
   // Precalculated index mapping values for face rotations
   private clockwiseMapping: number[];
   private counterClockwiseMapping: number[];
+  private doubleMapping: number[];
 
-  constructor(private cubeSize: number) {
+
+  constructor(private cubeSize: number, initialValues?: { [face: number]: any[] }) {
     this.numStickers = this.cubeSize * this.cubeSize;
-    let currentValue = 1;
     this.clockwiseMapping = [];
-    this.counterClockwiseMapping = []
+    this.counterClockwiseMapping = [];
+    this.doubleMapping = [];
+
+    this.faces = initialValues;
+
+    if (!this.faces) {
+      this.initValues();
+    }
+
+    for (let i = 1; i <= this.numStickers; i++) {
+      this.clockwiseMapping.push(clockwiseSticker(i, cubeSize));
+      this.counterClockwiseMapping.push(counterClockwiseSticker(i, cubeSize));
+      this.doubleMapping.push(doubleTurn(i, cubeSize));
+    }
+  }
+
+  private initValues() {
+    let currentValue = 1;
     AllFaces.forEach(face => {
       this.faces[face] = [];
       for (let i = 0; i < this.numStickers; i++) {
         this.faces[face].push(currentValue++);
       }
     });
-
-    for (let i = 1; i <= this.numStickers; i++) {
-      this.clockwiseMapping.push(clockwiseSticker(i, cubeSize));
-      this.counterClockwiseMapping.push(counterClockwiseSticker(i, cubeSize));
-    }
-
-    this.rTurn();
   }
 
   /**
@@ -136,13 +162,80 @@ export class CubeData {
   }
 
   /**
-   * Rotate layers around the x axis of the cube
+   * Rotates layer values around a given axis
    */
-  private xTurn(offset: number) {
+  private axisRotation(offset: number, axis: Axis, faceOrder: Face[], forward: boolean = true, double: boolean = false) {
+    if (!forward) {
+      faceOrder.reverse();
+    }
 
+    // Copy original values to avoid clobbering values when modifying stickers
+    let originalValues = faceOrder.map(face => this.faces[face].slice());
+
+    // Copy values
+    for (let i = 0; i < this.cubeSize; i++) {
+      const stickerIndex = (this.cubeSize * i) + offset;
+      for (let j = 0; j < faceOrder.length; j++) {
+        const face = faceOrder[j];
+        const nextFace = double ? faceOrder[(j+2) % faceOrder.length] : faceOrder[(j+1) % faceOrder.length];
+        const valueIndex = AxisOrientation[axis][face](stickerIndex+1, this.cubeSize) - 1;
+        const nextFaceValueIndex = AxisOrientation[axis][nextFace](stickerIndex+1, this.cubeSize) - 1;
+        this.faces[face][valueIndex] = originalValues[(double ? j + 2 : j + 1) % originalValues.length][nextFaceValueIndex];
+      }
+    }
   }
 
-  rTurn() {
-    this.rotateFace(Face.R, TurnType.Clockwise);
+  /**
+   * Rotate layers around the x axis of the cube
+   */
+  private xTurn(offset: number, forward: boolean = true, double: boolean = false) {
+    let faceOrder = [Face.U, Face.F, Face.D, Face.B];
+    this.axisRotation(offset, Axis.X, faceOrder, forward, double);
+  }
+
+  /**
+   * Rotate layers around the y axis of the cube
+   */
+  private yTurn(offset: number, forward: boolean = true, double: boolean = false) {
+    let faceOrder = [Face.L, Face.F, Face.R, Face.B];
+    this.axisRotation(offset, Axis.Y, faceOrder, forward, double);
+  }
+
+  /**
+   * Rotate layers around the z axis of the cube
+   */
+  private zTurn(offset: number, forward: boolean = true, double: boolean = false) {
+    let faceOrder = [Face.U, Face.L, Face.D, Face.R];
+    this.axisRotation(offset, Axis.Z, faceOrder, forward, double);
+  }
+
+  rTurn(turnType: TurnType) {
+    this.rotateFace(Face.R, turnType);
+    this.xTurn(2, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+  }
+
+  lTurn(turnType: TurnType) {
+    this.rotateFace(Face.L, turnType);
+    this.xTurn(0, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
+  }
+
+  uTurn(turnType: TurnType) {
+    this.rotateFace(Face.U, turnType);
+    this.yTurn(0, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+  }
+
+  dTurn(turnType: TurnType) {
+    this.rotateFace(Face.D, turnType);
+    this.yTurn(2, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
+  }
+
+  fTurn(turnType: TurnType) {
+    this.rotateFace(Face.F, turnType);
+    this.zTurn(2, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+  }
+
+  bTurn(turnType: TurnType) {
+    this.rotateFace(Face.B, turnType);
+    this.zTurn(0, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
   }
 }

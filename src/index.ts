@@ -1,10 +1,11 @@
-import { CubeData } from './cube/simulation';
+import { CubeData, TurnType } from './cube/simulation';
 import * as SVG from 'svg.js'
 import { makeCubeGeometry } from './cube/geometry';
 import { Vec3, Axis } from './math';
 import { renderCube } from './cube/drawing';
 import { ICubeOptions } from './cube/options';
-import { DefaultColorScheme } from './cube/constants';
+import { DefaultColorScheme, Face, AllFaces } from './cube/constants';
+import { ColorCode } from './constants';
 
 // $DEFAULTS = Array(
 //   'fmt'   => 'svg',
@@ -51,6 +52,22 @@ let centerTranslation: Vec3 = [-cubeSize/2, -cubeSize/2, -cubeSize/2];
 let zPosition: Vec3 = [0, 0, dist];
 
 (SVG as any).on(document, 'DOMContentLoaded', function() {
+
+  let startValues = {
+    [Face.U]: [ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White,ColorCode.White],
+    [Face.F]: [ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red,ColorCode.Red],
+    [Face.R]: [ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue,ColorCode.Blue],
+    [Face.D]: [ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow,ColorCode.Yellow],
+    [Face.L]: [ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green,ColorCode.Green],
+    [Face.B]: [ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange,ColorCode.Orange],
+  }
+  let test = new CubeData(3, startValues);
+  test.rTurn(TurnType.Double);
+  test.lTurn(TurnType.Double);
+  test.uTurn(TurnType.Double);
+  test.dTurn(TurnType.Double);
+  test.fTurn(TurnType.Double);
+  test.bTurn(TurnType.Double);
   
   let options: ICubeOptions = {
     cubeColor: 'black',
@@ -59,22 +76,7 @@ let zPosition: Vec3 = [0, 0, dist];
     strokeWidth: strokeWidth,
     outlineWidth: outlineWidth,
     colorScheme: DefaultColorScheme,
-    stickerColors: [
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'red','red','red','red','red','red','red','red','red',
-      'blue','blue','blue','blue','blue','blue','blue','blue','blue',
-      'green','green','green','green','green','green','green','green','green',
-      'yellow','yellow','yellow','yellow','yellow','yellow','yellow','yellow','yellow',
-      'orange', 'orange','orange','orange','orange','orange','orange','orange','orange',
-    ],
+    stickerColors: [].concat.apply([], AllFaces.map(face => test.faces[face].slice())),
     stickerOpacity: 100,
     centerTranslation: centerTranslation,
     zPosition: zPosition,
@@ -93,6 +95,4 @@ let zPosition: Vec3 = [0, 0, dist];
   let geometry = makeCubeGeometry(options);
 
   renderCube('drawing', geometry, options);
-
-  let test = new CubeData(3);
 })

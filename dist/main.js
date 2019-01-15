@@ -6151,7 +6151,7 @@ exports.makeCubeGeometry = makeCubeGeometry;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var _a, _b, _c;
+var _a, _b, _c, _d, _e;
 var math_1 = __webpack_require__(/*! ./../math */ "./src/math.ts");
 var constants_1 = __webpack_require__(/*! ./constants */ "./src/cube/constants.ts");
 var TurnType;
@@ -6161,16 +6161,13 @@ var TurnType;
     TurnType[TurnType["Double"] = 2] = "Double";
 })(TurnType = exports.TurnType || (exports.TurnType = {}));
 var faceIdentity = function (stickerNumber, cubeSize) { return stickerNumber; };
-var flipVertically = function (stickerNumber, cubeSize) {
-    var row = Math.floor((stickerNumber - 1) / cubeSize);
-    var col = (stickerNumber - 1) % cubeSize;
-    var newCol = (cubeSize - 1) - col;
-    return newCol + (cubeSize * row) + 1;
-};
 var counterClockwiseSticker = function (stickerNumber, cubeSize) { return (stickerNumber * cubeSize) % ((cubeSize * cubeSize) + 1); };
 var clockwiseSticker = function (stickerNumber, cubeSize) {
     var numStickers = cubeSize * cubeSize;
     return (numStickers + 1) - counterClockwiseSticker(stickerNumber, cubeSize);
+};
+var doubleTurn = function (stickerNumber, cubeSize) {
+    return ((cubeSize * cubeSize) - stickerNumber) + 1;
 };
 // Faces that wrap around a given axis
 var AxisMapping = (_a = {},
@@ -6182,14 +6179,31 @@ var AxisMapping = (_a = {},
 var AxisOrientation = (_b = {},
     _b[math_1.Axis.X] = (_c = {},
         _c[constants_1.Face.U] = faceIdentity,
-        _c[constants_1.Face.B] = flipVertically,
+        _c[constants_1.Face.B] = doubleTurn,
         _c[constants_1.Face.F] = faceIdentity,
         _c[constants_1.Face.D] = faceIdentity,
+        _c[constants_1.Face.L] = null,
+        _c[constants_1.Face.R] = null,
         _c),
+    _b[math_1.Axis.Y] = (_d = {},
+        _d[constants_1.Face.U] = null,
+        _d[constants_1.Face.B] = counterClockwiseSticker,
+        _d[constants_1.Face.F] = counterClockwiseSticker,
+        _d[constants_1.Face.D] = null,
+        _d[constants_1.Face.L] = counterClockwiseSticker,
+        _d[constants_1.Face.R] = counterClockwiseSticker,
+        _d),
+    _b[math_1.Axis.Z] = (_e = {},
+        _e[constants_1.Face.U] = counterClockwiseSticker,
+        _e[constants_1.Face.B] = null,
+        _e[constants_1.Face.F] = null,
+        _e[constants_1.Face.D] = clockwiseSticker,
+        _e[constants_1.Face.L] = faceIdentity,
+        _e[constants_1.Face.R] = doubleTurn,
+        _e),
     _b);
 var CubeData = /** @class */ (function () {
-    function CubeData(cubeSize) {
-        var _this = this;
+    function CubeData(cubeSize, initialValues) {
         this.cubeSize = cubeSize;
         /**
          *  Data to store face value
@@ -6241,21 +6255,29 @@ var CubeData = /** @class */ (function () {
          */
         this.faces = {};
         this.numStickers = this.cubeSize * this.cubeSize;
-        var currentValue = 1;
         this.clockwiseMapping = [];
         this.counterClockwiseMapping = [];
+        this.doubleMapping = [];
+        this.faces = initialValues;
+        if (!this.faces) {
+            this.initValues();
+        }
+        for (var i = 1; i <= this.numStickers; i++) {
+            this.clockwiseMapping.push(clockwiseSticker(i, cubeSize));
+            this.counterClockwiseMapping.push(counterClockwiseSticker(i, cubeSize));
+            this.doubleMapping.push(doubleTurn(i, cubeSize));
+        }
+    }
+    CubeData.prototype.initValues = function () {
+        var _this = this;
+        var currentValue = 1;
         constants_1.AllFaces.forEach(function (face) {
             _this.faces[face] = [];
             for (var i = 0; i < _this.numStickers; i++) {
                 _this.faces[face].push(currentValue++);
             }
         });
-        for (var i = 1; i <= this.numStickers; i++) {
-            this.clockwiseMapping.push(clockwiseSticker(i, cubeSize));
-            this.counterClockwiseMapping.push(counterClockwiseSticker(i, cubeSize));
-        }
-        this.rTurn();
-    }
+    };
     /**
      * Rotates values on an outer face of the rubiks cubes
      */
@@ -6275,12 +6297,79 @@ var CubeData = /** @class */ (function () {
         }
     };
     /**
+     * Rotates layer values around a given axis
+     */
+    CubeData.prototype.axisRotation = function (offset, axis, faceOrder, forward, double) {
+        var _this = this;
+        if (forward === void 0) { forward = true; }
+        if (double === void 0) { double = false; }
+        if (!forward) {
+            faceOrder.reverse();
+        }
+        // Copy original values to avoid clobbering values when modifying stickers
+        var originalValues = faceOrder.map(function (face) { return _this.faces[face].slice(); });
+        // Copy values
+        for (var i = 0; i < this.cubeSize; i++) {
+            var stickerIndex = (this.cubeSize * i) + offset;
+            for (var j = 0; j < faceOrder.length; j++) {
+                var face = faceOrder[j];
+                var nextFace = double ? faceOrder[(j + 2) % faceOrder.length] : faceOrder[(j + 1) % faceOrder.length];
+                var valueIndex = AxisOrientation[axis][face](stickerIndex + 1, this.cubeSize) - 1;
+                var nextFaceValueIndex = AxisOrientation[axis][nextFace](stickerIndex + 1, this.cubeSize) - 1;
+                this.faces[face][valueIndex] = originalValues[(double ? j + 2 : j + 1) % originalValues.length][nextFaceValueIndex];
+            }
+        }
+    };
+    /**
      * Rotate layers around the x axis of the cube
      */
-    CubeData.prototype.xTurn = function (offset) {
+    CubeData.prototype.xTurn = function (offset, forward, double) {
+        if (forward === void 0) { forward = true; }
+        if (double === void 0) { double = false; }
+        var faceOrder = [constants_1.Face.U, constants_1.Face.F, constants_1.Face.D, constants_1.Face.B];
+        this.axisRotation(offset, math_1.Axis.X, faceOrder, forward, double);
     };
-    CubeData.prototype.rTurn = function () {
-        this.rotateFace(constants_1.Face.R, TurnType.Clockwise);
+    /**
+     * Rotate layers around the y axis of the cube
+     */
+    CubeData.prototype.yTurn = function (offset, forward, double) {
+        if (forward === void 0) { forward = true; }
+        if (double === void 0) { double = false; }
+        var faceOrder = [constants_1.Face.L, constants_1.Face.F, constants_1.Face.R, constants_1.Face.B];
+        this.axisRotation(offset, math_1.Axis.Y, faceOrder, forward, double);
+    };
+    /**
+     * Rotate layers around the z axis of the cube
+     */
+    CubeData.prototype.zTurn = function (offset, forward, double) {
+        if (forward === void 0) { forward = true; }
+        if (double === void 0) { double = false; }
+        var faceOrder = [constants_1.Face.U, constants_1.Face.L, constants_1.Face.D, constants_1.Face.R];
+        this.axisRotation(offset, math_1.Axis.Z, faceOrder, forward, double);
+    };
+    CubeData.prototype.rTurn = function (turnType) {
+        this.rotateFace(constants_1.Face.R, turnType);
+        this.xTurn(2, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+    };
+    CubeData.prototype.lTurn = function (turnType) {
+        this.rotateFace(constants_1.Face.L, turnType);
+        this.xTurn(0, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
+    };
+    CubeData.prototype.uTurn = function (turnType) {
+        this.rotateFace(constants_1.Face.U, turnType);
+        this.yTurn(0, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+    };
+    CubeData.prototype.dTurn = function (turnType) {
+        this.rotateFace(constants_1.Face.D, turnType);
+        this.yTurn(2, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
+    };
+    CubeData.prototype.fTurn = function (turnType) {
+        this.rotateFace(constants_1.Face.F, turnType);
+        this.zTurn(2, turnType === TurnType.Clockwise, turnType === TurnType.Double);
+    };
+    CubeData.prototype.bTurn = function (turnType) {
+        this.rotateFace(constants_1.Face.B, turnType);
+        this.zTurn(0, turnType === TurnType.CounterClockwise, turnType === TurnType.Double);
     };
     return CubeData;
 }());
@@ -6305,6 +6394,7 @@ var geometry_1 = __webpack_require__(/*! ./cube/geometry */ "./src/cube/geometry
 var math_1 = __webpack_require__(/*! ./math */ "./src/math.ts");
 var drawing_1 = __webpack_require__(/*! ./cube/drawing */ "./src/cube/drawing.ts");
 var constants_1 = __webpack_require__(/*! ./cube/constants */ "./src/cube/constants.ts");
+var constants_2 = __webpack_require__(/*! ./constants */ "./src/constants.ts");
 // $DEFAULTS = Array(
 //   'fmt'   => 'svg',
 //   'pzl'   => '3',
@@ -6343,6 +6433,22 @@ var cubeSize = 3;
 var centerTranslation = [-cubeSize / 2, -cubeSize / 2, -cubeSize / 2];
 var zPosition = [0, 0, dist];
 SVG.on(document, 'DOMContentLoaded', function () {
+    var _a;
+    var startValues = (_a = {},
+        _a[constants_1.Face.U] = [constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White, constants_2.ColorCode.White],
+        _a[constants_1.Face.F] = [constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red, constants_2.ColorCode.Red],
+        _a[constants_1.Face.R] = [constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue, constants_2.ColorCode.Blue],
+        _a[constants_1.Face.D] = [constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow, constants_2.ColorCode.Yellow],
+        _a[constants_1.Face.L] = [constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green, constants_2.ColorCode.Green],
+        _a[constants_1.Face.B] = [constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange, constants_2.ColorCode.Orange],
+        _a);
+    var test = new simulation_1.CubeData(3, startValues);
+    test.rTurn(simulation_1.TurnType.Double);
+    test.lTurn(simulation_1.TurnType.Double);
+    test.uTurn(simulation_1.TurnType.Double);
+    test.dTurn(simulation_1.TurnType.Double);
+    test.fTurn(simulation_1.TurnType.Double);
+    test.bTurn(simulation_1.TurnType.Double);
     var options = {
         cubeColor: 'black',
         cubeSize: cubeSize,
@@ -6350,22 +6456,7 @@ SVG.on(document, 'DOMContentLoaded', function () {
         strokeWidth: strokeWidth,
         outlineWidth: outlineWidth,
         colorScheme: constants_1.DefaultColorScheme,
-        stickerColors: [
-            'white',
-            'white',
-            'white',
-            'white',
-            'white',
-            'white',
-            'white',
-            'white',
-            'white',
-            'red', 'red', 'red', 'red', 'red', 'red', 'red', 'red', 'red',
-            'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue',
-            'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green',
-            'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow',
-            'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange',
-        ],
+        stickerColors: [].concat.apply([], constants_1.AllFaces.map(function (face) { return test.faces[face].slice(); })),
         stickerOpacity: 100,
         centerTranslation: centerTranslation,
         zPosition: zPosition,
@@ -6382,7 +6473,6 @@ SVG.on(document, 'DOMContentLoaded', function () {
     };
     var geometry = geometry_1.makeCubeGeometry(options);
     drawing_1.renderCube('drawing', geometry, options);
-    var test = new simulation_1.CubeData(3);
 });
 
 
