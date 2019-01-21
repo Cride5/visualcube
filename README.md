@@ -9,7 +9,6 @@ TBD
 
 ### Still need to implement from Cride5's version
 * Cube dimensions from 1x1x1 to NxNxN. Currently capped at 9x9 for performance.
-* Algorithm support
 * Complete orientation control
 * Cube and facelet transparency
 * Custom colour schemes and background

@@ -62,3 +62,7 @@ export function project(pos: Vec3, d: number): Vec3 {
     pos[2] // Maintain z coordinate to allow use of rendering tricks
   ];
 }
+
+export function radians2Degrees(radians: number) {
+  return radians * 180 / Math.PI;
+}

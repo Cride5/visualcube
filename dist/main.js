@@ -5850,6 +5850,46 @@ function getTurnType(move) {
 
 /***/ }),
 
+/***/ "./src/cube/arrow.ts":
+/*!***************************!*\
+  !*** ./src/cube/arrow.ts ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var StickerDefinition = /** @class */ (function () {
+    function StickerDefinition() {
+    }
+    return StickerDefinition;
+}());
+exports.StickerDefinition = StickerDefinition;
+var Arrow = /** @class */ (function () {
+    function Arrow(s1, s2, color, s3, scale, influence) {
+        this.scale = 10; // Var range = 0 to 20, default 10
+        this.influence = 10; // Var range = 0 to 50, default 10
+        this.s1 = s1;
+        this.s2 = s2;
+        this.color = color;
+        if (scale) {
+            this.scale = scale;
+        }
+        if (influence) {
+            this.influence = influence;
+        }
+        if (s3) {
+            this.s3 = s3;
+        }
+    }
+    return Arrow;
+}());
+exports.Arrow = Arrow;
+
+
+/***/ }),
+
 /***/ "./src/cube/constants.ts":
 /*!*******************************!*\
   !*** ./src/cube/constants.ts ***!
@@ -5993,6 +6033,12 @@ function renderCube(containerId, geometry, options) {
             renderOLLStickers(ollGroup_1, face, geometry[face], faceRotations, options);
         });
     }
+    var arrowGroup = getArrowGroup(svg, geometry[0].length - 1);
+    if (Array.isArray(options.arrows)) {
+        options.arrows.forEach(function (arrow) {
+            renderArrow(arrowGroup, geometry, arrow, null);
+        });
+    }
 }
 exports.renderCube = renderCube;
 /**
@@ -6034,6 +6080,16 @@ function getOllLayerGroup(svg, options) {
         'stroke-linejoin': 'round'
     });
     return group;
+}
+function getArrowGroup(svg, cubeSize) {
+    var arrowGroup = svg.group();
+    arrowGroup.attr({
+        'opacity': 1,
+        'stroke-opacity': 1,
+        'stroke-width': (.12 / cubeSize),
+        'stroke-linecap': 'round'
+    });
+    return arrowGroup;
 }
 function renderCubeOutline(svg, face, options) {
     var cubeSize = face.length - 1;
@@ -6138,6 +6194,65 @@ function renderOLLStickers(group, face, stickers, rotations, options) {
     }
 }
 exports.renderOLLStickers = renderOLLStickers;
+/**
+ * Generates svg for an arrow pointing from sticker s1 to s2
+ */
+function renderArrow(group, geometry, arrow, sv) {
+    var cubeSize = geometry[0].length - 1;
+    // Find center point for each facelet
+    var p1y = Math.floor(arrow.s1.n / cubeSize);
+    var p1x = arrow.s1.n % cubeSize;
+    var p1 = [
+        (geometry[arrow.s1.face][p1x][p1y][0] + geometry[arrow.s1.face][p1x + 1][p1y + 1][0]) / 2,
+        (geometry[arrow.s1.face][p1x][p1y][1] + geometry[arrow.s1.face][p1x + 1][p1y + 1][1]) / 2,
+        0
+    ];
+    var p2y = Math.floor(arrow.s2.n / cubeSize);
+    var p2x = arrow.s2.n % cubeSize;
+    var p2 = [
+        (geometry[arrow.s1.face][p2x][p2y][0] + geometry[arrow.s1.face][p2x + 1][p2y + 1][0]) / 2,
+        (geometry[arrow.s1.face][p2x][p2y][1] + geometry[arrow.s1.face][p2x + 1][p2y + 1][1]) / 2,
+        0
+    ];
+    // Find midpoint between p1 and p2
+    var center = [
+        (p1[0] + p2[0]) / 2,
+        (p1[1] + p2[1]) / 2,
+        0
+    ];
+    // Shorten arrows towards midpoint according to config
+    p1 = math_1.transScale(p1, center, arrow.scale / 10);
+    p2 = math_1.transScale(p2, center, arrow.scale / 10);
+    if (sv) {
+        // TODO 
+    }
+    // Calculate arrow rotation
+    var rotation = p1[1] > p2[1] ? 270 : 90;
+    if (p2[0] - p1[0] != 0) {
+        rotation = math_1.radians2Degrees(Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])));
+        rotation = (p1[0] > p2[0]) ? rotation + 180 : rotation;
+    }
+    // Draw line
+    var lineSvg = group.path("M " + p1[0] + "," + p1[1] + " L " + p2[0] + "," + p2[1]);
+    lineSvg.fill('none');
+    lineSvg.stroke({
+        color: arrow.color,
+        opacity: 1
+    });
+    // Draw arrow head
+    var headSvg = group.path('M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z');
+    headSvg.attr({
+        transform: "translate(" + p2[0] + "," + p2[1] + ") scale(" + .033 / cubeSize + ") rotate(" + rotation + ")"
+    });
+    headSvg.style({
+        fill: arrow.color
+    });
+    headSvg.attr({
+        'stroke-width': 0,
+        'stroke-linejoin': 'round'
+    });
+}
+exports.renderArrow = renderArrow;
 
 
 /***/ }),
@@ -6558,6 +6673,7 @@ var drawing_1 = __webpack_require__(/*! ./cube/drawing */ "./src/cube/drawing.ts
 var constants_1 = __webpack_require__(/*! ./cube/constants */ "./src/cube/constants.ts");
 var constants_2 = __webpack_require__(/*! ./constants */ "./src/constants.ts");
 var algorithm_1 = __webpack_require__(/*! ./cube/algorithm */ "./src/cube/algorithm.ts");
+var arrow_1 = __webpack_require__(/*! ./cube/arrow */ "./src/cube/arrow.ts");
 // $DEFAULTS = Array(
 //   'fmt'   => 'svg',
 //   'pzl'   => '3',
@@ -6630,8 +6746,20 @@ function makeStickerColors(options) {
     return [].concat.apply([], constants_1.AllFaces.map(function (face) { return cubeData.faces[face].slice(); }));
 }
 SVG.on(document, 'DOMContentLoaded', function () {
+    var u0 = {
+        face: constants_1.Face.U,
+        n: 0
+    };
+    var u2 = {
+        face: constants_1.Face.U,
+        n: 2
+    };
+    var u8 = {
+        face: constants_1.Face.U,
+        n: 8
+    };
     var options = {
-        algorithm: 'F R\' U\' F\' U L\' B U\' B2 U\' F\' R\' B R2 F U L U',
+        algorithm: 'F2 U2 B2 L\' R F\' R2 D U R\' B2 L\' U2 R\' B2 R\' B\' F\' R2 U\'',
         cubeColor: 'black',
         cubeSize: cubeSize,
         cubeOpacity: cubeOpacity,
@@ -6651,7 +6779,12 @@ SVG.on(document, 'DOMContentLoaded', function () {
             y: oy,
             width: vw,
             height: vh
-        }
+        },
+        arrows: [
+            new arrow_1.Arrow(u0, u2, constants_2.ColorCode.Gray, undefined, 8),
+            new arrow_1.Arrow(u2, u8, constants_2.ColorCode.Gray, undefined, 8),
+            new arrow_1.Arrow(u8, u0, constants_2.ColorCode.Gray, undefined, 8)
+        ]
     };
     var geometry = geometry_1.makeCubeGeometry(options);
     options.stickerColors = makeStickerColors(options); // Colors of stickers after algorithms / masking applies
@@ -6733,6 +6866,10 @@ function project(pos, d) {
     ];
 }
 exports.project = project;
+function radians2Degrees(radians) {
+    return radians * 180 / Math.PI;
+}
+exports.radians2Degrees = radians2Degrees;
 
 
 /***/ })

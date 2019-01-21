@@ -2,11 +2,12 @@ import { CubeData } from './cube/simulation';
 import * as SVG from 'svg.js'
 import { makeCubeGeometry } from './cube/geometry';
 import { Vec3, Axis } from './math';
-import { renderCube } from './cube/drawing';
+import { renderCube, renderArrow } from './cube/drawing';
 import { ICubeOptions } from './cube/options';
-import { DefaultColorScheme, AllFaces } from './cube/constants';
-import { ColorName } from './constants';
+import { DefaultColorScheme, AllFaces, Face } from './cube/constants';
+import { ColorName, ColorCode } from './constants';
 import { parseAlgorithm } from './cube/algorithm';
+import { Arrow, StickerDefinition } from './cube/arrow';
 
 // $DEFAULTS = Array(
 //   'fmt'   => 'svg',
@@ -95,8 +96,23 @@ function makeStickerColors(options: ICubeOptions): string[] {
 
 (SVG as any).on(document, 'DOMContentLoaded', function() {
   
+  let u0: StickerDefinition = {
+    face: Face.U,
+    n: 0
+  };
+
+  let u2: StickerDefinition = {
+    face: Face.U,
+    n: 2
+  }
+
+  let u8: StickerDefinition = {
+    face: Face.U,
+    n: 8
+  }
+
   let options: ICubeOptions = {
-    algorithm: 'F R\' U\' F\' U L\' B U\' B2 U\' F\' R\' B R2 F U L U',
+    algorithm: 'F2 U2 B2 L\' R F\' R2 D U R\' B2 L\' U2 R\' B2 R\' B\' F\' R2 U\'',
     cubeColor: 'black',
     cubeSize: cubeSize,
     cubeOpacity: cubeOpacity,
@@ -116,7 +132,12 @@ function makeStickerColors(options: ICubeOptions): string[] {
       y: oy,
       width: vw,
       height: vh
-    }
+    },
+    arrows: [
+      new Arrow(u0, u2, ColorCode.Gray, undefined, 8),
+      new Arrow(u2, u8, ColorCode.Gray, undefined, 8),
+      new Arrow(u8, u0, ColorCode.Gray, undefined, 8)
+    ]
   };
 
   let geometry = makeCubeGeometry(options);

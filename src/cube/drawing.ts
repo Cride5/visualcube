@@ -1,9 +1,10 @@
 import { ColorName } from "./../constants";
 import * as SVG from "svg.js";
 import { CubeGeometry, FaceStickers, FaceRotations, rotateFaces } from "./geometry";
-import { Vec3, transScale, scale, translate } from "../math";
+import { Vec3, transScale, scale, translate, radians2Degrees } from "../math";
 import { Face, AllFaces } from "./constants";
 import { ICubeOptions } from "./options";
+import { StickerDefinition, Arrow } from "./arrow";
 
 /**
  * Utility methods for rendering cube geometry using svg.js
@@ -55,6 +56,14 @@ export function renderCube(containerId: string, geometry: CubeGeometry, options:
       renderOLLStickers(ollGroup,face, geometry[face], faceRotations, options);
     });
   }
+
+  let arrowGroup = getArrowGroup(svg, geometry[0].length - 1);
+
+  if (Array.isArray(options.arrows)) {
+    options.arrows.forEach(arrow => {
+      renderArrow(arrowGroup, geometry, arrow, null);
+    });
+  }
 }
 
 /**
@@ -100,7 +109,18 @@ function getOllLayerGroup(svg: SVG.Doc, options: ICubeOptions): SVG.G {
     'stroke-linejoin': 'round'
   });
   return group;
-} 
+}
+
+function getArrowGroup(svg: SVG.Doc, cubeSize: number): SVG.G {
+  let arrowGroup = svg.group();
+  arrowGroup.attr({
+    'opacity': 1,
+    'stroke-opacity': 1,
+    'stroke-width': (.12 / cubeSize),
+    'stroke-linecap': 'round'
+  });
+  return arrowGroup;
+}
 
 function renderCubeOutline(svg: SVG.G, face: FaceStickers, options: ICubeOptions): SVG.Polygon {
   const cubeSize =  face.length - 1;
@@ -215,4 +235,72 @@ export function renderOLLStickers(group: SVG.G, face: Face, stickers: FaceSticke
 
     renderSticker(group, p1, p2, p3, p4, getStickerColor(face, 0, i, options), options.cubeColor)
   }
+}
+
+/**
+ * Generates svg for an arrow pointing from sticker s1 to s2
+ */
+export function renderArrow(group: SVG.G, geometry: CubeGeometry, arrow: Arrow, sv: Vec3) {
+  let cubeSize = geometry[0].length - 1;
+
+  // Find center point for each facelet
+  let p1y = Math.floor(arrow.s1.n / cubeSize);
+  let p1x = arrow.s1.n % cubeSize;
+  let p1: Vec3 = [
+    (geometry[arrow.s1.face][p1x][p1y][0] + geometry[arrow.s1.face][p1x + 1][p1y + 1][0])/2,
+    (geometry[arrow.s1.face][p1x][p1y][1] + geometry[arrow.s1.face][p1x + 1][p1y + 1][1])/2,
+    0
+  ];
+  
+  let p2y = Math.floor(arrow.s2.n / cubeSize);
+  let p2x = arrow.s2.n % cubeSize;
+  let p2: Vec3 = [
+    (geometry[arrow.s1.face][p2x][p2y][0] + geometry[arrow.s1.face][p2x + 1][p2y + 1][0])/2,
+    (geometry[arrow.s1.face][p2x][p2y][1] + geometry[arrow.s1.face][p2x + 1][p2y + 1][1])/2,
+    0
+  ];
+
+  // Find midpoint between p1 and p2
+  let center: Vec3 = [
+    (p1[0] + p2[0])/2,
+    (p1[1] + p2[1])/2,
+    0
+  ];
+
+  // Shorten arrows towards midpoint according to config
+  p1 = transScale(p1, center, arrow.scale/10);
+  p2 = transScale(p2, center, arrow.scale/10);
+
+  if (sv) {
+    // TODO 
+  }
+
+  // Calculate arrow rotation
+  let rotation = p1[1] > p2[1] ? 270 : 90;
+  if (p2[0] - p1[0] != 0) {
+    rotation = radians2Degrees(Math.atan((p2[1]-p1[1])/(p2[0]-p1[0])));
+    rotation = (p1[0] > p2[0]) ? rotation + 180 : rotation;
+  }
+
+  // Draw line
+  let lineSvg = group.path(`M ${p1[0]},${p1[1]} L ${p2[0]},${p2[1]}`);
+  lineSvg.fill('none');
+  lineSvg.stroke({
+    color: arrow.color,
+    opacity: 1
+  });
+
+  // Draw arrow head
+  let headSvg = group.path('M 5.77,0.0 L -2.88,5.0 L -2.88,-5.0 L 5.77,0.0 z');
+  headSvg.attr({
+    transform: `translate(${p2[0]},${p2[1]}) scale(${.033/cubeSize}) rotate(${rotation})`
+  });
+
+  headSvg.style({
+    fill: arrow.color
+  });
+  headSvg.attr({
+    'stroke-width': 0,
+    'stroke-linejoin': 'round'
+  });
 }
