@@ -5,13 +5,12 @@ Fork of [VisualCube](https://github.com/Cride5/visualcube), a great Rubik's cube
 TBD
 
 ### Features 
+* Cube dimensions from 1x1x1 to NxNxN. Currently capped at 17x17 for performance.
 * Fully 3D cube visualisation
-
-### Still need to implement from Cride5's version
-* Cube dimensions from 1x1x1 to NxNxN. Currently capped at 9x9 for performance.
-* Complete orientation control
 * Cube and facelet transparency
 * Custom colour schemes and background
-* Image caching for speedy access
-* Cookie configurable variables
 * Arrow overlays
+
+### Still need to implement from Cride5's version
+* Complete orientation control
+* Cookie configurable variables

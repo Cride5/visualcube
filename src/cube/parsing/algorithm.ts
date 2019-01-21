@@ -1,5 +1,5 @@
-import { TurnType } from "./simulation";
-import { TurnAbbreviation, AlgorithmUnit, possibleMoves } from "./constants";
+import { TurnType } from "../simulation";
+import { TurnAbbreviation, AlgorithmUnit, possibleMoves } from "../constants";
 
 export interface Turn {
   move: AlgorithmUnit,

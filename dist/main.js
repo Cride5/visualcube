@@ -5794,102 +5794,6 @@ exports.ColorAbbreviationToCode = (_b = {},
 
 /***/ }),
 
-/***/ "./src/cube/algorithm.ts":
-/*!*******************************!*\
-  !*** ./src/cube/algorithm.ts ***!
-  \*******************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var simulation_1 = __webpack_require__(/*! ./simulation */ "./src/cube/simulation.ts");
-var constants_1 = __webpack_require__(/*! ./constants */ "./src/cube/constants.ts");
-/**
- * Takes in an algorithm string and parses the turns from it
- * algorithm string format should be moves separated by a single space
- * (ex. "U R2 L' x")
- */
-function parseAlgorithm(algorithm) {
-    if (!algorithm) {
-        return [];
-    }
-    return algorithm.split(' ').map(function (move) {
-        if (move.length > 2) {
-            throw new Error("Invalid move (" + move + ") in algorithm '" + algorithm + "'");
-        }
-        return {
-            move: getMove(move),
-            turnType: getTurnType(move)
-        };
-    });
-}
-exports.parseAlgorithm = parseAlgorithm;
-function getMove(move) {
-    if (constants_1.possibleMoves.indexOf(move.charAt(0)) < 0) {
-        throw new Error("invalid move (" + move + ")");
-    }
-    else
-        return move.charAt(0);
-}
-function getTurnType(move) {
-    switch (move.charAt(1)) { // if string is only length 1 .charAt(1) will return empty string
-        case constants_1.TurnAbbreviation.Clockwise:
-            return simulation_1.TurnType.Clockwise;
-        case constants_1.TurnAbbreviation.CounterClockwise:
-            return simulation_1.TurnType.CounterClockwise;
-        case constants_1.TurnAbbreviation.Double:
-            return simulation_1.TurnType.Double;
-        default:
-            throw new Error("Invalid move modifier (" + move.charAt(1) + ") in move '" + move + "'");
-    }
-    ;
-}
-
-
-/***/ }),
-
-/***/ "./src/cube/arrow.ts":
-/*!***************************!*\
-  !*** ./src/cube/arrow.ts ***!
-  \***************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var StickerDefinition = /** @class */ (function () {
-    function StickerDefinition() {
-    }
-    return StickerDefinition;
-}());
-exports.StickerDefinition = StickerDefinition;
-var Arrow = /** @class */ (function () {
-    function Arrow(s1, s2, color, s3, scale, influence) {
-        this.scale = 10; // Var range = 0 to 20, default 10
-        this.influence = 10; // Var range = 0 to 50, default 10
-        this.s1 = s1;
-        this.s2 = s2;
-        this.color = color;
-        if (scale) {
-            this.scale = scale;
-        }
-        if (influence) {
-            this.influence = influence;
-        }
-        if (s3) {
-            this.s3 = s3;
-        }
-    }
-    return Arrow;
-}());
-exports.Arrow = Arrow;
-
-
-/***/ }),
-
 /***/ "./src/cube/constants.ts":
 /*!*******************************!*\
   !*** ./src/cube/constants.ts ***!
@@ -5900,7 +5804,7 @@ exports.Arrow = Arrow;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var _a;
+var _a, _b;
 var constants_1 = __webpack_require__(/*! ./../constants */ "./src/constants.ts");
 var Face;
 (function (Face) {
@@ -5939,6 +5843,14 @@ exports.DefaultColorScheme = (_a = {},
     _a[Face.L] = constants_1.ColorCode.Orange,
     _a[Face.B] = constants_1.ColorCode.Green,
     _a);
+exports.JapaneseColorScheme = (_b = {},
+    _b[Face.U] = constants_1.ColorCode.Blue,
+    _b[Face.R] = constants_1.ColorCode.Orange,
+    _b[Face.F] = constants_1.ColorCode.Green,
+    _b[Face.D] = constants_1.ColorCode.White,
+    _b[Face.L] = constants_1.ColorCode.Red,
+    _b[Face.B] = constants_1.ColorCode.Yellow,
+    _b);
 var AlgorithmUnit;
 (function (AlgorithmUnit) {
     AlgorithmUnit["F"] = "F";
@@ -5994,6 +5906,7 @@ var SVG = __webpack_require__(/*! svg.js */ "./node_modules/svg.js/dist/svg.js")
 var geometry_1 = __webpack_require__(/*! ./geometry */ "./src/cube/geometry.ts");
 var math_1 = __webpack_require__(/*! ../math */ "./src/math.ts");
 var constants_2 = __webpack_require__(/*! ./constants */ "./src/cube/constants.ts");
+var arrow_1 = __webpack_require__(/*! ./parsing/arrow */ "./src/cube/parsing/arrow.ts");
 /**
  * Utility methods for rendering cube geometry using svg.js
  */
@@ -6034,11 +5947,16 @@ function renderCube(containerId, geometry, options) {
         });
     }
     var arrowGroup = getArrowGroup(svg, geometry[0].length - 1);
+    var arrowDefinitions = [];
     if (Array.isArray(options.arrows)) {
-        options.arrows.forEach(function (arrow) {
-            renderArrow(arrowGroup, geometry, arrow, null);
-        });
+        arrowDefinitions = options.arrows;
     }
+    else if (typeof options.arrows === 'string') {
+        arrowDefinitions = arrow_1.parseArrows(options.arrows);
+    }
+    arrowDefinitions.forEach(function (arrow) {
+        renderArrow(arrowGroup, geometry, arrow);
+    });
 }
 exports.renderCube = renderCube;
 /**
@@ -6352,6 +6270,150 @@ function makeCubeGeometry(options) {
     }, {});
 }
 exports.makeCubeGeometry = makeCubeGeometry;
+
+
+/***/ }),
+
+/***/ "./src/cube/parsing/algorithm.ts":
+/*!***************************************!*\
+  !*** ./src/cube/parsing/algorithm.ts ***!
+  \***************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var simulation_1 = __webpack_require__(/*! ../simulation */ "./src/cube/simulation.ts");
+var constants_1 = __webpack_require__(/*! ../constants */ "./src/cube/constants.ts");
+/**
+ * Takes in an algorithm string and parses the turns from it
+ * algorithm string format should be moves separated by a single space
+ * (ex. "U R2 L' x")
+ */
+function parseAlgorithm(algorithm) {
+    if (!algorithm) {
+        return [];
+    }
+    return algorithm.split(' ').map(function (move) {
+        if (move.length > 2) {
+            throw new Error("Invalid move (" + move + ") in algorithm '" + algorithm + "'");
+        }
+        return {
+            move: getMove(move),
+            turnType: getTurnType(move)
+        };
+    });
+}
+exports.parseAlgorithm = parseAlgorithm;
+function getMove(move) {
+    if (constants_1.possibleMoves.indexOf(move.charAt(0)) < 0) {
+        throw new Error("invalid move (" + move + ")");
+    }
+    else
+        return move.charAt(0);
+}
+function getTurnType(move) {
+    switch (move.charAt(1)) { // if string is only length 1 .charAt(1) will return empty string
+        case constants_1.TurnAbbreviation.Clockwise:
+            return simulation_1.TurnType.Clockwise;
+        case constants_1.TurnAbbreviation.CounterClockwise:
+            return simulation_1.TurnType.CounterClockwise;
+        case constants_1.TurnAbbreviation.Double:
+            return simulation_1.TurnType.Double;
+        default:
+            throw new Error("Invalid move modifier (" + move.charAt(1) + ") in move '" + move + "'");
+    }
+    ;
+}
+
+
+/***/ }),
+
+/***/ "./src/cube/parsing/arrow.ts":
+/*!***********************************!*\
+  !*** ./src/cube/parsing/arrow.ts ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var constants_1 = __webpack_require__(/*! ../constants */ "./src/cube/constants.ts");
+var constants_2 = __webpack_require__(/*! ../../constants */ "./src/constants.ts");
+var color_1 = __webpack_require__(/*! ./color */ "./src/cube/parsing/color.ts");
+var stickerPattern = '([URFDLB])([0-9]+)';
+var colorPattern = '(black|dgrey|grey|silver|white|yellow|red|orange|blue|green|purple|pink|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})';
+var arrowPattern = "^(" + stickerPattern + ")(" + stickerPattern + ")(" + stickerPattern + ")?(-s([0-9+]))?(-i([0-9+]))?(-" + colorPattern + ")?";
+function parseArrows(raw) {
+    if (typeof raw !== 'string') {
+        return [];
+    }
+    return raw.split(',')
+        .map(function (part) { return parseArrow(part); })
+        .filter(function (arrow) { return !!arrow; });
+}
+exports.parseArrows = parseArrows;
+function parseArrow(raw) {
+    if (typeof raw !== 'string') {
+        return null;
+    }
+    var arrowRegex = new RegExp(arrowPattern);
+    var match = arrowRegex.exec(raw);
+    if (!match) {
+        return null;
+    }
+    return {
+        s1: {
+            face: constants_1.Face[match[2]],
+            n: parseInt(match[3])
+        },
+        s2: {
+            face: constants_1.Face[match[5]],
+            n: parseInt(match[6])
+        },
+        s3: !match[7] ? undefined : {
+            face: constants_1.Face[match[8]],
+            n: parseInt(match[9])
+        },
+        color: match[15] ? color_1.parseColor(match[15]) : constants_2.ColorCode.Gray,
+        scale: match[11] ? parseInt(match[11]) : 10,
+        influence: match[13] ? parseInt(match[13]) : 10
+    };
+}
+exports.parseArrow = parseArrow;
+
+
+/***/ }),
+
+/***/ "./src/cube/parsing/color.ts":
+/*!***********************************!*\
+  !*** ./src/cube/parsing/color.ts ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var constants_1 = __webpack_require__(/*! ../../constants */ "./src/constants.ts");
+function parseColor(raw) {
+    var colorcodeRegex = /^[0-9a-fA-F]{6}|[0-9a-fA-F]{3}/;
+    // Append # for color codes
+    if (colorcodeRegex.exec(raw)) {
+        return "#" + raw;
+    }
+    if (constants_1.ColorAbbreviationToCode[raw]) {
+        return constants_1.ColorAbbreviationToCode[raw];
+    }
+    if (constants_1.ColorNameToCode[raw]) {
+        return constants_1.ColorNameToCode[raw];
+    }
+    // Default color
+    return constants_1.ColorCode.Gray;
+}
+exports.parseColor = parseColor;
 
 
 /***/ }),
@@ -6681,8 +6743,7 @@ var math_1 = __webpack_require__(/*! ./math */ "./src/math.ts");
 var drawing_1 = __webpack_require__(/*! ./cube/drawing */ "./src/cube/drawing.ts");
 var constants_1 = __webpack_require__(/*! ./cube/constants */ "./src/cube/constants.ts");
 var constants_2 = __webpack_require__(/*! ./constants */ "./src/constants.ts");
-var algorithm_1 = __webpack_require__(/*! ./cube/algorithm */ "./src/cube/algorithm.ts");
-var arrow_1 = __webpack_require__(/*! ./cube/arrow */ "./src/cube/arrow.ts");
+var algorithm_1 = __webpack_require__(/*! ./cube/parsing/algorithm */ "./src/cube/parsing/algorithm.ts");
 // $DEFAULTS = Array(
 //   'fmt'   => 'svg',
 //   'pzl'   => '3',
@@ -6801,12 +6862,7 @@ SVG.on(document, 'DOMContentLoaded', function () {
             width: vw,
             height: vh
         },
-        arrows: [
-            new arrow_1.Arrow(u0, u2, constants_2.ColorCode.Gray, undefined, 8),
-            new arrow_1.Arrow(u2, u8, constants_2.ColorCode.Gray, undefined, 8),
-            new arrow_1.Arrow(u8, u0, constants_2.ColorCode.Gray, undefined, 8),
-            new arrow_1.Arrow(r6, r2, constants_2.ColorCode.Yellow, r0, 8, 5)
-        ]
+        arrows: 'U0U2,U2U8,R6R2R0-s8-i5-yellow'
     };
     var geometry = geometry_1.makeCubeGeometry(options);
     options.stickerColors = makeStickerColors(options); // Colors of stickers after algorithms / masking applies

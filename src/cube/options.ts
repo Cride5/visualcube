@@ -1,6 +1,6 @@
 import { Axis } from './../math';
 import { Vec3 } from "../math";
-import { Arrow } from './arrow';
+import { Arrow } from './models/arrow';
 
 export interface ICubeOptions {
   algorithm?: string;
@@ -19,7 +19,7 @@ export interface ICubeOptions {
   view?: string;
   width: number;
   height: number;
-  arrows?: Arrow[],
+  arrows?: Arrow[] | string,
   viewbox: { // SVG viewbox settings
     x: number;
     y: number;

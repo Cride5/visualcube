@@ -1,6 +1,6 @@
 import { Axis } from './../math';
 import { AllFaces, Face, AlgorithmUnit } from './constants';
-import { Turn } from './algorithm';
+import { Turn } from './parsing/algorithm';
 
 export enum TurnType {
   Clockwise,

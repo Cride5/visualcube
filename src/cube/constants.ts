@@ -1,5 +1,5 @@
 import { ColorCode } from './../constants';
-import { ICubeColorScheme } from "./color-scheme";
+import { ICubeColorScheme } from "./models/color-scheme";
 
 export enum Face {
   U = 0,
@@ -35,6 +35,15 @@ export const DefaultColorScheme: ICubeColorScheme = {
   [Face.D]: ColorCode.White,
   [Face.L]: ColorCode.Orange,
   [Face.B]: ColorCode.Green
+}
+
+export const JapaneseColorScheme: ICubeColorScheme = {
+  [Face.U]: ColorCode.Blue,
+  [Face.R]: ColorCode.Orange,
+  [Face.F]: ColorCode.Green,
+  [Face.D]: ColorCode.White,
+  [Face.L]: ColorCode.Red,
+  [Face.B]: ColorCode.Yellow
 }
 
 export enum AlgorithmUnit {

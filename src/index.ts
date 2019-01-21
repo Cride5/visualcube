@@ -4,10 +4,12 @@ import { makeCubeGeometry } from './cube/geometry';
 import { Vec3, Axis } from './math';
 import { renderCube, renderArrow } from './cube/drawing';
 import { ICubeOptions } from './cube/options';
-import { DefaultColorScheme, AllFaces, Face } from './cube/constants';
+import { DefaultColorScheme, AllFaces, Face, JapaneseColorScheme } from './cube/constants';
 import { ColorName, ColorCode } from './constants';
-import { parseAlgorithm } from './cube/algorithm';
-import { Arrow, StickerDefinition } from './cube/arrow';
+import { parseAlgorithm } from './cube/parsing/algorithm';
+import { Arrow } from './cube/models/arrow';
+import { StickerDefinition } from './cube/models/sticker';
+import { arrowPattern } from './cube/parsing/arrow';
 
 // $DEFAULTS = Array(
 //   'fmt'   => 'svg',
@@ -148,12 +150,7 @@ function makeStickerColors(options: ICubeOptions): string[] {
       width: vw,
       height: vh
     },
-    arrows: [
-      new Arrow(u0, u2, ColorCode.Gray, undefined, 8),
-      new Arrow(u2, u8, ColorCode.Gray, undefined, 8),
-      new Arrow(u8, u0, ColorCode.Gray, undefined, 8),
-      new Arrow(r6, r2, ColorCode.Yellow, r0, 8, 5)
-    ]
+    arrows: 'U0U2,U2U8,R6R2R0-s8-i5-yellow'
   };
 
   let geometry = makeCubeGeometry(options);

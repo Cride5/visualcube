@@ -4,7 +4,8 @@ import { CubeGeometry, FaceStickers, FaceRotations, rotateFaces } from "./geomet
 import { Vec3, transScale, scale, translate, radians2Degrees } from "../math";
 import { Face, AllFaces } from "./constants";
 import { ICubeOptions } from "./options";
-import { StickerDefinition, Arrow } from "./arrow";
+import { Arrow } from "./models/arrow";
+import { parseArrows } from "./parsing/arrow";
 
 /**
  * Utility methods for rendering cube geometry using svg.js
@@ -58,12 +59,17 @@ export function renderCube(containerId: string, geometry: CubeGeometry, options:
   }
 
   let arrowGroup = getArrowGroup(svg, geometry[0].length - 1);
+  let arrowDefinitions: Arrow[] = [];
 
   if (Array.isArray(options.arrows)) {
-    options.arrows.forEach(arrow => {
-      renderArrow(arrowGroup, geometry, arrow, null);
-    });
+    arrowDefinitions = options.arrows;
+  } else if (typeof options.arrows === 'string') {
+    arrowDefinitions = parseArrows(options.arrows);
   }
+
+  arrowDefinitions.forEach(arrow => {
+    renderArrow(arrowGroup, geometry, arrow);
+  });
 }
 
 /**

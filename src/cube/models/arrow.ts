@@ -1,9 +1,4 @@
-import { Face } from "./constants";
-
-export class StickerDefinition {
-  face: Face;
-  n: number;
-}
+import { StickerDefinition } from "./sticker";
 
 export class Arrow {
   s1: StickerDefinition;
