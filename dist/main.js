@@ -6197,7 +6197,7 @@ exports.renderOLLStickers = renderOLLStickers;
 /**
  * Generates svg for an arrow pointing from sticker s1 to s2
  */
-function renderArrow(group, geometry, arrow, sv) {
+function renderArrow(group, geometry, arrow) {
     var cubeSize = geometry[0].length - 1;
     // Find center point for each facelet
     var p1y = Math.floor(arrow.s1.n / cubeSize);
@@ -6223,17 +6223,26 @@ function renderArrow(group, geometry, arrow, sv) {
     // Shorten arrows towards midpoint according to config
     p1 = math_1.transScale(p1, center, arrow.scale / 10);
     p2 = math_1.transScale(p2, center, arrow.scale / 10);
-    if (sv) {
-        // TODO 
+    var p3;
+    if (arrow.s3) {
+        var p3y = Math.floor(arrow.s3.n / cubeSize);
+        var p3x = arrow.s3.n % cubeSize;
+        p3 = [
+            (geometry[arrow.s1.face][p3x][p3y][0] + geometry[arrow.s1.face][p3x + 1][p3y + 1][0]) / 2,
+            (geometry[arrow.s1.face][p3x][p3y][1] + geometry[arrow.s1.face][p3x + 1][p3y + 1][1]) / 2,
+            0
+        ];
+        p3 = math_1.transScale(p3, center, arrow.influence / 5);
     }
     // Calculate arrow rotation
-    var rotation = p1[1] > p2[1] ? 270 : 90;
-    if (p2[0] - p1[0] != 0) {
-        rotation = math_1.radians2Degrees(Math.atan((p2[1] - p1[1]) / (p2[0] - p1[0])));
-        rotation = (p1[0] > p2[0]) ? rotation + 180 : rotation;
+    var p_ = p3 ? p3 : p1;
+    var rotation = p_[1] > p2[1] ? 270 : 90;
+    if (p2[0] - p_[0] != 0) {
+        rotation = math_1.radians2Degrees(Math.atan((p2[1] - p_[1]) / (p2[0] - p_[0])));
+        rotation = (p_[0] > p2[0]) ? rotation + 180 : rotation;
     }
     // Draw line
-    var lineSvg = group.path("M " + p1[0] + "," + p1[1] + " L " + p2[0] + "," + p2[1]);
+    var lineSvg = group.path("M " + p1[0] + "," + p1[1] + " " + (p3 ? 'Q ' + p3[0] + ',' + p3[1] : 'L') + " " + p2[0] + "," + p2[1]);
     lineSvg.fill('none');
     lineSvg.stroke({
         color: arrow.color,
@@ -6758,8 +6767,20 @@ SVG.on(document, 'DOMContentLoaded', function () {
         face: constants_1.Face.U,
         n: 8
     };
+    var r6 = {
+        face: constants_1.Face.R,
+        n: 6
+    };
+    var r2 = {
+        face: constants_1.Face.R,
+        n: 2
+    };
+    var r0 = {
+        face: constants_1.Face.R,
+        n: 0
+    };
     var options = {
-        algorithm: 'F2 U2 B2 L\' R F\' R2 D U R\' B2 L\' U2 R\' B2 R\' B\' F\' R2 U\'',
+        algorithm: 'S2 M2 E2',
         cubeColor: 'black',
         cubeSize: cubeSize,
         cubeOpacity: cubeOpacity,
@@ -6783,7 +6804,8 @@ SVG.on(document, 'DOMContentLoaded', function () {
         arrows: [
             new arrow_1.Arrow(u0, u2, constants_2.ColorCode.Gray, undefined, 8),
             new arrow_1.Arrow(u2, u8, constants_2.ColorCode.Gray, undefined, 8),
-            new arrow_1.Arrow(u8, u0, constants_2.ColorCode.Gray, undefined, 8)
+            new arrow_1.Arrow(u8, u0, constants_2.ColorCode.Gray, undefined, 8),
+            new arrow_1.Arrow(r6, r2, constants_2.ColorCode.Yellow, r0, 8, 5)
         ]
     };
     var geometry = geometry_1.makeCubeGeometry(options);

@@ -111,8 +111,23 @@ function makeStickerColors(options: ICubeOptions): string[] {
     n: 8
   }
 
+  let r6: StickerDefinition = {
+    face: Face.R,
+    n: 6
+  }
+
+  let r2: StickerDefinition = {
+    face: Face.R,
+    n: 2
+  }
+
+  let r0: StickerDefinition = {
+    face: Face.R,
+    n: 0
+  }
+
   let options: ICubeOptions = {
-    algorithm: 'F2 U2 B2 L\' R F\' R2 D U R\' B2 L\' U2 R\' B2 R\' B\' F\' R2 U\'',
+    algorithm: 'S2 M2 E2',
     cubeColor: 'black',
     cubeSize: cubeSize,
     cubeOpacity: cubeOpacity,
@@ -136,7 +151,8 @@ function makeStickerColors(options: ICubeOptions): string[] {
     arrows: [
       new Arrow(u0, u2, ColorCode.Gray, undefined, 8),
       new Arrow(u2, u8, ColorCode.Gray, undefined, 8),
-      new Arrow(u8, u0, ColorCode.Gray, undefined, 8)
+      new Arrow(u8, u0, ColorCode.Gray, undefined, 8),
+      new Arrow(r6, r2, ColorCode.Yellow, r0, 8, 5)
     ]
   };
 

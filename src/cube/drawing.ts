@@ -240,7 +240,7 @@ export function renderOLLStickers(group: SVG.G, face: Face, stickers: FaceSticke
 /**
  * Generates svg for an arrow pointing from sticker s1 to s2
  */
-export function renderArrow(group: SVG.G, geometry: CubeGeometry, arrow: Arrow, sv: Vec3) {
+export function renderArrow(group: SVG.G, geometry: CubeGeometry, arrow: Arrow) {
   let cubeSize = geometry[0].length - 1;
 
   // Find center point for each facelet
@@ -271,19 +271,28 @@ export function renderArrow(group: SVG.G, geometry: CubeGeometry, arrow: Arrow, 
   p1 = transScale(p1, center, arrow.scale/10);
   p2 = transScale(p2, center, arrow.scale/10);
 
-  if (sv) {
-    // TODO 
+  let p3: Vec3;
+  if (arrow.s3) {
+    let p3y = Math.floor(arrow.s3.n / cubeSize);
+    let p3x = arrow.s3.n % cubeSize;
+    p3 = [
+      (geometry[arrow.s1.face][p3x][p3y][0] + geometry[arrow.s1.face][p3x + 1][p3y + 1][0])/2,
+      (geometry[arrow.s1.face][p3x][p3y][1] + geometry[arrow.s1.face][p3x + 1][p3y + 1][1])/2,
+      0
+    ];
+    p3 = transScale(p3, center, arrow.influence/5);
   }
 
   // Calculate arrow rotation
-  let rotation = p1[1] > p2[1] ? 270 : 90;
-  if (p2[0] - p1[0] != 0) {
-    rotation = radians2Degrees(Math.atan((p2[1]-p1[1])/(p2[0]-p1[0])));
-    rotation = (p1[0] > p2[0]) ? rotation + 180 : rotation;
+  let p_ = p3 ? p3 : p1;
+  let rotation = p_[1] > p2[1] ? 270 : 90;
+  if (p2[0] - p_[0] != 0) {
+    rotation = radians2Degrees(Math.atan((p2[1]-p_[1])/(p2[0]-p_[0])));
+    rotation = (p_[0] > p2[0]) ? rotation + 180 : rotation;
   }
 
   // Draw line
-  let lineSvg = group.path(`M ${p1[0]},${p1[1]} L ${p2[0]},${p2[1]}`);
+  let lineSvg = group.path(`M ${p1[0]},${p1[1]} ${p3 ? 'Q ' + p3[0] + ',' + p3[1] : 'L'} ${p2[0]},${p2[1]}`);
   lineSvg.fill('none');
   lineSvg.stroke({
     color: arrow.color,
