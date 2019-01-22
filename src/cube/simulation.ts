@@ -21,6 +21,12 @@ const doubleTurn: FaceRotation = (stickerNumber, cubeSize) => {
   return ((cubeSize * cubeSize) - stickerNumber) + 1;
 }
 
+const OppositeTurn = {
+  [TurnType.Clockwise]: TurnType.CounterClockwise,
+  [TurnType.CounterClockwise]: TurnType.Clockwise,
+  [TurnType.Double]: TurnType.Double,
+}
+
 // Faces that wrap around a given axis
 const AxisMapping = {
   [Axis.X]: [Face.U, Face.B, Face.F, Face.D],
@@ -258,14 +264,20 @@ export class CubeData {
   }
 
   xTurn(turnType: TurnType) {
+    this.rotateFace(Face.R, turnType);
+    this.rotateFace(Face.L, OppositeTurn[turnType]);
     this.xLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize);
   }
 
   yTurn(turnType: TurnType) {
+    this.rotateFace(Face.U, turnType);
+    this.rotateFace(Face.D, OppositeTurn[turnType]);
     this.yLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize)
   }
 
   zTurn(turnType: TurnType) {
+    this.rotateFace(Face.F, turnType);
+    this.rotateFace(Face.B, OppositeTurn[turnType]);
     this.zLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize);
   }
 

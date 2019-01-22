@@ -5886,6 +5886,31 @@ var TurnAbbreviation;
     TurnAbbreviation["CounterClockwise"] = "'";
     TurnAbbreviation["Double"] = "2";
 })(TurnAbbreviation = exports.TurnAbbreviation || (exports.TurnAbbreviation = {}));
+var Masking;
+(function (Masking) {
+    Masking["FL"] = "fl";
+    Masking["F2L"] = "f2l";
+    Masking["LL"] = "ll";
+    Masking["CLL"] = "cll";
+    Masking["ELL"] = "ell";
+    Masking["OLL"] = "oll";
+    Masking["OCLL"] = "ocll";
+    Masking["OELL"] = "oell";
+    Masking["COLL"] = "coll";
+    Masking["OCELL"] = "ocell";
+    Masking["WV"] = "wv";
+    Masking["VH"] = "vh";
+    Masking["ELS"] = "els";
+    Masking["CLS"] = "cls";
+    Masking["CMLL"] = "cmll";
+    Masking["CROSS"] = "cross";
+    Masking["F2L3"] = "f2l_3";
+    Masking["F2L2"] = "f2l_2";
+    Masking["F2LSM"] = "f2l_sm";
+    Masking["F2L1"] = "f2l_1";
+    Masking["F2B"] = "f2b";
+    Masking["LINE"] = "line";
+})(Masking = exports.Masking || (exports.Masking = {}));
 
 
 /***/ }),
@@ -6274,6 +6299,233 @@ exports.makeCubeGeometry = makeCubeGeometry;
 
 /***/ }),
 
+/***/ "./src/cube/masking.ts":
+/*!*****************************!*\
+  !*** ./src/cube/masking.ts ***!
+  \*****************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
+var constants_1 = __webpack_require__(/*! ./constants */ "./src/cube/constants.ts");
+var maskingFunctions = (_a = {},
+    _a[constants_1.Masking.FL] = (_b = {},
+        _b[constants_1.Face.U] = function (row, col, cubeSize) { return false; },
+        _b[constants_1.Face.D] = function (row, col, cubeSize) { return true; },
+        _b[constants_1.Face.R] = function (row, col, cubeSize) { return row == (cubeSize - 1); },
+        _b[constants_1.Face.L] = function (row, col, cubeSize) { return row == (cubeSize - 1); },
+        _b[constants_1.Face.F] = function (row, col, cubeSize) { return row == (cubeSize - 1); },
+        _b[constants_1.Face.B] = function (row, col, cubeSize) { return row == (cubeSize - 1); },
+        _b),
+    _a[constants_1.Masking.F2L] = (_c = {},
+        _c[constants_1.Face.U] = function (row, col, cubeSize) { return false; },
+        _c[constants_1.Face.D] = function (row, col, cubeSize) { return true; },
+        _c[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0; },
+        _c[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0; },
+        _c[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0; },
+        _c[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0; },
+        _c),
+    _a[constants_1.Masking.LL] = (_d = {},
+        _d[constants_1.Face.U] = function (row, col, cubeSize) { return true; },
+        _d[constants_1.Face.D] = function (row, col, cubeSize) { return false; },
+        _d[constants_1.Face.R] = function (row, col, cubeSize) { return row == 0; },
+        _d[constants_1.Face.L] = function (row, col, cubeSize) { return row == 0; },
+        _d[constants_1.Face.F] = function (row, col, cubeSize) { return row == 0; },
+        _d[constants_1.Face.B] = function (row, col, cubeSize) { return row == 0; },
+        _d),
+    _a[constants_1.Masking.CLL] = (_e = {},
+        _e[constants_1.Face.U] = function (row, col, cubeSize) {
+            return (row > 0 && col > 0 && row < cubeSize - 1 && col < cubeSize - 1) // is center
+                || ((row == 0 || row == (cubeSize - 1)) && (col == 0 || col == (cubeSize - 1)));
+        },
+        _e[constants_1.Face.D] = function (row, col, cubeSize) { return false; },
+        _e[constants_1.Face.R] = function (row, col, cubeSize) { return row == 0 && (col == 0 || col == cubeSize - 1); },
+        _e[constants_1.Face.L] = function (row, col, cubeSize) { return row == 0 && (col == 0 || col == cubeSize - 1); },
+        _e[constants_1.Face.F] = function (row, col, cubeSize) { return row == 0 && (col == 0 || col == cubeSize - 1); },
+        _e[constants_1.Face.B] = function (row, col, cubeSize) { return row == 0 && (col == 0 || col == cubeSize - 1); },
+        _e),
+    _a[constants_1.Masking.ELL] = (_f = {},
+        _f[constants_1.Face.U] = function (row, col, cubeSize) { return !((row == 0 || row == (cubeSize - 1)) && (col == 0 || col == (cubeSize - 1))); },
+        _f[constants_1.Face.D] = function (row, col, cubeSize) { return false; },
+        _f[constants_1.Face.R] = function (row, col, cubeSize) { return row == 0 && col > 0 && col < cubeSize - 1; },
+        _f[constants_1.Face.L] = function (row, col, cubeSize) { return row == 0 && col > 0 && col < cubeSize - 1; },
+        _f[constants_1.Face.F] = function (row, col, cubeSize) { return row == 0 && col > 0 && col < cubeSize - 1; },
+        _f[constants_1.Face.B] = function (row, col, cubeSize) { return row == 0 && col > 0 && col < cubeSize - 1; },
+        _f),
+    _a[constants_1.Masking.OLL] = (_g = {},
+        _g[constants_1.Face.U] = function (row, col, cubeSize) { return true; },
+        _g[constants_1.Face.D] = function (row, col, cubeSize) { return false; },
+        _g[constants_1.Face.R] = function (row, col, cubeSize) { return false; },
+        _g[constants_1.Face.L] = function (row, col, cubeSize) { return false; },
+        _g[constants_1.Face.F] = function (row, col, cubeSize) { return false; },
+        _g[constants_1.Face.B] = function (row, col, cubeSize) { return false; },
+        _g),
+    _a[constants_1.Masking.OCLL] = (_h = {},
+        _h[constants_1.Face.U] = function (row, col, cubeSize) {
+            return (row > 0 && col > 0 && row < cubeSize - 1 && col < cubeSize - 1) // is center
+                || ((row == 0 || row == (cubeSize - 1)) && (col == 0 || col == (cubeSize - 1)));
+        },
+        _h[constants_1.Face.D] = function (row, col, cubeSize) { return false; },
+        _h[constants_1.Face.R] = function (row, col, cubeSize) { return false; },
+        _h[constants_1.Face.L] = function (row, col, cubeSize) { return false; },
+        _h[constants_1.Face.F] = function (row, col, cubeSize) { return false; },
+        _h[constants_1.Face.B] = function (row, col, cubeSize) { return false; },
+        _h),
+    _a[constants_1.Masking.OELL] = (_j = {},
+        _j[constants_1.Face.U] = function (row, col, cubeSize) { return !((row == 0 || row == (cubeSize - 1)) && (col == 0 || col == (cubeSize - 1))); },
+        _j[constants_1.Face.D] = function (row, col, cubeSize) { return false; },
+        _j[constants_1.Face.R] = function (row, col, cubeSize) { return false; },
+        _j[constants_1.Face.L] = function (row, col, cubeSize) { return false; },
+        _j[constants_1.Face.F] = function (row, col, cubeSize) { return false; },
+        _j[constants_1.Face.B] = function (row, col, cubeSize) { return false; },
+        _j),
+    _a[constants_1.Masking.COLL] = (_k = {},
+        _k[constants_1.Face.U] = function (row, col, cubeSize) { return true; },
+        _k[constants_1.Face.D] = function (row, col, cubeSize) { return false; },
+        _k[constants_1.Face.R] = function (row, col, cubeSize) { return row == 0 && (col == 0 || col == cubeSize - 1); },
+        _k[constants_1.Face.L] = function (row, col, cubeSize) { return row == 0 && (col == 0 || col == cubeSize - 1); },
+        _k[constants_1.Face.F] = function (row, col, cubeSize) { return row == 0 && (col == 0 || col == cubeSize - 1); },
+        _k[constants_1.Face.B] = function (row, col, cubeSize) { return row == 0 && (col == 0 || col == cubeSize - 1); },
+        _k),
+    _a[constants_1.Masking.OCELL] = (_l = {},
+        _l[constants_1.Face.U] = function (row, col, cubeSize) { return true; },
+        _l[constants_1.Face.D] = function (row, col, cubeSize) { return false; },
+        _l[constants_1.Face.R] = function (row, col, cubeSize) { return row == 0 && col > 0 && col < cubeSize - 1; },
+        _l[constants_1.Face.L] = function (row, col, cubeSize) { return row == 0 && col > 0 && col < cubeSize - 1; },
+        _l[constants_1.Face.F] = function (row, col, cubeSize) { return row == 0 && col > 0 && col < cubeSize - 1; },
+        _l[constants_1.Face.B] = function (row, col, cubeSize) { return row == 0 && col > 0 && col < cubeSize - 1; },
+        _l),
+    _a[constants_1.Masking.WV] = (_m = {},
+        _m[constants_1.Face.U] = function (row, col, cubeSize) { return true; },
+        _m[constants_1.Face.D] = function (row, col, cubeSize) { return true; },
+        _m[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0; },
+        _m[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0; },
+        _m[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0; },
+        _m[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0; },
+        _m),
+    _a[constants_1.Masking.VH] = (_o = {},
+        _o[constants_1.Face.U] = function (row, col, cubeSize) { return !((row == 0 || row == (cubeSize - 1)) && (col == 0 || col == (cubeSize - 1))); },
+        _o[constants_1.Face.D] = function (row, col, cubeSize) { return true; },
+        _o[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0; },
+        _o[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0; },
+        _o[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0; },
+        _o[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0; },
+        _o),
+    _a[constants_1.Masking.ELS] = (_p = {},
+        _p[constants_1.Face.U] = function (row, col, cubeSize) { return !((row == 0 || row == (cubeSize - 1)) && (col == 0 || col == (cubeSize - 1))); },
+        _p[constants_1.Face.D] = function (row, col, cubeSize) { return row == 0 ? col < cubeSize - 1 : true; },
+        _p[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0 && (row == cubeSize - 1 ? col > 0 : true); },
+        _p[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0; },
+        _p[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0 && (row == cubeSize - 1 ? col < cubeSize - 1 : true); },
+        _p[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0; },
+        _p),
+    _a[constants_1.Masking.CLS] = (_q = {},
+        _q[constants_1.Face.U] = function (row, col, cubeSize) { return true; },
+        _q[constants_1.Face.D] = function (row, col, cubeSize) { return true; },
+        _q[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0; },
+        _q[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0; },
+        _q[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0; },
+        _q[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0; },
+        _q),
+    _a[constants_1.Masking.CMLL] = (_r = {},
+        _r[constants_1.Face.U] = function (row, col, cubeSize) { return ((row == 0 || row == (cubeSize - 1)) && (col == 0 || col == (cubeSize - 1))); },
+        _r[constants_1.Face.D] = function (row, col, cubeSize) { return true; },
+        _r[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0 || col == 0 || col == cubeSize - 1; },
+        _r[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0 || col == 0 || col == cubeSize - 1; },
+        _r[constants_1.Face.F] = function (row, col, cubeSize) { return col == 0 || col == cubeSize - 1; },
+        _r[constants_1.Face.B] = function (row, col, cubeSize) { return col == 0 || col == cubeSize - 1; },
+        _r),
+    _a[constants_1.Masking.CROSS] = (_s = {},
+        _s[constants_1.Face.U] = function (row, col, cubeSize) { return false; },
+        _s[constants_1.Face.D] = function (row, col, cubeSize) { return !((row == 0 || row == (cubeSize - 1)) && (col == 0 || col == (cubeSize - 1))); },
+        _s[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0 && col > 0 && col < cubeSize - 1; },
+        _s[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0 && col > 0 && col < cubeSize - 1; },
+        _s[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0 && col > 0 && col < cubeSize - 1; },
+        _s[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0 && col > 0 && col < cubeSize - 1; },
+        _s),
+    _a[constants_1.Masking.F2L3] = (_t = {},
+        _t[constants_1.Face.U] = function (row, col, cubeSize) { return false; },
+        _t[constants_1.Face.D] = function (row, col, cubeSize) { return (row == 0 && col == cubeSize - 1) || !((row == 0 || row == (cubeSize - 1)) && (col == 0 || col == (cubeSize - 1))); },
+        _t[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0 && col < cubeSize - 1; },
+        _t[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0 && col > 0 && col < cubeSize - 1; },
+        _t[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0 && col > 0; },
+        _t[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0 && col > 0 && col < cubeSize - 1; },
+        _t),
+    _a[constants_1.Masking.F2L2] = (_u = {},
+        _u[constants_1.Face.U] = function (row, col, cubeSize) { return false; },
+        _u[constants_1.Face.D] = function (row, col, cubeSize) { return row > 0 || (col > 0 && col < cubeSize - 1); },
+        _u[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0 && col > 0; },
+        _u[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0 && col < cubeSize - 1; },
+        _u[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0 && col > 0 && col < cubeSize - 1; },
+        _u[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0; },
+        _u),
+    _a[constants_1.Masking.F2LSM] = (_v = {},
+        _v[constants_1.Face.U] = function (row, col, cubeSize) { return false; },
+        _v[constants_1.Face.D] = function (row, col, cubeSize) { return !((row == 0 || row == (cubeSize - 1)) && (col == 0 || col == (cubeSize - 1))) || (col == 0 && row == cubeSize - 1) || (row == 0 && col == cubeSize - 1); },
+        _v[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0 && col < cubeSize - 1; },
+        _v[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0 && col < cubeSize - 1; },
+        _v[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0 && col > 0; },
+        _v[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0 && col > 0; },
+        _v),
+    _a[constants_1.Masking.F2L1] = (_w = {},
+        _w[constants_1.Face.U] = function (row, col, cubeSize) { return false; },
+        _w[constants_1.Face.D] = function (row, col, cubeSize) { return row !== 0 || col !== cubeSize - 1; },
+        _w[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0 && col > 0; },
+        _w[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0; },
+        _w[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0 && col < cubeSize - 1; },
+        _w[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0; },
+        _w),
+    _a[constants_1.Masking.F2B] = (_x = {},
+        _x[constants_1.Face.U] = function (row, col, cubeSize) { return false; },
+        _x[constants_1.Face.D] = function (row, col, cubeSize) { return (col == 0 || col == cubeSize - 1); },
+        _x[constants_1.Face.R] = function (row, col, cubeSize) { return row > 0; },
+        _x[constants_1.Face.L] = function (row, col, cubeSize) { return row > 0; },
+        _x[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0 && (col == 0 || col == cubeSize - 1); },
+        _x[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0 && (col == 0 || col == cubeSize - 1); },
+        _x),
+    _a[constants_1.Masking.LINE] = (_y = {},
+        _y[constants_1.Face.U] = function (row, col, cubeSize) { return false; },
+        _y[constants_1.Face.D] = function (row, col, cubeSize) { return col > 0 && col < cubeSize - 1; },
+        _y[constants_1.Face.R] = function (row, col, cubeSize) { return false; },
+        _y[constants_1.Face.L] = function (row, col, cubeSize) { return false; },
+        _y[constants_1.Face.F] = function (row, col, cubeSize) { return row > 0 && col > 0 && col < cubeSize - 1; },
+        _y[constants_1.Face.B] = function (row, col, cubeSize) { return row > 0 && col > 0 && col < cubeSize - 1; },
+        _y),
+    _a);
+function makeMasking(masking, cubeSize) {
+    var _a;
+    if (!maskingFunctions[masking]) {
+        throw new Error("invalid masking " + masking);
+    }
+    var numStickers = cubeSize * cubeSize;
+    var faceValues = (_a = {},
+        _a[constants_1.Face.U] = [],
+        _a[constants_1.Face.F] = [],
+        _a[constants_1.Face.R] = [],
+        _a[constants_1.Face.D] = [],
+        _a[constants_1.Face.L] = [],
+        _a[constants_1.Face.B] = [],
+        _a);
+    var _loop_1 = function (i) {
+        var row = Math.floor(i / cubeSize);
+        var col = i % cubeSize;
+        constants_1.AllFaces.forEach(function (face) {
+            faceValues[face].push(maskingFunctions[masking][face](row, col, cubeSize));
+        });
+    };
+    for (var i = 0; i < numStickers; i++) {
+        _loop_1(i);
+    }
+    return faceValues;
+}
+exports.makeMasking = makeMasking;
+
+
+/***/ }),
+
 /***/ "./src/cube/parsing/algorithm.ts":
 /*!***************************************!*\
   !*** ./src/cube/parsing/algorithm.ts ***!
@@ -6428,7 +6680,7 @@ exports.parseColor = parseColor;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f;
 var math_1 = __webpack_require__(/*! ./../math */ "./src/math.ts");
 var constants_1 = __webpack_require__(/*! ./constants */ "./src/cube/constants.ts");
 var TurnType;
@@ -6446,39 +6698,44 @@ var clockwiseSticker = function (stickerNumber, cubeSize) {
 var doubleTurn = function (stickerNumber, cubeSize) {
     return ((cubeSize * cubeSize) - stickerNumber) + 1;
 };
-// Faces that wrap around a given axis
-var AxisMapping = (_a = {},
-    _a[math_1.Axis.X] = [constants_1.Face.U, constants_1.Face.B, constants_1.Face.F, constants_1.Face.D],
-    _a[math_1.Axis.Y] = [constants_1.Face.L, constants_1.Face.B, constants_1.Face.R, constants_1.Face.F],
-    _a[math_1.Axis.Z] = [constants_1.Face.L, constants_1.Face.U, constants_1.Face.R, constants_1.Face.D],
+var OppositeTurn = (_a = {},
+    _a[TurnType.Clockwise] = TurnType.CounterClockwise,
+    _a[TurnType.CounterClockwise] = TurnType.Clockwise,
+    _a[TurnType.Double] = TurnType.Double,
     _a);
-// Face's orientation related to other faces on a given axis
-var AxisOrientation = (_b = {},
-    _b[math_1.Axis.X] = (_c = {},
-        _c[constants_1.Face.U] = faceIdentity,
-        _c[constants_1.Face.B] = doubleTurn,
-        _c[constants_1.Face.F] = faceIdentity,
-        _c[constants_1.Face.D] = faceIdentity,
-        _c[constants_1.Face.L] = null,
-        _c[constants_1.Face.R] = null,
-        _c),
-    _b[math_1.Axis.Y] = (_d = {},
-        _d[constants_1.Face.U] = null,
-        _d[constants_1.Face.B] = counterClockwiseSticker,
-        _d[constants_1.Face.F] = counterClockwiseSticker,
-        _d[constants_1.Face.D] = null,
-        _d[constants_1.Face.L] = counterClockwiseSticker,
-        _d[constants_1.Face.R] = counterClockwiseSticker,
-        _d),
-    _b[math_1.Axis.Z] = (_e = {},
-        _e[constants_1.Face.U] = counterClockwiseSticker,
-        _e[constants_1.Face.B] = null,
-        _e[constants_1.Face.F] = null,
-        _e[constants_1.Face.D] = clockwiseSticker,
-        _e[constants_1.Face.L] = faceIdentity,
-        _e[constants_1.Face.R] = doubleTurn,
-        _e),
+// Faces that wrap around a given axis
+var AxisMapping = (_b = {},
+    _b[math_1.Axis.X] = [constants_1.Face.U, constants_1.Face.B, constants_1.Face.F, constants_1.Face.D],
+    _b[math_1.Axis.Y] = [constants_1.Face.L, constants_1.Face.B, constants_1.Face.R, constants_1.Face.F],
+    _b[math_1.Axis.Z] = [constants_1.Face.L, constants_1.Face.U, constants_1.Face.R, constants_1.Face.D],
     _b);
+// Face's orientation related to other faces on a given axis
+var AxisOrientation = (_c = {},
+    _c[math_1.Axis.X] = (_d = {},
+        _d[constants_1.Face.U] = faceIdentity,
+        _d[constants_1.Face.B] = doubleTurn,
+        _d[constants_1.Face.F] = faceIdentity,
+        _d[constants_1.Face.D] = faceIdentity,
+        _d[constants_1.Face.L] = null,
+        _d[constants_1.Face.R] = null,
+        _d),
+    _c[math_1.Axis.Y] = (_e = {},
+        _e[constants_1.Face.U] = null,
+        _e[constants_1.Face.B] = counterClockwiseSticker,
+        _e[constants_1.Face.F] = counterClockwiseSticker,
+        _e[constants_1.Face.D] = null,
+        _e[constants_1.Face.L] = counterClockwiseSticker,
+        _e[constants_1.Face.R] = counterClockwiseSticker,
+        _e),
+    _c[math_1.Axis.Z] = (_f = {},
+        _f[constants_1.Face.U] = counterClockwiseSticker,
+        _f[constants_1.Face.B] = null,
+        _f[constants_1.Face.F] = null,
+        _f[constants_1.Face.D] = clockwiseSticker,
+        _f[constants_1.Face.L] = faceIdentity,
+        _f[constants_1.Face.R] = doubleTurn,
+        _f),
+    _c);
 var CubeData = /** @class */ (function () {
     function CubeData(cubeSize, initialValues) {
         this.cubeSize = cubeSize;
@@ -6669,12 +6926,18 @@ var CubeData = /** @class */ (function () {
         this.zLayersRotation(1, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize - 2);
     };
     CubeData.prototype.xTurn = function (turnType) {
+        this.rotateFace(constants_1.Face.R, turnType);
+        this.rotateFace(constants_1.Face.L, OppositeTurn[turnType]);
         this.xLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize);
     };
     CubeData.prototype.yTurn = function (turnType) {
+        this.rotateFace(constants_1.Face.U, turnType);
+        this.rotateFace(constants_1.Face.D, OppositeTurn[turnType]);
         this.yLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize);
     };
     CubeData.prototype.zTurn = function (turnType) {
+        this.rotateFace(constants_1.Face.F, turnType);
+        this.rotateFace(constants_1.Face.B, OppositeTurn[turnType]);
         this.zLayersRotation(0, turnType === TurnType.Clockwise, turnType === TurnType.Double, this.cubeSize);
     };
     CubeData.prototype.turn = function (turn) {
@@ -6744,6 +7007,7 @@ var drawing_1 = __webpack_require__(/*! ./cube/drawing */ "./src/cube/drawing.ts
 var constants_1 = __webpack_require__(/*! ./cube/constants */ "./src/cube/constants.ts");
 var constants_2 = __webpack_require__(/*! ./constants */ "./src/constants.ts");
 var algorithm_1 = __webpack_require__(/*! ./cube/parsing/algorithm */ "./src/cube/parsing/algorithm.ts");
+var masking_1 = __webpack_require__(/*! ./cube/masking */ "./src/cube/masking.ts");
 // $DEFAULTS = Array(
 //   'fmt'   => 'svg',
 //   'pzl'   => '3',
@@ -6783,6 +7047,15 @@ var centerTranslation = [-cubeSize / 2, -cubeSize / 2, -cubeSize / 2];
 var zPosition = [0, 0, dist];
 function makeStickerColors(options) {
     var stickerColors = options.stickerColors;
+    var mask = options.mask ? masking_1.makeMasking(options.mask, options.cubeSize) : null;
+    if (mask && options.maskAlg) {
+        var maskCubeData_1 = new simulation_1.CubeData(options.cubeSize, mask);
+        var alg_1 = algorithm_1.parseAlgorithm(options.maskAlg);
+        alg_1.forEach(function (turn) {
+            maskCubeData_1.turn(turn);
+        });
+        mask = maskCubeData_1.faces;
+    }
     // Fill with color scheme if sticker colors not predefined.
     if (!stickerColors) {
         stickerColors = [].concat.apply([], constants_1.AllFaces.map(function (face) {
@@ -6803,6 +7076,9 @@ function makeStickerColors(options) {
                 else {
                     acc[face][(options.cubeSize * i) + j] = stickerColors[colorIndex];
                 }
+                if (mask && !mask[face][(options.cubeSize * i) + j]) {
+                    acc[face][(options.cubeSize * i) + j] = constants_2.ColorCode.DarkGray;
+                }
             }
         }
         return acc;
@@ -6816,39 +7092,14 @@ function makeStickerColors(options) {
     return [].concat.apply([], constants_1.AllFaces.map(function (face) { return cubeData.faces[face].slice(); }));
 }
 SVG.on(document, 'DOMContentLoaded', function () {
-    var u0 = {
-        face: constants_1.Face.U,
-        n: 0
-    };
-    var u2 = {
-        face: constants_1.Face.U,
-        n: 2
-    };
-    var u8 = {
-        face: constants_1.Face.U,
-        n: 8
-    };
-    var r6 = {
-        face: constants_1.Face.R,
-        n: 6
-    };
-    var r2 = {
-        face: constants_1.Face.R,
-        n: 2
-    };
-    var r0 = {
-        face: constants_1.Face.R,
-        n: 0
-    };
     var options = {
-        algorithm: 'S2 M2 E2',
+        algorithm: '',
         cubeColor: 'black',
         cubeSize: cubeSize,
         cubeOpacity: cubeOpacity,
         strokeWidth: strokeWidth,
         outlineWidth: outlineWidth,
         colorScheme: constants_1.DefaultColorScheme,
-        // stickerColors: [].concat.apply([], AllFaces.map(face => test.faces[face].slice())),
         stickerOpacity: 100,
         centerTranslation: centerTranslation,
         zPosition: zPosition,
@@ -6862,7 +7113,7 @@ SVG.on(document, 'DOMContentLoaded', function () {
             width: vw,
             height: vh
         },
-        arrows: 'U0U2,U2U8,R6R2R0-s8-i5-yellow'
+        mask: constants_1.Masking.LL,
     };
     var geometry = geometry_1.makeCubeGeometry(options);
     options.stickerColors = makeStickerColors(options); // Colors of stickers after algorithms / masking applies

@@ -81,3 +81,28 @@ export enum TurnAbbreviation {
   CounterClockwise = '\'',
   Double = '2'
 }
+
+export enum Masking {
+  FL = 'fl',
+  F2L = 'f2l',
+  LL = 'll',
+  CLL = 'cll',
+  ELL = 'ell',
+  OLL = 'oll',
+  OCLL = 'ocll',
+  OELL = 'oell',
+  COLL = 'coll',
+  OCELL = 'ocell',
+  WV = 'wv',
+  VH = 'vh',
+  ELS = 'els',
+  CLS = 'cls',
+  CMLL = 'cmll',
+  CROSS = 'cross',
+  F2L3 = 'f2l_3',
+  F2L2 = 'f2l_2',
+  F2LSM = 'f2l_sm',
+  F2L1 = 'f2l_1',
+  F2B = 'f2b',
+  LINE = 'line'
+}
