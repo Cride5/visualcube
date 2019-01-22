@@ -52,7 +52,8 @@ export function makeFaceStickers(face: Face, options: ICubeOptions): FaceSticker
       let sticker = makeStickerPosition(face, options.cubeSize, row, col);
 
       // Now scale and tranform point to ensure size/pos independent of dim
-      sticker = translate(sticker, options.centerTranslation);
+      let centerTranslation: Vec3 = [-options.cubeSize/2, -options.cubeSize/2, -options.cubeSize/2]
+      sticker = translate(sticker, centerTranslation);
       sticker = scale(sticker, 1/options.cubeSize);
 
       // Rotate cube as per perameter settings
@@ -61,9 +62,9 @@ export function makeFaceStickers(face: Face, options: ICubeOptions): FaceSticker
       });
 
       // Move cube away from viewer
-      sticker = translate(sticker, options.zPosition);
+      sticker = translate(sticker, [0, 0, options.dist]);
       // Finally project the 3D points onto 2D
-      sticker = project(sticker, options.zPosition[2]);
+      sticker = project(sticker, options.dist);
 
       stickers[row][col] = sticker;
     }

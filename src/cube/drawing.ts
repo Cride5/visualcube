@@ -21,10 +21,10 @@ const defaultFaceRotations: FaceRotations = {
   [Face.B]: [0, 0, 1]
 };
 
-export function renderCube(containerId: string, geometry: CubeGeometry, options: ICubeOptions) {
+export function renderCube(container: HTMLElement | string, geometry: CubeGeometry, options: ICubeOptions) {
   let faceRotations = rotateFaces(defaultFaceRotations, options.viewportRotations);
   let renderOrder = getRenderOrder(faceRotations);
-  let svg = SVG(containerId).size(options.width, options.height);
+  let svg = SVG(container as HTMLElement).size(options.width, options.height);
   svg.viewbox(
     options.viewbox.x,
     options.viewbox.y,

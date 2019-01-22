@@ -4,6 +4,7 @@ import { Arrow } from './models/arrow';
 import { Masking } from './constants';
 
 export interface ICubeOptions {
+  dist: number;
   algorithm?: string;
   backgroundColor: string;
   cubeColor: string;
@@ -14,15 +15,13 @@ export interface ICubeOptions {
   stickerOpacity: number;
   colorScheme: { [face: number]: string };
   stickerColors?: string[];
-  centerTranslation: Vec3;
-  zPosition: Vec3;
   viewportRotations: [Axis, number][];
   view?: string;
   width: number;
   height: number;
   mask?: Masking;
   maskAlg?: string;
-  arrows?: Arrow[] | string,
+  arrows?: Arrow[] | string;
   viewbox: { // SVG viewbox settings
     x: number;
     y: number;

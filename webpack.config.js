@@ -7,6 +7,9 @@ var config = {
     library: "sr-visualizer",
     libraryTarget: "umd" // exposes and know when to use module.exports or exports
   },
+  externals: {
+    svg: 'svg.js'
+  },
   module: {
     rules: [
       {
