@@ -1,6 +1,10 @@
 # VisualCube TS
 Fork of [VisualCube](https://github.com/Cride5/visualcube), a great Rubik's cube svg image generator. This version is a javascript library that can be used to embed Rubik's cube images in a page, without pre-rendering an image server side.
 
+Most of the original Author's logic remains the same. It has just been moved around into files to help it be a bit more readable. Some typing has also been added.
+
+Logic to determine sticker color and apply algorithms was mostly added as part of this project to work with the original structure. Code for the simulator to apply algorithms is unique to this project and was not ported over from the original php version.
+
 ### Installation Instructions
 TBD
 
