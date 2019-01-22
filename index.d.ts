@@ -1,13 +1,13 @@
 declare namespace SRVisualizer {
   export type Vec3 = [number, number, number];
 
-  export enum Axis {
+  export const enum Axis {
     X = 0,
     Y = 1,
     Z = 2
   }
 
-  export enum Masking {
+  export const enum Masking {
     FL = 'fl',
     F2L = 'f2l',
     LL = 'll',
@@ -32,7 +32,7 @@ declare namespace SRVisualizer {
     LINE = 'line'
   }
 
-  export enum Face {
+  export const enum Face {
     U = 0,
     R = 1,
     F = 2,

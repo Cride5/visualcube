@@ -5,8 +5,33 @@ Most of the original Author's logic remains the same. It has just been moved aro
 
 Logic to determine sticker color and apply algorithms was mostly added as part of this project to work with the original structure. Code for the simulator to apply algorithms is unique to this project and was not ported over from the original php version.
 
-### Installation Instructions
-TBD
+### Installation
+Install the package using npm
+```bash
+npm install --save sr-visualizer
+```
+
+### Usage
+Import the module
+```javascript
+import * as SRVisualizer from 'sr-visualizer'
+```
+
+Render a cube by calling `cube()` and passing in an html element, OR an element ID. This will render a default SVG cube inside that element.
+```javascript
+SRVisualizer.cube('element-id')
+```
+
+Default options can be overridden by passing in options to cube. For example you can render higher order cubes. Detailed description for all options will be provided below.
+```javascript
+SRVisualizer.cube('element-id', {
+  cubeSize: 4, // 4x4 cube
+  width: 500,  // width/height of the svg
+  height: 500
+})
+```
+
+### Documentation
 
 ### Features 
 * Cube dimensions from 1x1x1 to NxNxN. Currently capped at 17x17 for performance.

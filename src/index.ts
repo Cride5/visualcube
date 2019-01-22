@@ -31,7 +31,7 @@ const defaultOptions: ICubeOptions = {
   }
 };
 
-export function cube(container: HTMLElement | string, extraOptions: ICubeOptions) {
+export function cube(container: HTMLElement | string, extraOptions: any = {}) {
   let options = {...defaultOptions, ...extraOptions};
   let geomety = makeCubeGeometry(options);
   options.stickerColors = makeStickerColors(options);
