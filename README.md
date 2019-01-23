@@ -32,7 +32,7 @@ SRVisualizer.cube('element-id', {
 ```
 | Code | Description | Result |
 | ---- | ----------- | ------ |
-| cube('example', {width: 250, heigh: 250}) | Default options (except image size) | ![default cube](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/default.png) |
+| ```cube('example', {width: 250, heigh: 250})``` | Default options (except image size) | ![default cube](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/default.png) |
 
 ### Examples
 
