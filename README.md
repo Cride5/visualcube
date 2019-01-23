@@ -46,9 +46,89 @@ cube('example', {
 })
 ```
 
+![plan view](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/plan.png)
+
+#### Color Schemes 
+showcasing japanese color scheme
+```javascript
+import {cube, Face} from 'sr-visualizer'
+
+cube('example', {
+  algorithm: 'M2 E2 S2',
+  colorScheme: {
+    [Face.U]: '#0000F2',
+    [Face.R]: '#FFA100',
+    [Face.F]: '#00D800',
+    [Face.D]: '#FFFFFF',
+    [Face.L]: '#EE0000',
+    [Face.B]: '#FEFE00'
+  }
+})
+```
+
+![color scheme](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/colorscheme.png)
+
+#### Transparency
+```javascript
+import {cube, Face} from 'sr-visualizer'
+
+cube('example', {
+  cubeOpacity: 12,
+  stickerOpacity: 50
+})
+```
+
+![opacity](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/opacity.png)
+
+#### Masking
+only showing the last layer
+```javascript
+import {cube, Masking} from 'sr-visualizer'
+
+cube('example', {
+  mask: Masking.LL
+})
+```
+
+![mask](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/lastlayermask.png)
+
+#### Rotation
+```javascript
+import {cube, Axis} from 'sr-visualizer'
+
+cube('example', {
+  viewportRotations: [
+    [Axis.X, -34]
+  ]
+})
+```
+
+![rotation](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/rotation.png)
+
+#### Big Cubes
+```javascript
+cube('example', {
+  cubeSize: 17,
+  stickerColors: [...]
+})
+```
+
+![big](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/bigcube.png)
+
+#### Arrows
+```javascript
+cube('example', {
+  arrows: 'U0U2,U2U8,U8U0,R6R2R0-s8-i5-yellow'
+})
+```
+
+![arrows](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/arrows.png)
 
 ### Documentation
 Here is a table of the supported options
+| key | value range | default | description |
+| --- | ----------- | ------- | ----------- |
+| | | | |
 
 ### Still need to implement from Cride5's version
 * Backward compatible parameters to Cride5's version. The options parameter used to generate the cube should be able to take in the raw string input used in the original version. For example, when defining arrows, instead of passing in a array of type `Arrow` you could pass in something like `U0U2,U2U8,U8U0,R6R2R0-s8-i5-yellow` This is in case anyone is trying to upgrade to use this library and doesn't want to re build all of their image configs.
