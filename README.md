@@ -126,9 +126,15 @@ cube('example', {
 
 ### Documentation
 Here is a table of the supported options
-| key | value range | default | description |
-| --- | ----------- | ------- | ----------- |
-| | | | |
+
+| key | description | value range | default | comment |
+| --- | ----------- | ----------- | ------- | ------- |
+| dist | Projection Distance | 1 to 100 | 5 | |
+| algorithm | Algorithm to apply | [UDLRFBudlrfbMESxyz'2 ]* (ex "R U R' U") | | String of turns separated by space. On larger cubes algorithms only apply to outer layers |
+| backgroundColor | Background color of image | html color codes or names (ex. '#FFF' or 'white')  | white | |
+| cubeColor | Color cube is drawn as | html color codes or names (ex. '#000' or 'black') | black | |
+| cubeSize | Size of the cube | 1 to 17 | 5 | Values from N=(1 to 17) represent an NxNxN cube. Currently only regular cubes are modelled |
+
 
 ### Still need to implement from Cride5's version
 * Backward compatible parameters to Cride5's version. The options parameter used to generate the cube should be able to take in the raw string input used in the original version. For example, when defining arrows, instead of passing in a array of type `Arrow` you could pass in something like `U0U2,U2U8,U8U0,R6R2R0-s8-i5-yellow` This is in case anyone is trying to upgrade to use this library and doesn't want to re build all of their image configs.
