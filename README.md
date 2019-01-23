@@ -30,11 +30,22 @@ SRVisualizer.cube('element-id', {
   height: 500
 })
 ```
-| Code | Description | Result |
-| ---- | ----------- | ------ |
-| ```cube('example', {width: 250, heigh: 250})``` | Default options (except image size) | ![default cube](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/default.png) |
 
 ### Examples
+
+#### Default
+```javascript
+cube('example')
+```
+![default cube](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/default.png)
+
+#### Plan View
+```javascript
+cube('example', {
+  view: 'plan'
+})
+```
+
 
 ### Documentation
 Here is a table of the supported options
