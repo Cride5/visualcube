@@ -121,6 +121,36 @@ cube('example', {
   arrows: 'U0U2,U2U8,U8U0,R6R2R0-s8-i5-yellow'
 })
 ```
+OR
+```javascript
+cube('example', {
+  arrows: [
+    {
+      s1: { face: Face.U  n: 0 },
+      s2: { face: Face.U, n: 2 },
+      scale: 10
+    },
+    {
+      s1: { face: Face.U  n: 2 },
+      s2: { face: Face.U, n: 8 },
+      scale: 10
+    },
+    {
+      s1: { face: Face.U  n: 8 },
+      s2: { face: Face.U, n: 0 },
+      scale: 10
+    },
+    {
+      s1: { face: Face.R  n: 6 },
+      s2: { face: Face.R, n: 2 },
+      s3: { face: Face.R, n: 0 },
+      scale: 8,
+      influence: 5,
+      color: 'yellow'
+    },
+  ]
+});
+```
 
 ![arrows](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/arrows.png)
 
