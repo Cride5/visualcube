@@ -6,7 +6,7 @@ import { Masking } from './constants';
 export interface ICubeOptions {
   dist: number;
   algorithm?: string;
-  backgroundColor: string;
+  backgroundColor?: string;
   cubeColor: string;
   outlineWidth: number;
   strokeWidth: number;

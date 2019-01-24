@@ -87,9 +87,14 @@ function renderBackground(svg: SVG.Doc, options: ICubeOptions) {
   let backgroundSvg = svg.rect(options.viewbox.width, options.viewbox.height);
   backgroundSvg.x(options.viewbox.x);
   backgroundSvg.y(options.viewbox.y);
-  backgroundSvg.fill({
-    color: options.backgroundColor
-  });
+  if (!options.backgroundColor) {
+    backgroundSvg.fill('none');
+    backgroundSvg.opacity(0);
+  } else {
+    backgroundSvg.fill({
+      color: options.backgroundColor
+    });
+  }
 }
 
 function faceVisible(face: Face, rotations: FaceRotations) {

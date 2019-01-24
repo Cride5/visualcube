@@ -3,9 +3,9 @@ import { makeCubeGeometry } from './cube/geometry';
 import { Vec3, Axis } from './math';
 import { renderCube } from './cube/drawing';
 import { ICubeOptions } from './cube/options';
-import { DefaultColorScheme, Masking } from './cube/constants';
+import { DefaultColorScheme, Masking, JapaneseColorScheme } from './cube/constants';
 import { makeStickerColors } from './cube/stickers';
-import { ColorName } from './constants';
+import { ColorName, ColorCode } from './constants';
 
 const defaultOptions: ICubeOptions = {
   cubeSize: 3,
@@ -16,7 +16,6 @@ const defaultOptions: ICubeOptions = {
     [Axis.X, -34],
   ],
   colorScheme: DefaultColorScheme,
-  backgroundColor: ColorName.White,
   cubeColor: ColorName.Black,
   cubeOpacity: 100,
   stickerOpacity: 100,
@@ -38,20 +37,3 @@ export function cube(container: HTMLElement | string, extraOptions: any = {}) {
 
   renderCube(container, geomety, options);
 }
-
-// (SVG as any).on(document, 'DOMContentLoaded', function() {
-
-//   let options = {
-//     algorithm: 'M2',
-//     mask: Masking.LL,
-//     width: 512,
-//     height: 512,
-//   }
-
-//   let allOptions = {...defaultOptions, ...options};
-
-//   let geometry = makeCubeGeometry(allOptions);
-//   allOptions.stickerColors = makeStickerColors(allOptions); // Colors of stickers after algorithms / masking applies
-
-//   renderCube('drawing', geometry, allOptions);
-// })
