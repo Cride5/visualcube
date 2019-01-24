@@ -36,6 +36,21 @@ Alternatively you can render the raw SVG element by calling `cubeSVG()` the same
 SRVisualizer.cubeSVG(element)
 ```
 
+### Alternative Usage
+If you aren't using webpack or something similar to bundle your application and manage your imports you can include the javascript file on your page manually. But you also need to include svg.js (^2.7.1).
+
+```html
+<script src="path/to/svg.js"></script>
+<script src="path/to/visualcube/dist/main.js"></script>
+```
+
+then you can access the library from `window['sr-visualizer']`. However, you loose some of the benefits from the typings `index.d.ts`. Enums like `Face`, `Axis`, and `Mask` will be unavailable.
+
+```javascript
+let SRVisualizer = window['sr-visualizer'];
+SRVisualizer.cubePNG(document.getElementById('example'))
+```
+
 ### Examples
 
 #### Default
