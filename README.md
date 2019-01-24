@@ -55,13 +55,13 @@ SRVisualizer.cubePNG(document.getElementById('example'))
 
 #### Default
 ```javascript
-cubePNG('example')
+cubePNG(element)
 ```
 ![default cube](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/default.png)
 
 #### Plan View
 ```javascript
-cubePNG('example', {
+cubePNG(element, {
   view: 'plan'
 })
 ```
