@@ -58,7 +58,7 @@ showcasing japanese color scheme
 ```javascript
 import {cube, Face} from 'sr-visualizer'
 
-cubePNG('example', {
+cubePNG(element, {
   algorithm: 'M2 E2 S2',
   colorScheme: {
     [Face.U]: '#0000F2',
@@ -77,7 +77,7 @@ cubePNG('example', {
 ```javascript
 import {cube, Face} from 'sr-visualizer'
 
-cubePNG('example', {
+cubePNG(element, {
   cubeOpacity: 12,
   stickerOpacity: 50
 })
@@ -90,7 +90,7 @@ only showing the last layer
 ```javascript
 import {cube, Masking} from 'sr-visualizer'
 
-cubePNG('example', {
+cubePNG(element, {
   mask: Masking.LL
 })
 ```
@@ -101,7 +101,7 @@ cubePNG('example', {
 ```javascript
 import {cube, Axis} from 'sr-visualizer'
 
-cubePNG('example', {
+cubePNG(element, {
   viewportRotations: [
     [Axis.X, -34]
   ]
@@ -112,7 +112,7 @@ cubePNG('example', {
 
 #### Big Cubes
 ```javascript
-cubePNG('example', {
+cubePNG(element, {
   cubeSize: 17,
   stickerColors: [...]
 })
@@ -122,13 +122,13 @@ cubePNG('example', {
 
 #### Arrows
 ```javascript
-cubePNG('example', {
+cubePNG(element, {
   arrows: 'U0U2,U2U8,U8U0,R6R2R0-s8-i5-yellow'
 })
 ```
 OR
 ```javascript
-cubePNG('example', {
+cubePNG(element, {
   arrows: [
     {
       s1: { face: Face.U  n: 0 },
