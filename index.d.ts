@@ -83,7 +83,8 @@ declare namespace SRVisualizer {
     }
   }
 
-  export function cube(container: HTMLElement | string, options: CubeOptions): void
+  export function cubeSVG(container: HTMLElement | string, options: CubeOptions): void
+  export function cubePNG(container: HTMLElement, options: CubeOptions): void
 }
 
 export = SRVisualizer

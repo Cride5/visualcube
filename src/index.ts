@@ -30,10 +30,33 @@ const defaultOptions: ICubeOptions = {
   }
 };
 
-export function cube(container: HTMLElement | string, extraOptions: any = {}) {
+export function cubeSVG(container: HTMLElement | string, extraOptions: any = {}) {
   let options = {...defaultOptions, ...extraOptions};
   let geomety = makeCubeGeometry(options);
   options.stickerColors = makeStickerColors(options);
 
   renderCube(container, geomety, options);
+}
+
+export function cubePNG(container: HTMLElement, extraOptions: any = {}) {
+  let element = document.createElement('div');
+  cubeSVG(element, extraOptions);
+
+  setTimeout(() => {
+    let svgElement = element.querySelector('svg');
+    let targetImage = document.createElement('img'); // Where to draw the result
+    container.appendChild(targetImage);
+    let can = document.createElement('canvas'); // Not shown on page
+    let ctx = can.getContext('2d');
+    let loader = new Image; // Not shown on page
+  
+    loader.width  = can.width  = targetImage.width = extraOptions.width || 128;
+    loader.height = can.height = targetImage.height = extraOptions.height || 128;
+    loader.onload = function(){
+      ctx.drawImage( loader, 0, 0, loader.width, loader.height );
+      targetImage.src = can.toDataURL();
+    };
+    var svgAsXML = (new XMLSerializer).serializeToString( svgElement );
+    loader.src = 'data:image/svg+xml,' + encodeURIComponent( svgAsXML );
+  });
 }

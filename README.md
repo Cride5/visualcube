@@ -17,31 +17,36 @@ Import the module
 import * as SRVisualizer from 'sr-visualizer'
 ```
 
-Render a cube by calling `cube()` and passing in an html element, OR an element ID. This will render a default SVG cube inside that element.
+Render a cube by calling `cubePNG()` and passing in an html element to render the image inside.
 ```javascript
-SRVisualizer.cube('element-id')
+SRVisualizer.cubePNG(document.getElementById('element-id'))
 ```
 
 Default options can be overridden by passing in options to cube. For example you can render higher order cubes. Detailed description for all options will be provided below.
 ```javascript
-SRVisualizer.cube('element-id', {
+SRVisualizer.cubePNG(element, {
   cubeSize: 4, // 4x4 cube
   width: 500,  // width/height of the svg
   height: 500
 })
 ```
 
+Alternatively you can render the raw SVG element by calling `cubeSVG()` the same way you would `cubePNG()`
+```javascript
+SRVisualizer.cubeSVG(element)
+```
+
 ### Examples
 
 #### Default
 ```javascript
-cube('example')
+cubePNG('example')
 ```
 ![default cube](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/default.png)
 
 #### Plan View
 ```javascript
-cube('example', {
+cubePNG('example', {
   view: 'plan'
 })
 ```
@@ -53,7 +58,7 @@ showcasing japanese color scheme
 ```javascript
 import {cube, Face} from 'sr-visualizer'
 
-cube('example', {
+cubePNG('example', {
   algorithm: 'M2 E2 S2',
   colorScheme: {
     [Face.U]: '#0000F2',
@@ -72,7 +77,7 @@ cube('example', {
 ```javascript
 import {cube, Face} from 'sr-visualizer'
 
-cube('example', {
+cubePNG('example', {
   cubeOpacity: 12,
   stickerOpacity: 50
 })
@@ -85,7 +90,7 @@ only showing the last layer
 ```javascript
 import {cube, Masking} from 'sr-visualizer'
 
-cube('example', {
+cubePNG('example', {
   mask: Masking.LL
 })
 ```
@@ -96,7 +101,7 @@ cube('example', {
 ```javascript
 import {cube, Axis} from 'sr-visualizer'
 
-cube('example', {
+cubePNG('example', {
   viewportRotations: [
     [Axis.X, -34]
   ]
@@ -107,7 +112,7 @@ cube('example', {
 
 #### Big Cubes
 ```javascript
-cube('example', {
+cubePNG('example', {
   cubeSize: 17,
   stickerColors: [...]
 })
@@ -117,13 +122,13 @@ cube('example', {
 
 #### Arrows
 ```javascript
-cube('example', {
+cubePNG('example', {
   arrows: 'U0U2,U2U8,U8U0,R6R2R0-s8-i5-yellow'
 })
 ```
 OR
 ```javascript
-cube('example', {
+cubePNG('example', {
   arrows: [
     {
       s1: { face: Face.U  n: 0 },
