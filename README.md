@@ -1,4 +1,11 @@
 # VisualCube TS
+<p float="left">
+  <img src="https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/default.png" width="125" />
+  <img src="https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/plan.png" width="125" /> 
+  <img src="https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/opacity.png" width="125" /> 
+  <img src="https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/arrows.png" width="125" /> 
+</p>
+
 Fork of [VisualCube](https://github.com/Cride5/visualcube), a great Rubik's cube svg image generator. This version is a javascript library that can be used to embed Rubik's cube images in a page, without pre-rendering an image server side.
 
 Most of the original Author's logic remains the same. It has just been moved around into files to help it be a bit more readable. Some typing has also been added.
