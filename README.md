@@ -12,13 +12,13 @@ Most of the original Author's logic remains the same. It has just been moved aro
 
 Logic to determine sticker color and apply algorithms was mostly added as part of this project to work with the original structure. Code for the simulator to apply algorithms is unique to this project and was not ported over from the original php version.
 
-### Installation
+## Installation
 Install the package using npm
 ```bash
 npm install --save sr-visualizer
 ```
 
-### Usage
+## Usage
 Import the module
 ```javascript
 import * as SRVisualizer from 'sr-visualizer'
@@ -43,7 +43,7 @@ Alternatively you can render the raw SVG element by calling `cubeSVG()` the same
 SRVisualizer.cubeSVG(element)
 ```
 
-### Alternative Usage
+## Alternative Usage
 If you aren't using webpack or something similar to bundle your application and manage your imports you can include the javascript file on your page manually. But you also need to include svg.js (^2.7.1).
 
 ```html
@@ -58,15 +58,15 @@ let SRVisualizer = window['sr-visualizer'];
 SRVisualizer.cubePNG(document.getElementById('example'))
 ```
 
-### Examples
+## Examples
 
-#### Default
+### Default
 ```javascript
 cubePNG(element)
 ```
 ![default cube](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/default.png)
 
-#### Plan View
+### Plan View
 ```javascript
 cubePNG(element, {
   view: 'plan'
@@ -75,7 +75,7 @@ cubePNG(element, {
 
 ![plan view](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/plan.png)
 
-#### Color Schemes 
+### Color Schemes 
 showcasing japanese color scheme
 ```javascript
 import {cube, Face} from 'sr-visualizer'
@@ -95,7 +95,7 @@ cubePNG(element, {
 
 ![color scheme](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/colorscheme.png)
 
-#### Transparency
+### Transparency
 ```javascript
 import {cube, Face} from 'sr-visualizer'
 
@@ -107,7 +107,7 @@ cubePNG(element, {
 
 ![opacity](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/opacity.png)
 
-#### Masking
+### Masking
 only showing the last layer
 ```javascript
 import {cube, Masking} from 'sr-visualizer'
@@ -119,7 +119,7 @@ cubePNG(element, {
 
 ![mask](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/lastlayermask.png)
 
-#### Rotation
+### Rotation
 ```javascript
 import {cube, Axis} from 'sr-visualizer'
 
@@ -132,7 +132,7 @@ cubePNG(element, {
 
 ![rotation](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/rotation.png)
 
-#### Big Cubes
+### Big Cubes
 ```javascript
 cubePNG(element, {
   cubeSize: 17,
@@ -142,7 +142,7 @@ cubePNG(element, {
 
 ![big](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/bigcube.png)
 
-#### Arrows
+### Arrows
 ```javascript
 cubePNG(element, {
   arrows: 'U0U2,U2U8,U8U0,R6R2R0-s8-i5-yellow'
@@ -181,7 +181,7 @@ cubePNG(element, {
 
 ![arrows](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/arrows.png)
 
-### Documentation
+## Documentation
 Here is a table of the supported options
 
 | key | value range | default | description |
@@ -204,7 +204,7 @@ Here is a table of the supported options
 | arrows | `Arrow[]` OR Comma separated list in the form: <br><br> `<a_from><a_to>(<a_via>)?(-i[0-9+])?(-s[0-9+])?(-<color>)?` <br><br> Where `<a_x>` is: `[URFDLB][0-N]+` <br><br> And: `<color>` is an html color code or color name. | | Defines a list of arrows to be drawn on the cube. <br><br> You can either pass in an array of `Arrow`, or a string value supported by the original author's version. <br><br> Each arrow is defined with a minimum of two sticker identifiers to indicate where it should be drawn from and to. The optional third sticker identifier indicates which sticker it should pass through if a curved arrow is to be drawn. Arrows may be scaled so that they fall short, or past the centre of each facelet by specifying the s (scale) parameter after a dash. Where curved arrows are drawn the degree to which the arrow deviates from a straight path can be specified via the i (influence) parameter. Arrows may also optionally be assigned individual color, by using a - followed by a color code. <br><br> Example: `U0U2,U2U8,U8U0,R6R2R0-s8-i5-yellow` |
 
 
-### Still need to implement from Cride5's version
+## Still need to implement from Cride5's version
 * Backward compatible parameters to Cride5's version. The options parameter used to generate the cube should be able to take in the raw string input used in the original version. For example, when defining arrows, instead of passing in a array of type `Arrow` you could pass in something like `U0U2,U2U8,U8U0,R6R2R0-s8-i5-yellow` This is in case anyone is trying to upgrade to use this library and doesn't want to re build all of their image configs.
 * Case (backward algorithm)
 * Facelet Definition (Defines the cube state in terms of facelet positions)
