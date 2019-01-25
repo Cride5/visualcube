@@ -53,9 +53,13 @@ If you aren't using webpack or something similar to bundle your application and 
 
 then you can access the library from `window['sr-visualizer']`. However, you loose some of the benefits from the typings `index.d.ts`. Enums like `Face`, `Axis`, and `Mask` will be unavailable.
 
+Also be aware that you must wait for the DOM to be ready before rendering any cube images. You can do this with jQuery's `$(document).ready()` function, or just listen for the `DOMContentLoaded` event before rendering an image.
+
 ```javascript
-let SRVisualizer = window['sr-visualizer'];
-SRVisualizer.cubePNG(document.getElementById('example'))
+document.addEventListener("DOMContentLoaded", function(event) { 
+  let SRVisualizer = window['sr-visualizer'];
+  SRVisualizer.cubePNG(document.getElementById('example'))
+});
 ```
 
 ## Examples
@@ -135,12 +139,12 @@ cubePNG(element, {
 ### Big Cubes
 ```javascript
 cubePNG(element, {
-  cubeSize: 17,
-  stickerColors: [...]
+  cubeSize: 5,
+  algorithm: 'R U Uw2 Bw\' Dw L\' F\' Lw\' Dw Lw\' B Lw2 Bw B2 U2 L\' Fw Rw D\' Rw\' Bw D\' Rw2 L2 B L2 Bw L B\' R\' F\' R\' B\' Dw2 Lw2 D2 Dw\' B Lw L\' R\' Fw Uw2 R2 Bw\' Lw\' B R L\' Dw2 F D2 Bw\' U\' Uw F\' B R\' D2 Bw2'
 })
 ```
 
-![big](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/bigcube.png)
+![big](https://raw.githubusercontent.com/tdecker91/visualcube/master/assets/scramble.png)
 
 ### Arrows
 ```javascript
