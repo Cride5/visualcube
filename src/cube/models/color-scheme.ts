@@ -1,5 +1,5 @@
-import { ColorCode } from "../../constants";
+import { ColorCode } from '../../constants'
 
 export interface ICubeColorScheme {
-  [face: number]: ColorCode;
+  [face: number]: ColorCode
 }

@@ -1,6 +1,6 @@
-import { Face } from "../constants";
+import { Face } from '../constants'
 
 export class StickerDefinition {
-  face: Face;
-  n: number;
+  face: Face
+  n: number
 }

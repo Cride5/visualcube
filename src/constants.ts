@@ -25,7 +25,7 @@ export enum ColorName {
   Blue = 'blue',
   Green = 'green',
   Purple = 'purple',
-  Pink = 'pink'
+  Pink = 'pink',
 }
 
 export enum ColorAbbreviation {
@@ -41,10 +41,10 @@ export enum ColorAbbreviation {
   Green = 'g',
   Purple = 'm',
   Pink = 'p',
-  Transparent = 't'
+  Transparent = 't',
 }
 
-export const ColorNameToCode: { [name:string]: ColorCode } = {
+export const ColorNameToCode: { [name: string]: ColorCode } = {
   [ColorName.Black]: ColorCode.Black,
   [ColorName.DarkGray]: ColorCode.DarkGray,
   [ColorName.Gray]: ColorCode.Gray,
@@ -59,7 +59,7 @@ export const ColorNameToCode: { [name:string]: ColorCode } = {
   [ColorName.Pink]: ColorCode.Pink,
 }
 
-export const ColorAbbreviationToCode: { [name:string]: ColorCode } = {
+export const ColorAbbreviationToCode: { [name: string]: ColorCode } = {
   [ColorAbbreviation.Black]: ColorCode.Black,
   [ColorAbbreviation.DarkGray]: ColorCode.DarkGray,
   [ColorAbbreviation.Gray]: ColorCode.Gray,
@@ -72,5 +72,5 @@ export const ColorAbbreviationToCode: { [name:string]: ColorCode } = {
   [ColorAbbreviation.Green]: ColorCode.Green,
   [ColorAbbreviation.Purple]: ColorCode.Purple,
   [ColorAbbreviation.Pink]: ColorCode.Pink,
-  [ColorAbbreviation.Transparent]: null
+  [ColorAbbreviation.Transparent]: null,
 }
