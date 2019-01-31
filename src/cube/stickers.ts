@@ -1,7 +1,7 @@
 import { ICubeOptions } from './options'
 import { makeMasking } from './masking'
 import { CubeData } from './simulation'
-import { parseAlgorithm } from './parsing/algorithm'
+import { parseAlgorithm, parseCase, Turn } from './parsing/algorithm'
 import { AllFaces } from './constants'
 import { ColorName, ColorCode } from '../constants'
 
@@ -54,7 +54,14 @@ export function makeStickerColors(options: ICubeOptions): string[] {
 
   // Apply Algorithm
   let cubeData = new CubeData(options.cubeSize, faceMappedStickers)
-  let alg = parseAlgorithm(options.algorithm)
+
+  let alg: Turn[] = [];
+
+  if (options.case) {
+    alg = parseCase(options.case);
+  } else if (options.algorithm) {
+    alg = parseAlgorithm(options.algorithm)
+  }
 
   alg.forEach(move => {
     cubeData.turn(move)

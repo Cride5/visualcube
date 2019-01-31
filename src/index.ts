@@ -1,11 +1,11 @@
-import * as SVG from 'svg.js'
 import { makeCubeGeometry } from './cube/geometry'
-import { Vec3, Axis } from './math'
+import { Axis } from './math'
 import { renderCube } from './cube/drawing'
 import { ICubeOptions } from './cube/options'
-import { DefaultColorScheme, Masking, JapaneseColorScheme } from './cube/constants'
+import { DefaultColorScheme } from './cube/constants'
 import { makeStickerColors } from './cube/stickers'
-import { ColorName, ColorCode } from './constants'
+import { ColorName } from './constants'
+import { parseOptions } from './cube/parsing/options';
 
 const defaultOptions: ICubeOptions = {
   cubeSize: 3,
@@ -28,7 +28,7 @@ const defaultOptions: ICubeOptions = {
 }
 
 export function cubeSVG(container: HTMLElement | string, extraOptions: any = {}) {
-  let options = { ...defaultOptions, ...extraOptions }
+  let options = getOptions(defaultOptions, extraOptions);
   let geomety = makeCubeGeometry(options)
   options.stickerColors = makeStickerColors(options)
 
@@ -37,7 +37,8 @@ export function cubeSVG(container: HTMLElement | string, extraOptions: any = {})
 
 export function cubePNG(container: HTMLElement, extraOptions: any = {}) {
   let element = document.createElement('div')
-  cubeSVG(element, extraOptions)
+  let options = getOptions(defaultOptions, extraOptions);
+  cubeSVG(element, options)
 
   setTimeout(() => {
     let svgElement = element.querySelector('svg')
@@ -47,8 +48,8 @@ export function cubePNG(container: HTMLElement, extraOptions: any = {}) {
     let ctx = can.getContext('2d')
     let loader = new Image() // Not shown on page
 
-    loader.width = can.width = targetImage.width = extraOptions.width || 128
-    loader.height = can.height = targetImage.height = extraOptions.height || 128
+    loader.width = can.width = targetImage.width = options.width || 128
+    loader.height = can.height = targetImage.height = options.height || 128
     loader.onload = function() {
       ctx.drawImage(loader, 0, 0, loader.width, loader.height)
       targetImage.src = can.toDataURL()
@@ -56,4 +57,14 @@ export function cubePNG(container: HTMLElement, extraOptions: any = {}) {
     var svgAsXML = new XMLSerializer().serializeToString(svgElement)
     loader.src = 'data:image/svg+xml,' + encodeURIComponent(svgAsXML)
   })
+}
+
+function getOptions(defaultOptions: ICubeOptions, extraOptions: string | ICubeOptions): ICubeOptions {
+  let parsedOptions: ICubeOptions;
+  if (typeof extraOptions === 'string') {
+    parsedOptions = parseOptions(extraOptions);
+  } else {
+    parsedOptions = extraOptions;
+  }
+  return { ...defaultOptions, ...parsedOptions}
 }

@@ -7,7 +7,13 @@ export interface Turn {
   slices: number;
 }
 
-const turnRegex = /([2-9]+)?([UFRDLBMESxyz])(w)?([2\'])?/
+const turnRegex = /([2-9]+)?([UFRDLBMESxyz])(w)?([2\'])?/g
+
+const Opposite = {
+  [TurnType.Clockwise]: TurnType.CounterClockwise,
+  [TurnType.CounterClockwise]: TurnType.Clockwise,
+  [TurnType.Double]: TurnType.Double,
+}
 
 /**
  * Takes in an algorithm string and parses the turns from it
@@ -20,22 +26,34 @@ export function parseAlgorithm(algorithm: string): Turn[] {
   if (!algorithm) {
     return []
   }
-  return algorithm.split(' ').filter(move => move).map(move => {
-    let match = turnRegex.exec(move);
-    if (!match) {
-      throw new Error(`Invalid move (${move}) in algorithm '${algorithm}'`)
-    }
-    let rawSlices: string = match[1];
-    let rawFace = match[2];
-    let outerBlockIndicator = match[3];
-    let rawType = match[4] || TurnAbbreviation.Clockwise; // Default to clockwise
+  let turns: Turn[] = []
+  let match;
+  do {
+    match = turnRegex.exec(algorithm);
+    if (match) {
+      let rawSlices: string = match[1];
+      let rawFace = match[2];
+      let outerBlockIndicator = match[3];
+      let rawType = match[4] || TurnAbbreviation.Clockwise; // Default to clockwise
 
-    return <Turn>{
-      move: getMove(rawFace),
-      turnType: getTurnType(rawType),
-      slices: getSlices(rawSlices, outerBlockIndicator)
+      turns.push(<Turn>{
+        move: getMove(rawFace),
+        turnType: getTurnType(rawType),
+        slices: getSlices(rawSlices, outerBlockIndicator)
+      })
     }
-  })
+  } while (match)
+
+  return turns;
+}
+
+export function parseCase(algorithm: string): Turn[] {
+  return parseAlgorithm(algorithm).map(turn => {
+    return <Turn> {
+      turnType: Opposite[turn.turnType],
+      move: turn.move
+    };
+  }).reverse();
 }
 
 function getSlices(rawSlices, outerBlockIndicator): number {

@@ -210,8 +210,6 @@ Here is a table of the supported options
 
 
 ## Still need to implement from Cride5's version
-* Backward compatible parameters to Cride5's version. The options parameter used to generate the cube should be able to take in the raw string input used in the original version. For example, when defining arrows, instead of passing in a array of type `Arrow` you could pass in something like `U0U2,U2U8,U8U0,R6R2R0-s8-i5-yellow` This is in case anyone is trying to upgrade to use this library and doesn't want to re build all of their image configs.
-* Case (backward algorithm)
 * Facelet Definition (Defines the cube state in terms of facelet positions)
 * Configurable default arrow color
 * Transparent view

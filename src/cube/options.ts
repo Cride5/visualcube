@@ -1,11 +1,11 @@
 import { Axis } from './../math'
-import { Vec3 } from '../math'
 import { Arrow } from './models/arrow'
 import { Masking } from './constants'
 
 export interface ICubeOptions {
   dist: number
   algorithm?: string
+  case?: string
   backgroundColor?: string
   cubeColor: string
   outlineWidth: number
