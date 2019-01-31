@@ -39,6 +39,11 @@ SRVisualizer.cubePNG(element, {
 })
 ```
 
+If you don't want to rebuild all of the configs for your existing images using the php scripts you can provide the url as your options. They will automatically be parsed and applied to the rendered cube.
+```javascript
+SRVisualizer.cubePNG(element, 'visualcube.php?pzl=4&size=500')
+```
+
 Alternatively you can render the raw SVG element by calling `cubeSVG()` the same way you would `cubePNG()`
 ```javascript
 SRVisualizer.cubeSVG(element)
