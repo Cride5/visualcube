@@ -197,7 +197,8 @@ Here is a table of the supported options
 | key | value range | default | description |
 | --- | ----------- | ------- | ------- |
 | dist | 1 to 100 | 5 | Projection Distance |
-| algorithm | `[UDLRFBudlrfbMESxyz'2 ]*` (ex "R U R' U") | | String of turns separated by space. On larger cubes algorithms only apply to outer layers |
+| algorithm | `([2-9]+)?([UuFfRrDdLlBbMESxyz])(w)?([2\'])?` (ex "R U R' U") | | WCA cube notation. |
+| case | `([2-9]+)?([UuFfRrDdLlBbMESxyz])(w)?([2\'])?` (ex "R U R' U") | | The system displays the cube state which is solved by applying the algorithm  |
 | backgroundColor | html color codes or names (ex. '#FFF' or 'white')  | | |
 | cubeColor | html color codes or names (ex. '#000' or 'black') | black | Color cube is drawn as |
 | cubeSize | 1 to 17 | 3 | Values from N=(1 to 17) represent an NxNxN cube. Currently only regular cubes are modelled |
@@ -205,6 +206,7 @@ Here is a table of the supported options
 | stickerOpacity | 0 to 100 | 100 | Setting this value causes the facelets to be rendered with transparency |
 | colorScheme | `{ [face: Face]: string }` | U -> yellow, R -> red, F -> blue, D-> white, L -> orange, B -> green | Mapping from face to color. Color can be RGB hex value, or html color name. `Face` is an enum exported from the library. (ex. Face.U, Face.R etc..) |
 | stickerColors | Array of colors (string value html color name or color code) | | The order of the colors specified represent the faces in this order: U R F D L B Cube size determines how many definitions you need to fill the cube. A 3x3 cube will need 54 elements in the array. |
+| facelets | Array of facelet (u,r,f,...) | | Defines the cube state in terms of facelet positions. u stands for a 'U' facelet (and likewise with rfdlb). Defining a cube state using this method means the cube will be coloured according to the scheme defined by the sch variable. Three special characters are used to indicate the following:n: This is a blank face (coloured grey)<br> o: This is an 'oriented' face (coloured silver)<br>t: This is a transparent face, and will not appear on the cube |
 | viewportRotations | `[Axis, number][]` | `[[Axis.Y, 45],[Axis.X, -34]]` | Each entry in the sequence is an axis (x, y or z), followed by the number of degrees to rotate in a clockwise direction. Negative values are permitted. Any number of rotations is possible. `Axis` is an enum exported from the library containing values X, Y and Z |
 | view | "plan" |  | The view parameter allows special views to facilitate interpretation of different case aspects. This will override any custom viewport rotations passed in.
 | width | whole numbers | 128 | Width the svg container will be |
