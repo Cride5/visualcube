@@ -67,6 +67,7 @@ declare namespace SRVisualizer {
     stickerOpacity?: number;
     colorScheme?: { [face: number]: string };
     stickerColors?: string[];
+    facelets?: string[];
     zPosition?: Vec3;
     viewportRotations?: [Axis, number][];
     view?: string;

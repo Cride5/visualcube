@@ -1,4 +1,4 @@
-import { ColorName } from './../constants'
+import { ColorName, FaceletToFace, FaceletDefinition, FaceletToColor, ColorCode } from './../constants'
 import * as SVG from 'svg.js'
 import { CubeGeometry, FaceStickers, FaceRotations, rotateFaces } from './geometry'
 import { Vec3, transScale, scale, translate, radians2Degrees } from '../math'
@@ -168,7 +168,9 @@ function renderFaceStickers(svg: SVG.Doc, face: Face, stickers: FaceStickers, op
       let p4 = transScale(stickers[j][i + 1], centerPoint, 0.85)
 
       let color = getStickerColor(face, i, j, options)
-      renderSticker(group, p1, p2, p3, p4, color, options.cubeColor)
+      if (color !== ColorName.Transparent) {
+        renderSticker(group, p1, p2, p3, p4, color, options.cubeColor)
+      }
     }
   }
 
@@ -210,19 +212,31 @@ function renderSticker(
  * into the array of sticker colors by the number the sticker is
  */
 function getStickerColor(face: Face, row: number, col: number, options: ICubeOptions): string {
-  if (!Array.isArray(options.stickerColors)) {
-    return options.colorScheme[face] || ColorName.Black
-  }
-
   const faceIndex = AllFaces.indexOf(face)
   const stickerNumber = row * options.cubeSize + col
   const colorIndex = faceIndex * (options.cubeSize * options.cubeSize) + stickerNumber
 
-  if (options.stickerColors.length <= colorIndex) {
-    return ColorName.Black
-  }
+  if (!Array.isArray(options.facelets) && Array.isArray(options.stickerColors)) {
+    if (options.stickerColors.length <= colorIndex) {
+      return ColorName.Black
+    }
 
-  return options.stickerColors[colorIndex]
+    return options.stickerColors[colorIndex]
+  } else if (Array.isArray(options.facelets)) {
+    if (options.facelets.length <= colorIndex) {
+      return ColorCode.DarkGray
+    }
+
+    let fd = options.facelets[colorIndex]
+    if (FaceletToFace[fd] != null) {
+      const face = FaceletToFace[fd]
+      return options.colorScheme[face]
+    }
+
+    return FaceletToColor[fd] || ColorCode.DarkGray
+  } else {
+    return options.colorScheme[face] || ColorName.Black
+  }
 }
 
 // Renders the top rim of the R U L and B faces out from side of cube
@@ -248,7 +262,11 @@ export function renderOLLStickers(
     let p3 = translate(transScale(stickers[i + 1][1], centerPoint, 0.94), v2)
     let p4 = translate(transScale(stickers[i][1], centerPoint, 0.94), v2)
 
-    renderSticker(group, p1, p2, p3, p4, getStickerColor(face, 0, i, options), options.cubeColor)
+    let stickerColor = getStickerColor(face, 0, i, options)
+
+    if (stickerColor !== ColorName.Transparent) {
+      renderSticker(group, p1, p2, p3, p4, stickerColor, options.cubeColor)
+    }
   }
 }
 

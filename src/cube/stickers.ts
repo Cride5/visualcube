@@ -55,10 +55,10 @@ export function makeStickerColors(options: ICubeOptions): string[] {
   // Apply Algorithm
   let cubeData = new CubeData(options.cubeSize, faceMappedStickers)
 
-  let alg: Turn[] = [];
+  let alg: Turn[] = []
 
   if (options.case) {
-    alg = parseCase(options.case);
+    alg = parseCase(options.case)
   } else if (options.algorithm) {
     alg = parseAlgorithm(options.algorithm)
   }

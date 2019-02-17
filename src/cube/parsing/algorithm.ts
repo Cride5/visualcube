@@ -2,9 +2,9 @@ import { TurnType } from '../simulation'
 import { TurnAbbreviation, AlgorithmUnit, possibleMoves } from '../constants'
 
 export interface Turn {
-  move: AlgorithmUnit;
-  turnType: TurnType;
-  slices: number;
+  move: AlgorithmUnit
+  turnType: TurnType
+  slices: number
 }
 
 const turnRegex = /([2-9]+)?([UuFfRrDdLlBbMESxyz])(w)?([2\'])?/g
@@ -19,7 +19,7 @@ const Opposite = {
  * Takes in an algorithm string and parses the turns from it
  * algorithm string format should be moves separated by a single space
  * (ex. "U R2 L' x")
- * 
+ *
  * https://www.worldcubeassociation.org/regulations/#article-12-notation
  */
 export function parseAlgorithm(algorithm: string): Turn[] {
@@ -27,52 +27,54 @@ export function parseAlgorithm(algorithm: string): Turn[] {
     return []
   }
   let turns: Turn[] = []
-  let match;
+  let match
   do {
-    match = turnRegex.exec(algorithm);
+    match = turnRegex.exec(algorithm)
     if (match) {
-      let rawSlices: string = match[1];
-      let rawFace: string = match[2];
-      let outerBlockIndicator = match[3];
-      let rawType = match[4] || TurnAbbreviation.Clockwise; // Default to clockwise
-      let isLowerCaseMove = rawFace === rawFace.toLowerCase();
+      let rawSlices: string = match[1]
+      let rawFace: string = match[2]
+      let outerBlockIndicator = match[3]
+      let rawType = match[4] || TurnAbbreviation.Clockwise // Default to clockwise
+      let isLowerCaseMove = rawFace === rawFace.toLowerCase()
 
       if (isLowerCaseMove) {
-        rawFace = rawFace.toUpperCase();
+        rawFace = rawFace.toUpperCase()
       }
 
       let turn: Turn = {
         move: getMove(rawFace),
         turnType: getTurnType(rawType),
-        slices: isLowerCaseMove ? 2 : getSlices(rawSlices, outerBlockIndicator)
+        slices: isLowerCaseMove ? 2 : getSlices(rawSlices, outerBlockIndicator),
       }
 
-      turns.push(turn);
+      turns.push(turn)
     }
   } while (match)
 
-  return turns;
+  return turns
 }
 
 export function parseCase(algorithm: string): Turn[] {
-  return parseAlgorithm(algorithm).map(turn => {
-    return <Turn> {
-      turnType: Opposite[turn.turnType],
-      move: turn.move,
-      slices: turn.slices
-    };
-  }).reverse();
+  return parseAlgorithm(algorithm)
+    .map(turn => {
+      return <Turn>{
+        turnType: Opposite[turn.turnType],
+        move: turn.move,
+        slices: turn.slices,
+      }
+    })
+    .reverse()
 }
 
 function getSlices(rawSlices, outerBlockIndicator): number {
   if (outerBlockIndicator && !rawSlices) {
-    return 2;
+    return 2
   } else if (!outerBlockIndicator && rawSlices) {
     throw new Error(`Invalid move: Cannot specify num slices if outer block move indicator 'w' is not present`)
   } else if (!outerBlockIndicator && !rawSlices) {
-    return 1;
+    return 1
   } else {
-    return parseInt(rawSlices);
+    return parseInt(rawSlices)
   }
 }
 

@@ -1,6 +1,6 @@
 import { ColorCode } from './../constants'
 import { ICubeColorScheme } from './models/color-scheme'
-import { Axis } from '../..';
+import { Axis } from '../..'
 
 export enum Face {
   U = 0,
@@ -56,9 +56,9 @@ export enum AlgorithmUnit {
 }
 
 export const AxisSymbolToAxis = {
-  'x': Axis.X,
-  'y': Axis.Y,
-  'z': Axis.Z 
+  x: Axis.X,
+  y: Axis.Y,
+  z: Axis.Z,
 }
 
 export const possibleMoves: string[] = [

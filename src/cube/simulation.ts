@@ -229,12 +229,12 @@ export class CubeData {
    * Restricts the number of slices used in outer block moves to the cube size
    */
   private safeSlices(n: number): number {
-    return n > this.cubeSize ? this.cubeSize : n;
+    return n > this.cubeSize ? this.cubeSize : n
   }
 
   rTurn(turnType: TurnType, slices: number = 1) {
     this.rotateFace(Face.R, turnType)
-    let offset = this.cubeSize - slices;
+    let offset = this.cubeSize - slices
     this.xLayersRotation(offset, turnType === TurnType.Clockwise, turnType === TurnType.Double, slices)
   }
 
@@ -250,13 +250,13 @@ export class CubeData {
 
   dTurn(turnType: TurnType, slices: number = 1) {
     this.rotateFace(Face.D, turnType)
-    let offset = this.cubeSize - slices;
+    let offset = this.cubeSize - slices
     this.yLayersRotation(offset, turnType === TurnType.CounterClockwise, turnType === TurnType.Double, slices)
   }
 
   fTurn(turnType: TurnType, slices: number = 1) {
     this.rotateFace(Face.F, turnType)
-    let offset = this.cubeSize - slices;
+    let offset = this.cubeSize - slices
     this.zLayersRotation(offset, turnType === TurnType.Clockwise, turnType === TurnType.Double, slices)
   }
 
@@ -299,7 +299,7 @@ export class CubeData {
   }
 
   turn(turn: Turn) {
-    let slices = this.safeSlices(turn.slices);
+    let slices = this.safeSlices(turn.slices)
     switch (turn.move) {
       case AlgorithmUnit.F:
         this.fTurn(turn.turnType, slices)

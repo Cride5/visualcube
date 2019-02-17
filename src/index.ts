@@ -5,7 +5,8 @@ import { ICubeOptions } from './cube/options'
 import { DefaultColorScheme } from './cube/constants'
 import { makeStickerColors } from './cube/stickers'
 import { ColorName } from './constants'
-import { parseOptions } from './cube/parsing/options';
+import { parseOptions } from './cube/parsing/options'
+import { parseFaceletDefinitions } from './cube/parsing/faceletDefinitions'
 
 const defaultOptions: ICubeOptions = {
   cubeSize: 3,
@@ -28,7 +29,7 @@ const defaultOptions: ICubeOptions = {
 }
 
 export function cubeSVG(container: HTMLElement | string, extraOptions: any = {}) {
-  let options = getOptions(defaultOptions, extraOptions);
+  let options = getOptions(defaultOptions, extraOptions)
   let geomety = makeCubeGeometry(options)
   options.stickerColors = makeStickerColors(options)
 
@@ -37,7 +38,7 @@ export function cubeSVG(container: HTMLElement | string, extraOptions: any = {})
 
 export function cubePNG(container: HTMLElement, extraOptions: any = {}) {
   let element = document.createElement('div')
-  let options = getOptions(defaultOptions, extraOptions);
+  let options = getOptions(defaultOptions, extraOptions)
   cubeSVG(element, options)
 
   setTimeout(() => {
@@ -60,11 +61,16 @@ export function cubePNG(container: HTMLElement, extraOptions: any = {}) {
 }
 
 function getOptions(defaultOptions: ICubeOptions, extraOptions: string | ICubeOptions): ICubeOptions {
-  let parsedOptions: ICubeOptions;
+  let parsedOptions: ICubeOptions
   if (typeof extraOptions === 'string') {
-    parsedOptions = parseOptions(extraOptions);
+    parsedOptions = parseOptions(extraOptions)
   } else {
-    parsedOptions = extraOptions;
+    parsedOptions = extraOptions
   }
-  return { ...defaultOptions, ...parsedOptions}
+
+  if (typeof parsedOptions.facelets === 'string') {
+    parsedOptions.facelets = parseFaceletDefinitions(parsedOptions.facelets)
+  }
+
+  return { ...defaultOptions, ...parsedOptions }
 }
