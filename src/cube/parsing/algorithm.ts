@@ -7,7 +7,7 @@ export interface Turn {
   slices: number;
 }
 
-const turnRegex = /([2-9]+)?([UFRDLBMESxyz])(w)?([2\'])?/g
+const turnRegex = /([2-9]+)?([UuFfRrDdLlBbMESxyz])(w)?([2\'])?/g
 
 const Opposite = {
   [TurnType.Clockwise]: TurnType.CounterClockwise,
@@ -32,15 +32,22 @@ export function parseAlgorithm(algorithm: string): Turn[] {
     match = turnRegex.exec(algorithm);
     if (match) {
       let rawSlices: string = match[1];
-      let rawFace = match[2];
+      let rawFace: string = match[2];
       let outerBlockIndicator = match[3];
       let rawType = match[4] || TurnAbbreviation.Clockwise; // Default to clockwise
+      let isLowerCaseMove = rawFace === rawFace.toLowerCase();
 
-      turns.push(<Turn>{
+      if (isLowerCaseMove) {
+        rawFace = rawFace.toUpperCase();
+      }
+
+      let turn: Turn = {
         move: getMove(rawFace),
         turnType: getTurnType(rawType),
-        slices: getSlices(rawSlices, outerBlockIndicator)
-      })
+        slices: isLowerCaseMove ? 2 : getSlices(rawSlices, outerBlockIndicator)
+      }
+
+      turns.push(turn);
     }
   } while (match)
 
@@ -51,7 +58,8 @@ export function parseCase(algorithm: string): Turn[] {
   return parseAlgorithm(algorithm).map(turn => {
     return <Turn> {
       turnType: Opposite[turn.turnType],
-      move: turn.move
+      move: turn.move,
+      slices: turn.slices
     };
   }).reverse();
 }
