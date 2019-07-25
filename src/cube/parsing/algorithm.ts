@@ -1,3 +1,4 @@
+import { cubeRotations } from './../constants';
 import { TurnType } from '../simulation'
 import { TurnAbbreviation, AlgorithmUnit, possibleMoves } from '../constants'
 
@@ -35,12 +36,13 @@ export function parseAlgorithm(algorithm: string): Turn[] {
       let rawFace: string = match[2]
       let outerBlockIndicator = match[3]
       let rawType = match[4] || TurnAbbreviation.Clockwise // Default to clockwise
-      let isLowerCaseMove = rawFace === rawFace.toLowerCase()
+      let isLowerCaseMove = rawFace === rawFace.toLowerCase() && cubeRotations.indexOf(rawFace) === -1;
 
       if (isLowerCaseMove) {
         rawFace = rawFace.toUpperCase()
       }
 
+      console.log(rawFace, rawType, possibleMoves);
       let turn: Turn = {
         move: getMove(rawFace),
         turnType: getTurnType(rawType),
@@ -80,7 +82,8 @@ function getSlices(rawSlices, outerBlockIndicator): number {
 
 function getMove(rawFace: string): AlgorithmUnit {
   if (possibleMoves.indexOf(rawFace) < 0) {
-    throw new Error(`Invalid move (${rawFace}): Possible turn faces are [U R F L D B M E S]`)
+
+    throw new Error(`Invalid move (${rawFace}): Possible turn faces are [U R F L D B M E S x y z]`)
   } else return rawFace as AlgorithmUnit
 }
 
