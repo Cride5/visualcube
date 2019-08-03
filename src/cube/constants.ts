@@ -76,11 +76,7 @@ export const possibleMoves: string[] = [
   AlgorithmUnit.Z,
 ]
 
-export const cubeRotations: string[] = [
-  AlgorithmUnit.X,
-  AlgorithmUnit.Y,
-  AlgorithmUnit.Z,
-]
+export const cubeRotations: string[] = [AlgorithmUnit.X, AlgorithmUnit.Y, AlgorithmUnit.Z]
 
 export enum TurnAbbreviation {
   Clockwise = '',
