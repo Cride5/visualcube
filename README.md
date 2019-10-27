@@ -1,10 +1,25 @@
 # VisualCube
-Generate custom Rubik's cube visualisations from your browser address bar. 
+Generate custom Rubik's cube visualizations from your browser address bar. 
 
 ### Installation Instructions
 
 These instructions are for installing the script on your own web server. If you do not have access to your own server, or would just like to try out the software, please visit:
 http://cube.crider.co.uk/visualcube.php
+
+##### Docker integration
+
+If you want to run VisualCube locally or on the server but you don't want to install PHP, is a good idea to deploy app as a Docker container.
+To build your own Docker image run from the root of the repository:
+```sh
+$ docker build -t visual-cube .
+```
+
+And then create a container locally with exposed port 80 (for HTTP):
+```sh
+$ docker run --rm -p 80:80 visual-cube
+```
+
+Go to address `http://localhost/visualcube.php` in your browser.
 
 ##### Prerequisites
 
@@ -31,7 +46,7 @@ RewriteRule ^visualcube\.(gif|png|jpg|jpeg|tiff|ico)$ http://www.example.com/vis
 
 ### Features
 
-* Fully 3D cube visualisation
+* Fully 3D cube visualization
 * Cube dimensions from 1x1x1 to NxNxN. Currently capped at 9x9 for performance.
 * Algorithm support
 * Complete orientation control
