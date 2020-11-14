@@ -1,5 +1,5 @@
 # VisualCube
-Generate custom Rubik's cube visualizations from your browser address bar. 
+Generate custom Rubik's cube visualisations from your browser address bar. 
 
 ### Installation Instructions
 
@@ -46,7 +46,7 @@ RewriteRule ^visualcube\.(gif|png|jpg|jpeg|tiff|ico)$ http://www.example.com/vis
 
 ### Features
 
-* Fully 3D cube visualization
+* Fully 3D cube visualisation
 * Cube dimensions from 1x1x1 to NxNxN. Currently capped at 9x9 for performance.
 * Algorithm support
 * Complete orientation control
