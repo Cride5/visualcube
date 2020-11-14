@@ -6,6 +6,21 @@ Generate custom Rubik's cube visualisations from your browser address bar.
 These instructions are for installing the script on your own web server. If you do not have access to your own server, or would just like to try out the software, please visit:
 http://cube.crider.co.uk/visualcube.php
 
+##### Docker integration
+
+If you want to run VisualCube locally or on the server but you don't want to install PHP, is a good idea to deploy app as a Docker container.
+To build your own Docker image run from the root of the repository:
+```sh
+$ docker build -t visual-cube .
+```
+
+And then create a container locally with exposed port 80 (for HTTP):
+```sh
+$ docker run --rm -p 80:80 visual-cube
+```
+
+Go to address `http://localhost/visualcube.php` in your browser.
+
 ##### Prerequisites
 
 * Access to an Apache web server with PHP and ImageMagic installed.
