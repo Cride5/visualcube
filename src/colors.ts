@@ -1,0 +1,47 @@
+export enum ColorCode {
+  Black = '#000000',
+  DarkGray = '#404040',
+  Gray = '#808080',
+  Silver = '#BFBFBF',
+  White = '#FFFFFF',
+  Yellow = '#FEFE00',
+  Red = '#EE0000',
+  Orange = '#FFA100',
+  Blue = '#0000F2',
+  Green = '#00D800',
+  Purple = '#A83DD9',
+  Pink = '#F33D7B',
+  Transparent = 'transparent',
+}
+
+export enum ColorName {
+  Black = 'black',
+  DarkGray = 'darkGray',
+  Gray = 'gray',
+  Silver = 'silver',
+  White = 'white',
+  Yellow = 'yellow',
+  Red = 'red',
+  Orange = 'orange',
+  Blue = 'blue',
+  Green = 'green',
+  Purple = 'purple',
+  Pink = 'pink',
+  Transparent = 'transparent',
+}
+
+export enum ColorAbbreviation {
+  Black = 'n',
+  DarkGray = 'd',
+  Gray = 'l',
+  Silver = 's',
+  White = 'w',
+  Yellow = 'y',
+  Red = 'r',
+  Orange = 'o',
+  Blue = 'b',
+  Green = 'g',
+  Purple = 'm',
+  Pink = 'p',
+  Transparent = 't',
+}

@@ -1,9 +1,9 @@
+import { ColorName, ColorCode } from './../colors';
 import { ICubeOptions } from './options'
 import { makeMasking } from './masking'
 import { CubeData } from './simulation'
 import { parseAlgorithm, parseCase, Turn } from './parsing/algorithm'
 import { AllFaces } from './constants'
-import { ColorName, ColorCode } from '../constants'
 
 export function makeStickerColors(options: ICubeOptions): string[] {
   let stickerColors = options.stickerColors

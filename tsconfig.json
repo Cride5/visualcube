@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/",
+    "outDir": "./dist/lib",
     "noImplicitAny": false,
     "module": "commonjs",
     "target": "es5",
-    "allowJs": true,
-  }
+    "declaration": true,
+    "types": []
+  },
+  "include": ["./src"],
+  "exclude": ["./node_modules/*"]
 }

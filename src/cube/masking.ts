@@ -1,6 +1,6 @@
 import { Masking, Face, AllFaces } from './constants'
 
-type FaceValues = { [face: number]: any[] }
+export type FaceValues = { [face: number]: any[] }
 type MaskingFunctions = {
   [masking: string]: {
     [face: number]: (row: number, col: number, cubeSize: number) => boolean

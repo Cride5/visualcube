@@ -1,7 +1,7 @@
+import { ColorCode } from './../../colors';
 import { StickerDefinition } from '../models/sticker'
 import { Arrow } from '../models/arrow'
 import { Face } from '../constants'
-import { ColorCode, ColorName } from '../../constants'
 import { parseColor } from './color'
 
 const stickerPattern = '([URFDLB])([0-9]+)'

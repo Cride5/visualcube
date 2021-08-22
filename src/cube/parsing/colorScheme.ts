@@ -1,6 +1,7 @@
+import { ColorCode } from './../../colors';
 import { ICubeColorScheme } from '../models/color-scheme'
 import { parseColor } from './color'
-import { ColorCode, ColorNameToCode, ColorAbbreviationToCode } from '../../constants'
+import { ColorNameToCode, ColorAbbreviationToCode } from '../../constants'
 import { AllFaces, DefaultColorScheme } from '../constants'
 
 export function parseColorScheme(rawValue: string): ICubeColorScheme {
