@@ -200,7 +200,7 @@
 					case 'x' : $rtn_[$i][0] = 0; break;
 					case 'y' : $rtn_[$i][0] = 1; break;
 					case 'z' : $rtn_[$i][0] = 2; break;
-					default : continue;
+					default : break;
 				}
 				$rtn_[$i][1] = $matches[2][$i];
 			}
