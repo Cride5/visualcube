@@ -336,85 +336,85 @@
 				// For OLL all LL orientations should match
 				switch($group_id){
 					case  1: // OLL
-						$match = match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)); // CO
+						$match = cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)); // CO
 						break;
 					case  2: // PBL (permutation of all corners)
-						$match = match($cube[1], $ref_cube[1]); // CP
+						$match = cube_match($cube[1], $ref_cube[1]); // CP
 						break;
 					case  3: // CLL (LL orientation + permutation)
-						$match = match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
-							&& match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)); // CP
+						$match = cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)); // CP
 						break;
 					case  4: // OLL
-						$match = match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
-							&& match(array_slice($cube[4], 0, 4), array_slice($ref_cube[4], 0, 4)); // EO
+						$match = cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& cube_match(array_slice($cube[4], 0, 4), array_slice($ref_cube[4], 0, 4)); // EO
 						break;
 					case  5: // PLL
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
 						break;
 					case  6: // CLL
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)); // CO
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)); // CO
 						break;
 					case  7: // ELL
-						$match = match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)) // EP
-							&& match(array_slice($cube[4], 0, 4), array_slice($ref_cube[4], 0, 4)); // EO
+						$match = cube_match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)) // EP
+							&& cube_match(array_slice($cube[4], 0, 4), array_slice($ref_cube[4], 0, 4)); // EO
 						break;
 					case  8: // CMLL
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)); // CO
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)); // CO
 						break;
 					case  9: // COLL
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)); // CO
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)); // CO
 						break;
 					case 10: // ZBLL
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
-							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& cube_match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
 						break;
 					case 11: // ELS
-						$match = match(array_slice($cube[4], 0, 4), array_slice($ref_cube[4], 0, 4)) // EO
+						$match = cube_match(array_slice($cube[4], 0, 4), array_slice($ref_cube[4], 0, 4)) // EO
 							&& els_FR($cube) == els_FR($ref_cube);
 						break;
 					case 12: // CLS 
-						match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)); // CO
+						cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)); // CO
 						break;
 					case 13: // ZBLL-T
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
-							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& cube_match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
 						break;
 					case 14: // ZBLL-U
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
-							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& cube_match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
 						break;
 					case 15: // ZBLL-L
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
-							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& cube_match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
 						break;
 					case 16: // ZBLL-H
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
-							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& cube_match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
 						break;
 					case 17: // ZBLL-Pi
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
-							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& cube_match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
 						break;
 					case 18: // ZBLL-S
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
-							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& cube_match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
 						break;
 					case 19: // ZBLL-As
-						$match = match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
-							&& match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
-							&& match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
+						$match = cube_match(array_slice($cube[1], 0, 4), array_slice($ref_cube[1], 0, 4)) // CP
+							&& cube_match(array_slice($cube[2], 0, 4), array_slice($ref_cube[2], 0, 4)) // CO
+							&& cube_match(array_slice($cube[3], 0, 4), array_slice($ref_cube[3], 0, 4)); // EP
 						break;
 				}
 //if($match) println("r:$r true");
@@ -482,25 +482,25 @@
 	function is_member_strict($cube, $group_id){
 		global $VCUBE;
 		switch($group_id){
-			case  1: if(match($cube, $VCUBE['2OFL']    )) return true; break; // OLL
-			case  2: if(match($cube, $VCUBE['2O']      )) return true; break; // PBL
-			case  3: if(match($cube, $VCUBE['2FL']     )) return true; break; // CLL
-			case  4: if(match($cube, $VCUBE['F2L']     )) return true; break; // OLL
-			case  5: if(match($cube, $VCUBE['F2L_OLL'] )) return true; break; // PLL
-			case  6: if(match($cube, $VCUBE['F2L']     )) return true; break; // CLL
-			case  7: if(match($cube, $VCUBE['F2L_CLL'] )) return true; break; // ELL
-			case  8: if(match($cube, $VCUBE['F2B']     )) return true; break; // CMLL
-			case  9: if(match($cube, $VCUBE['F2L_OCLL'])) return true; break; // COLL
-			case 10: if(match($cube, $VCUBE['F2L_OCLL'])) return true; break; // ZBLL
-			case 11: if(match($cube, $VCUBE['F2LS']    )) return true; break; // ELS
-			case 12: if(match($cube, $VCUBE['F2LS_EO'] )) return true; break; // CLS
-			case 13: if(match($cube, $VCUBE['F2L_OCLL_T'])) return true; break; // ZBLL-T
-			case 14: if(match($cube, $VCUBE['F2L_OCLL_U'])) return true; break; // ZBLL-U
-			case 15: if(match($cube, $VCUBE['F2L_OCLL_L'])) return true; break; // ZBLL-L
-			case 16: if(match($cube, $VCUBE['F2L_OCLL_H'])) return true; break; // ZBLL-H
-			case 17: if(match($cube, $VCUBE['F2L_OCLL_PI'])) return true; break; // ZBLL-PI
-			case 18: if(match($cube, $VCUBE['F2L_OCLL_S'])) return true; break; // ZBLL-S
-			case 19: if(match($cube, $VCUBE['F2L_OCLL_AS'])) return true; break; // ZBLL-AS
+			case  1: if(cube_match($cube, $VCUBE['2OFL']    )) return true; break; // OLL
+			case  2: if(cube_match($cube, $VCUBE['2O']      )) return true; break; // PBL
+			case  3: if(cube_match($cube, $VCUBE['2FL']     )) return true; break; // CLL
+			case  4: if(cube_match($cube, $VCUBE['F2L']     )) return true; break; // OLL
+			case  5: if(cube_match($cube, $VCUBE['F2L_OLL'] )) return true; break; // PLL
+			case  6: if(cube_match($cube, $VCUBE['F2L']     )) return true; break; // CLL
+			case  7: if(cube_match($cube, $VCUBE['F2L_CLL'] )) return true; break; // ELL
+			case  8: if(cube_match($cube, $VCUBE['F2B']     )) return true; break; // CMLL
+			case  9: if(cube_match($cube, $VCUBE['F2L_OCLL'])) return true; break; // COLL
+			case 10: if(cube_match($cube, $VCUBE['F2L_OCLL'])) return true; break; // ZBLL
+			case 11: if(cube_match($cube, $VCUBE['F2LS']    )) return true; break; // ELS
+			case 12: if(cube_match($cube, $VCUBE['F2LS_EO'] )) return true; break; // CLS
+			case 13: if(cube_match($cube, $VCUBE['F2L_OCLL_T'])) return true; break; // ZBLL-T
+			case 14: if(cube_match($cube, $VCUBE['F2L_OCLL_U'])) return true; break; // ZBLL-U
+			case 15: if(cube_match($cube, $VCUBE['F2L_OCLL_L'])) return true; break; // ZBLL-L
+			case 16: if(cube_match($cube, $VCUBE['F2L_OCLL_H'])) return true; break; // ZBLL-H
+			case 17: if(cube_match($cube, $VCUBE['F2L_OCLL_PI'])) return true; break; // ZBLL-PI
+			case 18: if(cube_match($cube, $VCUBE['F2L_OCLL_S'])) return true; break; // ZBLL-S
+			case 19: if(cube_match($cube, $VCUBE['F2L_OCLL_AS'])) return true; break; // ZBLL-AS
 		}
 		return false;
 	}
@@ -961,10 +961,10 @@
 	
 	// Returns whether the cubes match
 	// Entries of -1 are counted as matching
-	function match($cube1, $cube2){
+	function cube_match($cube1, $cube2){
 		for($i = 0; $i < count($cube1); $i++){
 			if(is_array($cube1[$i])){
-				if(!match($cube1[$i], $cube2[$i])) return false;
+				if(!cube_match($cube1[$i], $cube2[$i])) return false;
 			}else if(!(
 				$cube1[$i] == $cube2[$i] 
 				|| $cube1[$i] == -1
