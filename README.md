@@ -4,7 +4,7 @@ Generate custom Rubik's cube visualisations from your browser address bar.
 ### Installation Instructions
 
 These instructions are for installing the script on your own web server. If you do not have access to your own server, or would just like to try out the software, please visit:
-http://cube.crider.co.uk/visualcube.php
+http://cube.rider.biz/visualcube.php
 
 #### Using Docker
 
